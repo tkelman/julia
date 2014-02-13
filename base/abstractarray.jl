@@ -325,11 +325,9 @@ imag{T<:Real}(x::AbstractArray{T}) = zero(x)
 *(A::Number, B::AbstractArray) = A .* B
 *(A::AbstractArray, B::Number) = A .* B
 
-/(A::Number, B::AbstractArray) = A ./ B
 /(A::AbstractArray, B::Number) = A ./ B
 
 \(A::Number, B::AbstractArray) = B ./ A
-\(A::AbstractArray, B::Number) = B ./ A
 
 ./(x::Number,y::AbstractArray )         = throw(MethodError(./, (x,y)))
 ./(x::AbstractArray, y::Number)         = throw(MethodError(./, (x,y)))
