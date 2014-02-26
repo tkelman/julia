@@ -1,4 +1,4 @@
-type DArray{T,N,A} <: AbstractArray{T,N}
+type DArray{T,N,A} <: StoredArray{T,N}
     dims::NTuple{N,Int}
 
     chunks::Array{RemoteRef,N}
@@ -49,6 +49,11 @@ DArray(init, dims) = DArray(init, dims, workers()[1:min(nworkers(),maximum(dims)
 
 # new DArray similar to an existing one
 DArray(init, d::DArray) = DArray(init, size(d), procs(d), [size(d.chunks)...])
+
+similar(d::DArray, T, dims::Dims)= DArray(I->Array(T, map(length,I)), dims, procs(d))
+similar(d::DArray, T)= similar(d, T, size(d))
+similar{T}(d::DArray{T}, dims::Dims)= similar(d, T, dims)
+similar{T}(d::DArray{T})= similar(d, T, size(d))
 
 size(d::DArray) = d.dims
 procs(d::DArray) = d.pmap
@@ -298,3 +303,13 @@ map(f::Callable, d::DArray) = DArray(I->map(f, localpart(d)), d)
 reduce(f::Function, d::DArray) =
     mapreduce(fetch, f,
               { @spawnat p reduce(f, localpart(d)) for p in procs(d) })
+
+              
+function map!(f::Callable, d::DArray) 
+    @sync begin
+        for p in procs(d)
+            @spawnat p map!(f, localpart(d))
+        end
+    end
+end
+

@@ -106,6 +106,7 @@ function read{T <: Integer}(s::IO, ::Type{T})
 end
 
 read(s::IO, ::Type{Bool})    = (read(s,Uint8)!=0)
+read(s::IO, ::Type{Float16}) = box(Float16,unbox(Int16,read(s,Int16)))
 read(s::IO, ::Type{Float32}) = box(Float32,unbox(Int32,read(s,Int32)))
 read(s::IO, ::Type{Float64}) = box(Float64,unbox(Int64,read(s,Int64)))
 
@@ -380,7 +381,7 @@ end
 
 ## low-level calls ##
 
-write(s::IOStream, b::Uint8) = int(ccall(:jl_putc, Int32, (Uint8, Ptr{Void}), b, s.ios))
+write(s::IOStream, b::Uint8) = int(ccall(:ios_putc, Int32, (Uint8, Ptr{Void}), b, s.ios))
 
 function write{T}(s::IOStream, a::Array{T})
     if isbits(T)

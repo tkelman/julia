@@ -296,6 +296,50 @@ const tupleref_tfunc = function (A, t, i)
 end
 t_func[tupleref] = (2, 2, tupleref_tfunc)
 
+function limit_type_depth(t::ANY, d::Int, cov::Bool, vars)
+    if isa(t,TypeVar) || isa(t,TypeConstructor)
+        return t
+    end
+    if isa(t,Tuple)
+        if d > MAX_TYPE_DEPTH
+            R = Tuple
+        else
+            R = map(x->limit_type_depth(x, d+1, cov, vars), t)
+        end
+    elseif isa(t,UnionType)
+        if d > MAX_TYPE_DEPTH
+            R = Any
+        else
+            R = Union(limit_type_depth(t.types, d, cov, vars)...)
+        end
+    elseif isa(t,DataType)
+        P = t.parameters
+        if P === ()
+            return t
+        end
+        if d > MAX_TYPE_DEPTH
+            R = t.name.primary
+        else
+            Q = map(x->limit_type_depth(x, d+1, false, vars), P)
+            if !cov && any(p->contains_is(vars,p), Q)
+                R = TypeVar(:_,t.name.primary)
+                push!(vars, R)
+                return R
+            else
+                R = t.name.primary{Q...}
+            end
+        end
+    else
+        return t
+    end
+    if !cov && d > MAX_TYPE_DEPTH
+        R = TypeVar(:_,R)
+        push!(vars, R)
+    end
+    return R
+end
+
+
 const getfield_tfunc = function (A, s0, name)
     s = s0
     if isType(s)
@@ -327,10 +371,13 @@ const getfield_tfunc = function (A, s0, name)
             if fld === :types && isleaftype(sp.types)
                 return Type{sp.types}
             end
+            if fld === :super && isleaftype(sp)
+                return Type{sp.super}
+            end
         end
         for i=1:length(s.names)
             if is(s.names[i],fld)
-                return s.types[i]
+                return limit_type_depth(s.types[i], 0, true, {s.parameters...})
             end
         end
         return None
@@ -1129,6 +1176,9 @@ typeinf(linfo,atypes::ANY,sparams::ANY,def) = typeinf(linfo,atypes,sparams,def,t
 
 CYCLE_ID = 1
 
+#trace_inf = false
+#enable_trace_inf() = (global trace_inf=true)
+
 # def is the original unspecialized version of a method. we aggregate all
 # saved type inference data there.
 function typeinf(linfo::LambdaStaticData,atypes::Tuple,sparams::Tuple, def, cop)
@@ -1161,7 +1211,9 @@ function typeinf(linfo::LambdaStaticData,atypes::Tuple,sparams::Tuple, def, cop)
     #if dbg
     #    print("typeinf ", linfo.name, " ", object_id(ast0), "\n")
     #end
-    #print("typeinf ", linfo.name, " ", atypes, " ", linfo.file,":",linfo.line,"\n")
+    #if trace_inf
+    #    print("typeinf ", linfo.name, " ", atypes, " ", linfo.file,":",linfo.line,"\n")
+    #end
     # if isdefined(:STDOUT)
     #     write(STDOUT, "typeinf ")
     #     write(STDOUT, string(linfo.name))

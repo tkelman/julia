@@ -112,7 +112,7 @@ length(S::SharedArray) = prod(S.dims)
 size(S::SharedArray) = S.dims
 
 procs(S::SharedArray) = S.pids
-indexpids(S::SharedArray) = S.pididx
+indexpids(S::SharedArray) = S.pidx
 
 sdata(S::SharedArray) = S.s
 sdata(A::AbstractArray) = A
@@ -151,7 +151,7 @@ end
 
 
 # Don't serialize s (it is the complete array) and 
-# pididx, which is relevant to the current process only
+# pidx, which is relevant to the current process only
 function serialize(s, S::SharedArray)
     serialize_type(s, typeof(S))
     serialize(s, length(SharedArray.names)) 
@@ -211,7 +211,29 @@ function shmem_randn(dims; kwargs...)
 end
 shmem_randn(I::Int...; kwargs...) = shmem_randn(I; kwargs...)
 
-similar(S::SharedArray, T, dims::Dims) = similar(S.s, T, dims)
+similar(S::SharedArray, T, dims::Dims) = SharedArray(T, dims; pids=procs(S)) 
+similar(S::SharedArray, T) = similar(S, T, size(S)) 
+similar(S::SharedArray, dims::Dims) = similar(S, eltype(S), dims) 
+similar(S::SharedArray) = similar(S, eltype(S), size(S)) 
+
+map(f::Callable, S::SharedArray) = (S2 = similar(S); S2[:] = S[:]; map!(f, S2); S2)
+
+reduce(f::Function, S::SharedArray) =
+    mapreduce(fetch, f,
+              { @spawnat p reduce(f, S.loc_subarr_1d) for p in procs(S) })
+
+
+function map!(f::Callable, S::SharedArray) 
+    @sync begin
+        for p in procs(S)
+            @spawnat p begin 
+                for idx in localindexes(S)
+                    S.s[idx] = f(S.s[idx])
+                end
+            end
+        end
+    end
+end
 
 
 function print_shmem_limits(slen)
@@ -284,3 +306,4 @@ function assert_same_host(procs)
     return (first_privip != getipaddr()) ? false : true
 end
 
+              

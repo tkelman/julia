@@ -17,7 +17,7 @@ import
         itrunc, eps, signbit, sin, cos, tan, sec, csc, cot, acos, asin, atan,
         cosh, sinh, tanh, sech, csch, coth, acosh, asinh, atanh, atan2,
         serialize, deserialize, inf, nan, hash, cbrt, typemax, typemin,
-        realmin, realmax, get_rounding, set_rounding
+        realmin, realmax, get_rounding, set_rounding, maxintfloat
 
 import Base.Math.lgamma_r
 
@@ -75,11 +75,12 @@ BigFloat(x::Integer) = BigFloat(BigInt(x))
 BigFloat(x::Union(Bool,Int8,Int16,Int32)) = BigFloat(convert(Clong,x))
 BigFloat(x::Union(Uint8,Uint16,Uint32)) = BigFloat(convert(Culong,x))
 
-BigFloat(x::Union(Float16,Float32)) = BigFloat(float64(x))
+BigFloat(x::Union(Float16,Float32,Float16)) = BigFloat(float64(x))
 BigFloat(x::Rational) = BigFloat(num(x)) / BigFloat(den(x))
 
 convert(::Type{Rational}, x::BigFloat) = convert(Rational{BigInt}, x)
 convert(::Type{BigFloat}, x::Rational) = BigFloat(x) # to resolve ambiguity
+convert(::Type{BigFloat}, x::Float16) = BigFloat(x) # to resolve ambiguity
 convert(::Type{BigFloat}, x::Real) = BigFloat(x)
 convert(::Type{FloatingPoint}, x::BigInt) = BigFloat(x)
 
@@ -591,6 +592,9 @@ function set_bigfloat_precision(x::Int)
     end
     DEFAULT_PRECISION[end] = x
 end
+
+maxintfloat(x::BigFloat) = BigFloat(2)^precision(x)
+maxintfloat(::Type{BigFloat}) = BigFloat(2)^get_bigfloat_precision()
 
 function to_mpfr(r::RoundingMode)
     c = r.code

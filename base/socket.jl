@@ -324,11 +324,11 @@ accept(server::PipeServer) = accept(server, Pipe())
 
 bind(sock::TcpServer, addr::InetAddr) = bind(sock,addr.host,addr.port)
 
-_bind(sock::TcpServer, host::IPv4, port::Uint16) = ccall(:jl_tcp_bind, Int32, (Ptr{Void}, Uint16, Uint32),
-            sock.handle, hton(port), hton(host.host))
+_bind(sock::TcpServer, host::IPv4, port::Uint16) = ccall(:jl_tcp_bind, Int32, (Ptr{Void}, Uint16, Uint32, Cuint),
+            sock.handle, hton(port), hton(host.host), 0)
 
-_bind(sock::TcpServer, host::IPv6, port::Uint16) = ccall(:jl_tcp_bind6, Int32, (Ptr{Void}, Uint16, Ptr{Uint128}),
-            sock.handle, hton(port), &hton(host.host))
+_bind(sock::TcpServer, host::IPv6, port::Uint16) = ccall(:jl_tcp_bind6, Int32, (Ptr{Void}, Uint16, Ptr{Uint128}, Cuint),
+            sock.handle, hton(port), &hton(host.host), 0)
 
 # UDP 
 
@@ -546,7 +546,7 @@ function getipaddr()
         end
     end
     ccall(:uv_free_interface_addresses,Void,(Ptr{Uint8},Int32),addr,count)
-    error("no active external interfaces")
+    return ip"127.0.0.1"
 end
 
 ##

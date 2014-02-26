@@ -89,6 +89,9 @@ end
 # searching definitions
 
 function which(f::Callable, args...)
+    if !isgeneric(f)
+        throw(ErrorException("not a generic function, no methods available"))
+    end
     ms = methods(f, map(a->(isa(a,Type) ? Type{a} : typeof(a)), args))
     isempty(ms) && throw(MethodError(f, args))
     ms[1]
@@ -202,10 +205,10 @@ function less(file::String, line::Integer)
 end
 less(file::String) = less(file, 1)
 
-edit(f::Function)    = edit(functionloc(f)...)
-edit(f::Function, t) = edit(functionloc(f,t)...)
-less(f::Function)    = less(functionloc(f)...)
-less(f::Function, t) = less(functionloc(f,t)...)
+edit(f::Union(Function,DataType))    = edit(functionloc(f)...)
+edit(f::Union(Function,DataType), t) = edit(functionloc(f,t)...)
+less(f::Union(Function,DataType))    = less(functionloc(f)...)
+less(f::Union(Function,DataType), t) = less(functionloc(f,t)...)
 
 # clipboard copy and paste
 
@@ -352,7 +355,7 @@ function versioninfo(io::IO=STDOUT, verbose::Bool=false)
     if !isempty(GIT_VERSION_INFO.commit_short)
       println(io,             "Commit $(GIT_VERSION_INFO.commit_short) ($(GIT_VERSION_INFO.date_string))")
     end
-    if ccall(:jl_is_debugbuild, Bool, ())
+    if ccall(:jl_is_debugbuild, Cint, ())!=0
         println(io, "DEBUG build")
     end
     println(io,             "Platform Info:")

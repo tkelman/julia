@@ -27,20 +27,17 @@ New language features
   * Unicode identifiers are normalized (NFC) so that different encodings
     of equivalent strings are treated as the same identifier ([#5462]).
 
-New library functions
----------------------
+Library improvements
+--------------------
 
-  * `GitHub` module for interacting with the GitHub API
-
-  * `Pkg.submit(pkg[,commit])` function to automatically submit
-    a GitHub pull request to the package author.
+  * Well-behaved floating-point ranges ([#2333], [#5636]).
+    Introduced the `FloatRange` type for floating-point ranges with a step,
+    which will give intuitive/correct results for classically problematic
+    ranges like `0.1:0.1:0.3`, `0.0:0.7:2.1` or `1.0:1/49:27.0`.
 
   * `mod2pi` function ([#4799], [#4862]).
 
   * New functions `minmax` and `extrema` ([#5275]).
-
-Library improvements
---------------------
 
   * `consume(p)` extended to `consume(p, args...)`, allowing it
     to optionally pass `args...` back to the producer ([#4775]).
@@ -63,6 +60,19 @@ Library improvements
     than just printing its results.
 
   * `errno([code])` function to get or set the C library's `errno`.
+
+  * `GitHub` module for interacting with the GitHub API
+
+  * Package improvements
+
+    * Packages are now installed into `.julia/v0.3` by default (or
+      whatever the current Julia version is), so that different
+      versions of Julia can co-exist with incompatible packages.
+      Existing `.julia` installations are unaffected unless `Pkg.init()`
+      is run to re-create the package directories ([#3344], [#5737]).
+
+    * `Pkg.submit(pkg[,commit])` function to automatically submit
+      a GitHub pull request to the package author.
 
   * Collections improvements
 
@@ -178,6 +188,9 @@ Library improvements
   * The `setenv` function for external processes now accepts a `dir` keyword
     argument for specifying the directory to start the child process in ([#4888]).
 
+  * Constructors for collections (`Set`, `Dict`, etc.) now generally accept a
+    single iterable argument giving the elements of the collection ([#4996], [#4871])
+
 Deprecated or removed
 ---------------------
 
@@ -265,6 +278,10 @@ Deprecated or removed
 [#5748]: https://github.com/JuliaLang/julia/issues/5748
 [#5511]: https://github.com/JuliaLang/julia/issues/5511
 [#5819]: https://github.com/JuliaLang/julia/issues/5819
+[#4871]: https://github.com/JuliaLang/julia/issues/4871
+[#4996]: https://github.com/JuliaLang/julia/issues/4996
+[#2333]: https://github.com/JuliaLang/julia/issues/2333
+[#5636]: https://github.com/JuliaLang/julia/issues/5636
 
 Julia v0.2.0 Release Notes
 ==========================

@@ -395,6 +395,12 @@ eval(Sys, :(@deprecate shlib_list dllist))
 @deprecate put      put!
 @deprecate take     take!
 
+@deprecate Set(a, b...) Set({a, b...})
+# for a bit of backwards compatibility
+IntSet(xs::Integer...) = (s=IntSet(); for a in xs; push!(s,a); end; s)
+Set{T<:Number}(xs::T...) = Set{T}(xs)
+
+
 # 0.3 discontinued functions
 
 function nnz(X)
@@ -403,4 +409,4 @@ function nnz(X)
 end
 export nnz
 
-
+scale!{T<:Base.LinAlg.BlasReal}(X::Array{T}, s::Complex) = error("scale!: Cannot scale a real array by a complex value in-place.  Use scale(X::Array{Real}, s::Complex) instead.")
