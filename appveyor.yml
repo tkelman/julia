@@ -1,0 +1,4 @@
+install:
+  - cinst Cygwin
+  - cinst cyg-get
+  - cyg-get mingw64-x86_64-gcc-g++,mingw64-x86_64-gcc-gfortran
