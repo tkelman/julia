@@ -12,8 +12,13 @@
 
 # stop on error
 set -e
-pwd
-dos2unix contrib/relative_path.sh deps/jldownload */*/configure */*/config.status
+
+if [ -n "$APPVEYOR" ]
+  git config core.eol
+  git config --global core.eol
+  git config --global core.eol lf
+fi
+dos2unix contrib/relative_path.sh deps/jldownload
 
 if [ `arch` = x86_64 ]; then
   XC_HOST=x86_64-w64-mingw32 make
