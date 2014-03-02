@@ -12,6 +12,9 @@
 #
 # This script is intended to be executed from the base julia directory as contrib/cygwin_build.sh
 
+# Stop on error
+set -e
+
 # The frequent use of 2>&1 is so AppVeyor doesn't highlight so many normal messages as errors
 if [ -n "`file contrib/relative_path.sh | grep CRLF`" ]; then
   dos2unix contrib/relative_path.sh deps/jldownload deps/find_python_for_llvm 2>&1
@@ -46,12 +49,12 @@ if [ `arch` = x86_64 ]; then
   echo "LIBBLASNAME = libopenblas" >> Make.user
   echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
   echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
-
+  
   # Download readline binary
   wget ftp://rpmfind.net/linux/fedora/linux/releases/20/Everything/x86_64/os/Packages/m/mingw64-readline-6.2-3.fc20.noarch.rpm >> get-deps.log 2>&1
   bsdtar -xf mingw64-readline-6.2-3.fc20.noarch.rpm
   echo "USE_SYSTEM_READLINE = 1" >> Make.user
-
+  
   # Download pcre binary
   wget ftp://rpmfind.net/linux/fedora/linux/releases/18/Everything/x86_64/os/Packages/m/mingw64-pcre-8.31-1.fc18.noarch.rpm >> get-deps.log 2>&1
   bsdtar -xf mingw64-pcre-8.31-1.fc18.noarch.rpm
@@ -66,12 +69,12 @@ if [ `arch` = x86_64 ]; then
   wget ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw64-gmp-5.1.3-1.fc21.noarch.rpm >> get-deps.log 2>&1
   bsdtar -xf mingw64-gmp-5.1.3-1.fc21.noarch.rpm
   echo "USE_SYSTEM_GMP = 1" >> Make.user
-
+  
   # Download mpfr binary
   wget ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw64-mpfr-3.1.2-1.fc21.noarch.rpm >> get-deps.log 2>&1
   bsdtar -xf mingw64-mpfr-3.1.2-1.fc21.noarch.rpm
   echo "USE_SYSTEM_MPFR = 1" >> Make.user
-
+  
   # Download zlib binary
   wget ftp://rpmfind.net/linux/fedora/linux/releases/20/Everything/x86_64/os/Packages/m/mingw64-zlib-1.2.8-2.fc20.noarch.rpm >> get-deps.log 2>&1
   bsdtar -xf mingw64-zlib-1.2.8-2.fc20.noarch.rpm
@@ -95,5 +98,9 @@ make -C deps get-uv get-double-conversion get-openlibm get-openspecfun get-rando
 if [ -n "`file deps/libuv/missing | grep CRLF`" ]; then
   dos2unix -f */*/configure */*/missing */*/config.sub */*/config.guess */*/depcomp 2>&1
 fi
+
+# fix -fPIC warnings from SuiteSparse
+make -C deps SuiteSparse-4.2.1/Makefile
+sed -i 's/-fPIC//g' deps/SuiteSparse-4.2.1/SuiteSparse_config/SuiteSparse_config.mk
 
 make -j 4
