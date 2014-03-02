@@ -49,7 +49,7 @@ if [ `arch` = x86_64 ]; then
   bsdtar -C usr -xf openblas.7z
   echo "USE_SYSTEM_BLAS = 1" >> Make.user
   echo "USE_SYSTEM_LAPACK = 1" >> Make.user
-  echo "LIBBLAS = -lopenblas" >> Make.user
+  echo "LIBBLAS = -L$PWD/usr/lib -lopenblas" >> Make.user
   echo "LIBBLASNAME = libopenblas" >> Make.user
   echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
   echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
