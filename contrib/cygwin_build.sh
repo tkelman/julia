@@ -48,6 +48,8 @@ if [ `arch` = x86_64 ]; then
   bsdtar -xf openblas.7z
   mkdir -p usr/bin
   mv lib/libopenblas.dll usr/bin
+  # Also needs msvcr90.dll?
+  cp /cygdrive/c/Windows/System32/drivers/msvcr90.dll usr/bin
   echo "USE_SYSTEM_BLAS = 1" >> Make.user
   echo "USE_SYSTEM_LAPACK = 1" >> Make.user
   echo "LIBBLAS = -L$PWD/usr/bin -lopenblas" >> Make.user
