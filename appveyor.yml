@@ -5,6 +5,8 @@ install:
   - cyg-get make
   - cyg-get mingw64-x86_64-gcc-g++
   - cyg-get mingw64-x86_64-gcc-gfortran
+  - cyg-get dos2unix
 
 build_script:
-  C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia; pwd; uname -a; ls; make XC_HOST=x86_64-w64-mingw32"
+  C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && \
+    dos2unix contrib/relative_path.sh && XC_HOST=x86_64-w64-mingw32 make"
