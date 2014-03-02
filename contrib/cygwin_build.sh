@@ -45,6 +45,7 @@ if [ `arch` = x86_64 ]; then
   
   # Download OpenBlas binary
   wget -O openblas.7z "https://drive.google.com/uc?export=download&id=0B4DmELLTwYmlVWxuTU1QOHozbWM" >> get-deps.log 2>&1
+  mkdir -p usr
   bsdtar -C usr -xf openblas.7z
   echo "USE_SYSTEM_BLAS = 1" >> Make.user
   echo "USE_SYSTEM_LAPACK = 1" >> Make.user
