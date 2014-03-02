@@ -1,7 +1,6 @@
 install:
   - cinst cyg-get
   - set PATH=%PATH%;C:\cygwin
-  - cyg-get default
   - cyg-get make
   - cyg-get mingw64-x86_64-gcc-g++
   - cyg-get mingw64-x86_64-gcc-fortran
