@@ -46,16 +46,42 @@ if [ `arch` = x86_64 ]; then
   echo "LIBBLASNAME = libopenblas" >> Make.user
   echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
   echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
-  
+
   # Download readline binary
-  wget http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_Factory/noarch/mingw64-readline-6.2-3.15.noarch.rpm >> get-deps.log 2>&1
-  bsdtar -xf mingw64-readline-6.2-3.15.noarch.rpm
+  wget ftp://rpmfind.net/linux/fedora/linux/releases/20/Everything/x86_64/os/Packages/m/mingw64-readline-6.2-3.fc20.noarch.rpm >> get-deps.log 2>&1
+  bsdtar -xf mingw64-readline-6.2-3.fc20.noarch.rpm
   echo "USE_SYSTEM_READLINE = 1" >> Make.user
+
+  # Download pcre binary
+  wget ftp://rpmfind.net/linux/fedora/linux/releases/18/Everything/x86_64/os/Packages/m/mingw64-pcre-8.31-1.fc18.noarch.rpm >> get-deps.log 2>&1
+  bsdtar -xf mingw64-pcre-8.31-1.fc18.noarch.rpm
+  echo "USE_SYSTEM_PCRE = 1" >> Make.user
+  
+  # Download fftw binary
+  wget ftp://rpmfind.net/linux/fedora/linux/releases/20/Everything/x86_64/os/Packages/m/mingw64-fftw-3.3.3-2.fc20.noarch.rpm >> get-deps.log 2>&1
+  bsdtar -xf mingw64-fftw-3.3.3-2.fc20.noarch.rpm
+  echo "USE_SYSTEM_FFTW = 1" >> Make.user
+  
+  # Download gmp binary
+  wget ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw64-gmp-5.1.3-1.fc21.noarch.rpm >> get-deps.log 2>&1
+  bsdtar -xf mingw64-gmp-5.1.3-1.fc21.noarch.rpm
+  echo "USE_SYSTEM_GMP = 1" >> Make.user
+
+  # Download mpfr binary
+  wget ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw64-mpfr-3.1.2-1.fc21.noarch.rpm >> get-deps.log 2>&1
+  bsdtar -xf mingw64-mpfr-3.1.2-1.fc21.noarch.rpm
+  echo "USE_SYSTEM_MPFR = 1" >> Make.user
+
+  # Download zlib binary
+  wget ftp://rpmfind.net/linux/fedora/linux/releases/20/Everything/x86_64/os/Packages/m/mingw64-zlib-1.2.8-2.fc20.noarch.rpm >> get-deps.log 2>&1
+  bsdtar -xf mingw64-zlib-1.2.8-2.fc20.noarch.rpm
+  echo "USE_SYSTEM_ZLIB = 1" >> Make.user
 else
   echo "XC_HOST = i686-pc-mingw32" > Make.user
   echo "override BUILD_MACHINE = i686-pc-cygwin" >> Make.user
   
-  make -C deps get-llvm get-openblas get-lapack get-readline > get-deps.log 2>&1
+  make -C deps get-llvm get-openblas get-lapack get-readline get-pcre \
+    get-fftw get-gmp get-mpfr get-zlib > get-deps.log 2>&1
   # OpenBlas uses HOSTCC to compile getarch, but we might not have Cygwin GCC installed
   if [ -z `which gcc 2>/dev/null` ]; then
     echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
@@ -63,9 +89,8 @@ else
 fi
 
 #make -C deps getall >> get-deps.log 2>&1
-make -C deps get-uv get-pcre get-double-conversion get-openlibm \
-  get-openspecfun get-random get-fftw get-suitesparse get-arpack get-unwind \
-  get-osxunwind get-gmp get-mpfr get-zlib get-patchelf get-utf8proc >> get-deps.log 2>&1
+make -C deps get-uv get-double-conversion get-openlibm get-openspecfun get-random \
+  get-suitesparse get-arpack get-unwind get-osxunwind get-patchelf get-utf8proc >> get-deps.log 2>&1
 
 if [ -n "`file deps/libuv/missing | grep CRLF`" ]; then
   dos2unix -f */*/configure */*/missing */*/config.sub */*/config.guess */*/depcomp 2>&1
