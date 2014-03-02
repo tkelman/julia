@@ -1,6 +1,7 @@
 install:
+  - cinst Cygwin
   - cinst cyg-get
-  - cyg-get default,mingw64-x86_64-gcc-g++,mingw64-x86_64-gcc-gfortran
+  - cyg-get mingw64-x86_64-gcc-g++,mingw64-x86_64-gcc-gfortran
 
 build_script:
-  C:\cygwin\bin\sh.exe --login -c "uname -a"
+  C:\cygwin\bin\sh.exe --login -c "pwd; uname -a; ls; make"
