@@ -19,5 +19,5 @@ else
 fi
 
 make -C deps getall > get-deps.log 2>&1
-dos2unix */*/configure 2>&1
+dos2unix -f */*/configure 2>&1
 make
