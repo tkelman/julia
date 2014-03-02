@@ -15,15 +15,17 @@
 # The frequent use of 2>&1 is so AppVeyor doesn't highlight so many normal messages as errors
 dos2unix contrib/relative_path.sh deps/jldownload deps/find_python_for_llvm 2>&1
 
-# add -C (caching) to CONFIGURE_COMMON in deps/Makefile for faster configure scripts
+# Add -C (caching) to CONFIGURE_COMMON in deps/Makefile for slightly faster configure scripts
 sed -i 's/CONFIGURE_COMMON = /CONFIGURE_COMMON = -C /' deps/Makefile
 
 if [ `arch` = x86_64 ]; then
   echo "XC_HOST = x86_64-w64-mingw32" > Make.user
   echo "override BUILD_MACHINE = x86_64-pc-cygwin" >> Make.user
-  # download binary llvm
+  # Download binary llvm
   wget https://sourceforge.net/projects/mingw-w64-dgn/files/others/llvm-3.3-w64-bin-x86_64-20130804.7z > get-deps.log 2>&1
   bsdtar -xf llvm-3.3-w64-bin-x86_64-20130804.7z
+  # Copy MinGW libs into llvm/bin folder
+  cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/*.dll llvm/bin
   echo "USE_SYSTEM_LLVM = 1" >> Make.user
   echo "LLVM_CONFIG = $PWD/llvm/bin/llvm-config" >> Make.user
   echo "LLVM_LLC = $PWD/llvm/bin/llc" >> Make.user
