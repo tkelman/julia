@@ -1,5 +1,6 @@
 install:
   - cinst cyg-get
+  - set PATH=%PATH%;C:\cygwin
   - cyg-get dos2unix
   - cyg-get make
   - cyg-get wget
