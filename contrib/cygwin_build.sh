@@ -14,6 +14,9 @@
 
 dos2unix contrib/relative_path.sh deps/jldownload deps/find_python_for_llvm 2>&1
 
+# add -C (caching) to CONFIGURE_COMMON in deps/Makefile for faster configure scripts
+sed -i 's/CONFIGURE_COMMON = /CONFIGURE_COMMON = -C /' deps/Makefile
+
 if [ `arch` = x86_64 ]; then
   echo "XC_HOST = x86_64-w64-mingw32" > Make.user
   # download binary llvm
