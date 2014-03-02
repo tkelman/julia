@@ -1,10 +1,7 @@
 install:
   - cinst cyg-get
   - set PATH=%PATH%;C:\cygwin
-  - cyg-get make
-  - cyg-get mingw64-x86_64-gcc-g++
-  - cyg-get mingw64-x86_64-gcc-fortran
-  - cyg-get dos2unix
+  - cyg-get make,mingw64-x86_64-gcc-g++,mingw64-x86_64-gcc-fortran,dos2unix
 
 build_script:
   C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && sh -evf contrib/cygwin_build.sh"
