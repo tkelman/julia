@@ -3,8 +3,8 @@ install:
   - set PATH=%PATH%;C:\cygwin
   - "cyg-get dos2unix >> cyg-get.log"
   - "cyg-get make >> cyg-get.log"
-  - "cyg-get curl >> cyg-get.log"
-  - "cyg-get python >> cyg-get.log"
+  - "cyg-get wget >> cyg-get.log"
+#  - "cyg-get python >> cyg-get.log"
   - "cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log"
   - "cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log"
 
