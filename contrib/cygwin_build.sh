@@ -104,8 +104,10 @@ if [ -n "`file deps/libuv/missing | grep CRLF`" ]; then
   dos2unix -f */*/configure */*/missing */*/config.sub */*/config.guess */*/depcomp 2>&1
 fi
 
-# fix -fPIC warnings from SuiteSparse
+# Fix -fPIC warnings from SuiteSparse
 make -C deps SuiteSparse-4.2.1/Makefile
 sed -i 's/-fPIC//g' deps/SuiteSparse-4.2.1/SuiteSparse_config/SuiteSparse_config.mk
+# Quiet down SuiteSparse's library creation
+export ARFLAGS=cr
 
 make -j 4
