@@ -45,11 +45,12 @@ if [ `arch` = x86_64 ]; then
   
   # Download OpenBlas binary
   wget -O openblas.7z "https://drive.google.com/uc?export=download&id=0B4DmELLTwYmlVWxuTU1QOHozbWM" >> get-deps.log 2>&1
-  mkdir -p usr
-  bsdtar -C usr -xf openblas.7z
+  bsdtar -xf openblas.7z
+  mkdir -p usr/bin
+  mv lib/libopenblas.dll usr/bin
   echo "USE_SYSTEM_BLAS = 1" >> Make.user
   echo "USE_SYSTEM_LAPACK = 1" >> Make.user
-  echo "LIBBLAS = -L$PWD/usr/lib -lopenblas" >> Make.user
+  echo "LIBBLAS = -L$PWD/usr/bin -lopenblas" >> Make.user
   echo "LIBBLASNAME = libopenblas" >> Make.user
   echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
   echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
