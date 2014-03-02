@@ -30,14 +30,14 @@ if [ `arch` = x86_64 ]; then
   # Copy MinGW libs into llvm/bin folder
   cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/*.dll llvm/bin
   echo "USE_SYSTEM_LLVM = 1" >> Make.user
-  #echo "USE_LLVM_SHLIB = 1" >> Make.user
   echo "LLVM_CONFIG = $PWD/llvm/bin/llvm-config" >> Make.user
   echo "LLVM_LLC = $PWD/llvm/bin/llc" >> Make.user
+  echo "LDFLAGS = -L$PWD/llvm/lib" >> Make.user
   
   # Download OpenBlas binary
   wget -O openblas.7z "https://drive.google.com/uc?export=download&id=0B4DmELLTwYmlVWxuTU1QOHozbWM" >> get-deps.log 2>&1
   bsdtar -xf openblas.7z
-  echo "USE_SYSTEM_BLAS = " >> Make.user
+  echo "USE_SYSTEM_BLAS = 1" >> Make.user
   echo "LIBBLAS = -L$PWD/lib -lopenblas" >> Make.user
   echo "LIBBLASNAME = libopenblas" >> Make.user
 else
