@@ -13,7 +13,7 @@
 # stop on error
 set -e
 
-if [ -n "$APPVEYOR" ]
+if [ -n "$APPVEYOR" ]; then
   git config core.eol
   git config --global core.eol
   git config --global core.eol lf
