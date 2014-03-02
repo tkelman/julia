@@ -37,7 +37,7 @@ else
 fi
 # OpenBlas uses HOSTCC to compile getarch, but we might not have Cygwin GCC installed
 if [ -z `which gcc 2>/dev/null` ]; then
-  echo "override HOSTCC = $(CROSS_COMPILE)gcc" >> Make.user
+  echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
 fi
 
 #make -C deps getall >> get-deps.log 2>&1
