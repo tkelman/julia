@@ -15,12 +15,13 @@
 # The frequent use of 2>&1 is so AppVeyor doesn't highlight so many normal messages as errors
 dos2unix contrib/relative_path.sh deps/jldownload deps/find_python_for_llvm 2>&1
 
-# Add -C (caching) to CONFIGURE_COMMON in deps/Makefile for slightly faster configure scripts
+# add -C (caching) to CONFIGURE_COMMON in deps/Makefile for faster configure scripts
 sed -i 's/CONFIGURE_COMMON = /CONFIGURE_COMMON = -C /' deps/Makefile
 
 if [ `arch` = x86_64 ]; then
   echo "XC_HOST = x86_64-w64-mingw32" > Make.user
-  # Download binary llvm
+  echo "override BUILD_MACHINE = x86_64-pc-cygwin" >> Make.user
+  # download binary llvm
   wget https://sourceforge.net/projects/mingw-w64-dgn/files/others/llvm-3.3-w64-bin-x86_64-20130804.7z > get-deps.log 2>&1
   bsdtar -xf llvm-3.3-w64-bin-x86_64-20130804.7z
   echo "USE_SYSTEM_LLVM = 1" >> Make.user
@@ -28,6 +29,7 @@ if [ `arch` = x86_64 ]; then
   echo "LLVM_LLC = $PWD/llvm/bin/llc" >> Make.user
 else
   echo "XC_HOST = i686-pc-mingw32" > Make.user
+  echo "override BUILD_MACHINE = i686-pc-cygwin" >> Make.user
   make -C deps get-llvm > get-deps.log 2>&1
 fi
 
@@ -36,6 +38,4 @@ make -C deps get-readline get-uv get-pcre get-double-conversion get-openlibm get
   get-random get-openblas get-lapack get-fftw get-suitesparse get-arpack get-unwind \
   get-osxunwind get-gmp get-mpfr get-zlib get-patchelf get-utf8proc >> get-deps.log 2>&1
 dos2unix -f */*/configure */*/missing */*/config.sub */*/config.guess */*/depcomp 2>&1
-# Readline has an old config.guess that doesn't recognize 64-bit Cygwin, copy from something newer
-cp deps/libuv/config.guess deps/readline-5.0/support
 make -j 4
