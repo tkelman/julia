@@ -24,7 +24,7 @@ end
 _gmp_clear_func = C_NULL
 _mpfr_clear_func = C_NULL
 
-function gmp_init()
+function __init__()
     global _gmp_clear_func = cglobal((:__gmpz_clear, :libgmp))
     global _mpfr_clear_func = cglobal((:mpfr_clear, :libmpfr))
     ccall((:__gmp_set_memory_functions, :libgmp), Void,
@@ -262,21 +262,23 @@ for (fJ, fC) in ((:-, :neg), (:~, :com))
     end
 end
 
-function <<(x::BigInt, c::Uint)
+function <<(x::BigInt, c::Int32)
+    c < 0 && throw(DomainError())
+    c == 0 && return x
     z = BigInt()
     ccall((:__gmpz_mul_2exp, :libgmp), Void, (Ptr{BigInt}, Ptr{BigInt}, Culong), &z, &x, c)
     return z
 end
 
-function >>>(x::BigInt, c::Uint)
+function >>(x::BigInt, c::Int32)
+    c < 0 && throw(DomainError())
+    c == 0 && return x
     z = BigInt()
     ccall((:__gmpz_fdiv_q_2exp, :libgmp), Void, (Ptr{BigInt}, Ptr{BigInt}, Culong), &z, &x, c)
     return z
 end
 
-<<(x::BigInt, c::Int32) = c < 0 ? throw(DomainError()) : x << uint(c)
->>>(x::BigInt, c::Int32) = c < 0 ? throw(DomainError()) : x >>> uint(c)
->>(x::BigInt, c::Int32) = x >>> c
+>>>(x::BigInt, c::Int32) = x >> c
 
 trailing_zeros(x::BigInt) = int(ccall((:__gmpz_scan1, :libgmp), Culong, (Ptr{BigInt}, Culong), &x, 0))
 trailing_ones(x::BigInt) = int(ccall((:__gmpz_scan0, :libgmp), Culong, (Ptr{BigInt}, Culong), &x, 0))

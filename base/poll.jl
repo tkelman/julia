@@ -12,7 +12,7 @@ type FileMonitor
         end
         this = new(handle,cb,false,Condition())
         associate_julia_struct(handle,this)
-        finalizer(this,close)
+        finalizer(this,uvfinalize)
         this        
     end
     FileMonitor(file) = FileMonitor(false,file)
@@ -80,7 +80,7 @@ type PollingFileWatcher <: UVPollingWatcher
         end
         this = new(handle, file, false, Condition(), cb)
         associate_julia_struct(handle,this)
-        finalizer(this,close)
+        finalizer(this,uvfinalize)
         this
     end  
     PollingFileWatcher(file) =  PollingFileWatcher(false,file)
@@ -116,7 +116,7 @@ function FDWatcher(fd::RawFD)
     end
     this = FDWatcher(handle,fd,false,Condition(),false,FDEvent())
     associate_julia_struct(handle,this)
-    finalizer(this,close)
+    finalizer(this,uvfinalize)
     this
 end
 @windows_only function FDWatcher(fd::WindowsRawSocket)
@@ -129,7 +129,7 @@ end
     end
     this = FDWatcher(handle,fd,false,Condition(),false,FDEvent())
     associate_julia_struct(handle,this)
-    finalizer(this,close)
+    finalizer(this,uvfinalize)
     this
 end
 
@@ -171,10 +171,10 @@ end
 # on unix
 
 let
-    global fdwatcher_reinit
+    global fdwatcher_init
     @unix_only begin
-        local fdwatcher_array = Array(FDWatcher,0)
-        function fdwatcher_reinit()
+        local fdwatcher_array
+        function fdwatcher_init()
             fdwatcher_array = Array(FDWatcher,0)
         end
 
@@ -190,8 +190,8 @@ let
         end 
     end
     @windows_only begin
-        local fdwatcher_array = Dict{WindowsRawSocket,FDWatcher}()
-        function fdwatcher_reinit()
+        local fdwatcher_array
+        function fdwatcher_init()
             fdwatcher_array = Dict{WindowsRawSocket,FDWatcher}()
         end
 
@@ -220,7 +220,7 @@ function wait(pfw::PollingFileWatcher; interval=2.0)
     if !pfw.open
         start_watching(pfw_wait_cb,pfw,interval)
     end
-    prev,curr = wait(pfw.notify)
+    prev,curr = stream_wait(pfw,pfw.notify)
     if isempty(pfw.notify.waitq)
         stop_watching(pfw)
     end
@@ -228,7 +228,7 @@ function wait(pfw::PollingFileWatcher; interval=2.0)
 end
 
 function wait(m::FileMonitor)
-    err, filename, events = wait(m.notify)
+    err, filename, events = stream_wait(m,m.notify)
     filename, events
 end
 

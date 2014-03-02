@@ -143,7 +143,7 @@ function repl_callback(ast::ANY, show_value)
     put!(repl_channel, (ast, show_value))
 end
 
-_eval_done = Condition()
+_repl_start = Condition()
 
 function run_repl()
     global const repl_channel = RemoteRef()
@@ -152,19 +152,36 @@ function run_repl()
 
     # install Ctrl-C interrupt handler (InterruptException)
     ccall(:jl_install_sigint_handler, Void, ())
-    buf = Uint8[0]
-    @async begin
-        while !eof(STDIN)
-            read(STDIN, buf)
-            ccall(:jl_read_buffer,Void,(Ptr{Void},Cssize_t),buf,1)
-            if _repl_enough_stdin
-                wait(_eval_done)
+    buf = Array(Uint8)
+    global _repl_enough_stdin = true
+    input = @async begin
+        try
+            while true
+                if _repl_enough_stdin
+                    wait(_repl_start)
+                end
+                try
+                    if eof(STDIN) # if TTY, can throw InterruptException, must be in try/catch block
+                        return
+                    end
+                    read(STDIN, buf)
+                    ccall(:jl_read_buffer,Void,(Ptr{Void},Cssize_t),buf,length(buf))
+                catch ex
+                    if isa(ex,InterruptException)
+                        println(STDOUT, "^C")
+                        ccall(:jl_reset_input,Void,())
+                        repl_callback(nothing, 0)
+                    else
+                        rethrow(ex)
+                    end
+                end
             end
+        finally
+            put!(repl_channel,(nothing,-1))
         end
-        put!(repl_channel,(nothing,-1))
     end
 
-    while true
+    while !istaskdone(input)
         if have_color
             prompt_string = "\01\033[1m\033[32m\02julia> \01\033[0m"*input_color()*"\02"
         else
@@ -172,6 +189,7 @@ function run_repl()
         end
         ccall(:repl_callback_enable, Void, (Ptr{Uint8},), prompt_string)
         global _repl_enough_stdin = false
+        notify(_repl_start)
         start_reading(STDIN)
         (ast, show_value) = take!(repl_channel)
         if show_value == -1
@@ -179,7 +197,6 @@ function run_repl()
             break
         end
         eval_user_input(ast, show_value!=0)
-        notify(_eval_done)
     end
 
     if have_color
@@ -336,11 +353,6 @@ function init_head_sched()
     register_worker(LPROC)
 end
 
-function init_profiler()
-    # Use a max size of 1M profile samples, and fire timer every 1ms
-    Profile.init(1_000_000, 0.001)
-end
-
 function load_juliarc()
     # If the user built us with a specific Base.SYSCONFDIR, check that location first for a juliarc.jl file
     #   If it is not found, then continue on to the relative path based on JULIA_HOME
@@ -354,25 +366,12 @@ end
 
 
 function _start()
-    # set up standard streams
-    reinit_stdio()
-    fdwatcher_reinit()
-    # Initialize RNG
-    Random.librandom_init()
-    Sys.init()
-    global const CPU_CORES = Sys.CPU_CORES
     if CPU_CORES > 8 && !("OPENBLAS_NUM_THREADS" in keys(ENV)) && !("OMP_NUM_THREADS" in keys(ENV))
         # Prevent openblas from stating to many threads, unless/until specifically requested
         ENV["OPENBLAS_NUM_THREADS"] = 8
     end
-    # Check that BLAS is correctly built
-    check_blas()
-    LinAlg.init()
-    GMP.gmp_init()
-    init_profiler()
     start_gc_msgs_task()
 
-    #atexit(()->flush(STDOUT))
     try
         any(a->(a=="--worker"), ARGS) || init_head_sched()
         init_load_path()
