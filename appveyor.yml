@@ -1,5 +1,7 @@
 install:
   - "cinst cyg-get > cyg-get.log"
+# vcredist2008 is needed because of the win64 openblas binary I found
+  - "cinst vcredist2008 >> cyg-get.log"
   - set PATH=%PATH%;C:\cygwin
   - "cyg-get dos2unix >> cyg-get.log"
   - "cyg-get make >> cyg-get.log"
