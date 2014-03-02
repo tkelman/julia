@@ -13,6 +13,8 @@
 # stop on error
 set -e
 
+git config --global user.email "appveyor@julialang.org"
+git config --global user.name "Julia AppVeyor"
 echo "* text=auto" >>.gitattributes
 rm .git/index     # Remove the index to force git to
 git reset         # re-scan the working directory
