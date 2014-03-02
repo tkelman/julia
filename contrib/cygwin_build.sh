@@ -13,13 +13,13 @@
 # stop on error
 set -e
 
-#echo "* text=auto" >>.gitattributes
+echo "* text=auto" >>.gitattributes
 rm .git/index     # Remove the index to force git to
 git reset         # re-scan the working directory
 #git status        # Show files that will be normalized
-#git add -u
-#git add .gitattributes
-#git commit -m "Introduce end-of-line normalization"
+git add -u
+git add .gitattributes
+git commit -m "Introduce end-of-line normalization"
 
 #dos2unix contrib/relative_path.sh deps/jldownload
 
