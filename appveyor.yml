@@ -3,9 +3,9 @@ install:
   - set PATH=%PATH%;C:\cygwin
   - "cyg-get dos2unix >> cyg-get.log"
   - "cyg-get make >> cyg-get.log"
-  - "cyg-get wget >> cyg-get.log"
+  - "cyg-get curl >> cyg-get.log"
   - "cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log"
   - "cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log"
 
 build_script:
-  C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && tr -d '\r' < contrib/cygwin_build.sh > contrib/cygwin_build_d2u.sh && contrib/cygwin_build_d2u.sh"
+  cmd: C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && dos2unix contrib/cygwin_build.sh && contrib/cygwin_build.sh"
