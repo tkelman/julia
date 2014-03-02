@@ -11,7 +11,7 @@
 # This script is intended to be executed from the base julia directory as contrib/cygwin_build.sh
 
 # stop on error
-set -e
+#set -e
 
 if [ -n "$APPVEYOR" ]; then
   git config core.eol
