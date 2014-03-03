@@ -135,5 +135,9 @@ sed -i 's/-fPIC//g' deps/SuiteSparse-4.2.1/SuiteSparse_config/SuiteSparse_config
 # Quiet down SuiteSparse's library creation
 export ARFLAGS=cr
 
+git --version
+# Git on AppVeyor is having trouble with version_git for some reason?
+echo "override NO_GIT = 1" >> Make.user
+
 make -j 4
 make testall
