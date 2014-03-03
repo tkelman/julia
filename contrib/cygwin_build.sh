@@ -57,6 +57,7 @@ if [ `arch` = x86_64 ]; then
   wget -O openblas.7z "https://drive.google.com/uc?export=download&id=0B4DmELLTwYmlVWxuTU1QOHozbWM" >> get-deps.log 2>&1
   bsdtar -xf openblas.7z
   mv lib/libopenblas.dll usr/bin
+  chmod +x usr/bin/libopenblas.dll
   # Also needs msvcr90.dll?
   #cp /cygdrive/c/Windows/System32/drivers/msvcr90.dll usr/bin
   echo "USE_SYSTEM_BLAS = 1" >> Make.user
