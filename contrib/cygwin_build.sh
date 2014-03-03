@@ -52,18 +52,17 @@ if [ `arch` = x86_64 ]; then
   x86_64-w64-mingw32-ar cr usr/lib/libgtest_main.a
   
   # Download OpenBlas binary
-  #wget -O openblas.7z "https://drive.google.com/uc?export=download&id=0B4DmELLTwYmlVWxuTU1QOHozbWM" >> get-deps.log 2>&1
-  #bsdtar -xf openblas.7z
-  #mkdir -p usr/bin
-  #mv lib/libopenblas.dll usr/bin
+  wget -O openblas.7z "https://drive.google.com/uc?export=download&id=0B4DmELLTwYmlVWxuTU1QOHozbWM" >> get-deps.log 2>&1
+  bsdtar -xf openblas.7z
+  mv lib/libopenblas.dll usr/bin
   # Also needs msvcr90.dll?
   #cp /cygdrive/c/Windows/System32/drivers/msvcr90.dll usr/bin
-  #echo "USE_SYSTEM_BLAS = 1" >> Make.user
-  #echo "USE_SYSTEM_LAPACK = 1" >> Make.user
-  #echo "LIBBLAS = -L$PWD/usr/bin -lopenblas" >> Make.user
-  #echo "LIBBLASNAME = libopenblas" >> Make.user
-  #echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
-  #echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
+  echo "USE_SYSTEM_BLAS = 1" >> Make.user
+  echo "USE_SYSTEM_LAPACK = 1" >> Make.user
+  echo "LIBBLAS = -L$PWD/usr/bin -lopenblas" >> Make.user
+  echo "LIBBLASNAME = libopenblas" >> Make.user
+  echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
+  echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
   
   # Download readline binary
   wget ftp://rpmfind.net/linux/fedora/linux/releases/20/Everything/x86_64/os/Packages/m/mingw64-readline-6.2-3.fc20.noarch.rpm >> get-deps.log 2>&1
@@ -103,7 +102,7 @@ else
   echo "XC_HOST = i686-pc-mingw32" > Make.user
   echo "override BUILD_MACHINE = i686-pc-cygwin" >> Make.user
   
-  make -C deps get-llvm get-readline get-pcre \
+  make -C deps get-llvm get-openblas get-lapack get-readline get-pcre \
     get-fftw get-gmp get-mpfr get-zlib > get-deps.log 2>&1
 fi
 # OpenBlas uses HOSTCC to compile getarch, but we might not have Cygwin GCC installed
@@ -112,7 +111,7 @@ if [ -z `which gcc 2>/dev/null` ]; then
 fi
 
 #make -C deps getall >> get-deps.log 2>&1
-make -C deps get-openblas get-lapack get-uv get-double-conversion get-openlibm get-openspecfun get-random \
+make -C deps get-uv get-double-conversion get-openlibm get-openspecfun get-random \
   get-suitesparse get-arpack get-unwind get-osxunwind get-patchelf get-utf8proc >> get-deps.log 2>&1
 
 if [ -n "`file deps/libuv/missing | grep CRLF`" ]; then
