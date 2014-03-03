@@ -34,12 +34,12 @@ if [ `arch` = x86_64 ]; then
   wget https://sourceforge.net/projects/mingw-w64-dgn/files/others/llvm-3.3-w64-bin-x86_64-20130804.7z > get-deps.log 2>&1
   bsdtar -xf llvm-3.3-w64-bin-x86_64-20130804.7z
   if [ -d usr ]; then
-    for i in bin lib; do
+    for i in bin lib include; do
       mkdir -p usr/$i
-      mv llvm/$i/* usr/$i
     done
+    mv llvm/bin/* usr/bin
+    mv llvm/lib/*.a usr/lib
     if ! [ -d usr/include/llvm ]; then
-      mkdir -p usr/include
       mv llvm/include/llvm usr/include
       mv llvm/include/llvm-c usr/include
     fi
