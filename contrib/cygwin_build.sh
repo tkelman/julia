@@ -34,10 +34,15 @@ if [ `arch` = x86_64 ]; then
   wget https://sourceforge.net/projects/mingw-w64-dgn/files/others/llvm-3.3-w64-bin-x86_64-20130804.7z > get-deps.log 2>&1
   bsdtar -xf llvm-3.3-w64-bin-x86_64-20130804.7z
   if [ -d usr ]; then
-    for i in bin include lib; do
+    for i in bin lib; do
       mkdir -p usr/$i
       mv llvm/$i/* usr/$i
     done
+    if ! [ -d usr/include/llvm ]; then
+      mkdir -p usr/include
+      mv llvm/include/llvm usr/include
+      mv llvm/include/llvm-c usr/include
+    fi
   else
     mv llvm usr
   fi
@@ -69,6 +74,9 @@ if [ `arch` = x86_64 ]; then
   bsdtar -xf mingw64-readline-6.2-3.fc20.noarch.rpm
   echo "USE_SYSTEM_READLINE = 1" >> Make.user
   echo "override READLINE = -lreadline -lhistory" >> Make.user
+  # Download libtermcap binary (dependency of readline)
+  wget ftp://rpmfind.net/linux/fedora/linux/releases/20/Everything/x86_64/os/Packages/m/mingw64-termcap-1.3.1-16.fc20.noarch.rpm >> get-deps.log 2>&1
+  bsdtar -xf mingw64-termcap-1.3.1-16.fc20.noarch.rpm
   
   # Download pcre binary
   wget ftp://rpmfind.net/linux/fedora/linux/releases/18/Everything/x86_64/os/Packages/m/mingw64-pcre-8.31-1.fc18.noarch.rpm >> get-deps.log 2>&1
@@ -95,9 +103,10 @@ if [ `arch` = x86_64 ]; then
   bsdtar -xf mingw64-zlib-1.2.8-2.fc20.noarch.rpm
   echo "USE_SYSTEM_ZLIB = 1" >> Make.user
   
-  # Move all downloaded lib and bin files into build tree
-  mv usr/x86_64-w64-mingw32/sys-root/mingw/lib/*.dll.a usr/lib
+  # Move all downloaded bin, lib, and include files into build tree
   mv usr/x86_64-w64-mingw32/sys-root/mingw/bin/* usr/bin
+  mv usr/x86_64-w64-mingw32/sys-root/mingw/lib/*.dll.a usr/lib
+  mv usr/x86_64-w64-mingw32/sys-root/mingw/include/* usr/include
 else
   echo "XC_HOST = i686-pc-mingw32" > Make.user
   echo "override BUILD_MACHINE = i686-pc-cygwin" >> Make.user
