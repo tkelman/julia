@@ -107,6 +107,10 @@ if [ `arch` = x86_64 ]; then
   mv usr/x86_64-w64-mingw32/sys-root/mingw/bin/* usr/bin
   mv usr/x86_64-w64-mingw32/sys-root/mingw/lib/*.dll.a usr/lib
   mv usr/x86_64-w64-mingw32/sys-root/mingw/include/* usr/include
+  
+  # Rename versioned dll's
+  mv usr/bin/libpcre-1.dll usr/bin/libpcre.dll
+  mv usr/bin/libmpfr-4.dll usr/bin/libmpfr.dll
 else
   echo "XC_HOST = i686-pc-mingw32" > Make.user
   echo "override BUILD_MACHINE = i686-pc-cygwin" >> Make.user
