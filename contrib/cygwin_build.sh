@@ -49,9 +49,6 @@ if [ `arch` = x86_64 ]; then
   echo "USE_SYSTEM_LLVM = 1" >> Make.user
   echo "LLVM_CONFIG = $PWD/usr/bin/llvm-config" >> Make.user
   echo "LLVM_LLC = $PWD/usr/bin/llc" >> Make.user
-  #echo "LDFLAGS = -L$PWD/llvm/lib" >> Make.user
-  #echo "CXXFLAGS = -I$PWD/llvm/include" >> Make.user
-  #echo "CFLAGS = -I$PWD/llvm/include" >> Make.user
   # This binary version doesn't include libgtest or libgtest_main for some reason
   x86_64-w64-mingw32-ar cr usr/lib/libgtest.a
   x86_64-w64-mingw32-ar cr usr/lib/libgtest_main.a
@@ -114,6 +111,7 @@ if [ `arch` = x86_64 ]; then
   mv usr/bin/libpcre-1.dll usr/bin/libpcre.dll
   mv usr/bin/libmpfr-4.dll usr/bin/libmpfr.dll
   cp usr/bin/libgmp-10.dll usr/bin/libgmp.dll
+  mv usr/bin/libfftw3-3.dll usr/bin/libfftw3.dll
 else
   echo "XC_HOST = i686-pc-mingw32" > Make.user
   echo "override BUILD_MACHINE = i686-pc-cygwin" >> Make.user
@@ -141,3 +139,4 @@ sed -i 's/-fPIC//g' deps/SuiteSparse-4.2.1/SuiteSparse_config/SuiteSparse_config
 export ARFLAGS=cr
 
 make -j 4
+make testall
