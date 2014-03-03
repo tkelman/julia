@@ -110,7 +110,7 @@ if [ `arch` = x86_64 ]; then
   # Rename versioned dll's
   mv usr/bin/libpcre-1.dll usr/bin/libpcre.dll
   mv usr/bin/libmpfr-4.dll usr/bin/libmpfr.dll
-  cp usr/bin/libgmp-10.dll usr/bin/libgmp.dll
+  cp usr/bin/libgmp-10.dll usr/bin/libgmp.dll # copy since libmpfr links to the versioned name
   mv usr/bin/libfftw3-3.dll usr/bin/libfftw3.dll
 else
   echo "XC_HOST = i686-pc-mingw32" > Make.user
