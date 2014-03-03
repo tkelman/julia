@@ -5,15 +5,18 @@
 # - make
 # - wget
 # - bsdtar
-# - git
 # - python (for llvm)
 # - mingw64-x86_64-gcc-g++ (for 64 bit)
 # - mingw64-x86_64-gcc-fortran (for 64 bit)
 # - mingw-gcc-g++ (for 32 bit, not yet tested)
 # - mingw-gcc-fortran (for 32 bit, not yet tested)
 #
-# This script is intended to be executed from the main julia
-# directory as contrib/cygwin_build.sh
+# This script is intended to be executed from the main julia directory
+# as contrib/cygwin_build.sh. The only part that's absolutely necessary
+# is setting XC_HOST, the rest of this script deals with using binary
+# downloads for as many of Julia's dependencies as possible. Results
+# will be more reliable but take longer if all dependencies are compiled
+# from source as usual.
 
 # Stop on error
 set -e
@@ -75,7 +78,7 @@ if [ `arch` = x86_64 ]; then
   echo "LIBBLASNAME = libopenblas" >> Make.user
   echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
   echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
-  # apparently this openblas library was not built with 64bit integer support
+  # Apparently this openblas library was not built with 64bit integer support
   echo "USE_BLAS64 = 0" >> Make.user
   
   # Download MinGW binaries from Fedora rpm's for readline,
@@ -137,4 +140,6 @@ sed -i 's/-fPIC//g' deps/SuiteSparse-4.2.1/SuiteSparse_config/SuiteSparse_config
 export ARFLAGS=cr
 
 make -j 4
+echo $GIT_SSH
+unset GIT_SSH
 make testall
