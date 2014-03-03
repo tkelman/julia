@@ -5,6 +5,7 @@
 # - make
 # - wget
 # - bsdtar
+# - git
 # - python (for llvm)
 # - mingw64-x86_64-gcc-g++ (for 64 bit)
 # - mingw64-x86_64-gcc-fortran (for 64 bit)
@@ -134,10 +135,6 @@ make -C deps SuiteSparse-4.2.1/Makefile
 sed -i 's/-fPIC//g' deps/SuiteSparse-4.2.1/SuiteSparse_config/SuiteSparse_config.mk
 # Quiet down SuiteSparse's library creation
 export ARFLAGS=cr
-
-git --version
-# Git on AppVeyor is having trouble with version_git for some reason?
-echo "override NO_GIT = 1" >> Make.user
 
 make -j 4
 make testall
