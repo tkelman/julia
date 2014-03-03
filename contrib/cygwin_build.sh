@@ -20,7 +20,7 @@ set -e
 
 # The frequent use of 2>&1 is so AppVeyor doesn't highlight so many normal messages as errors
 if [ -n "`file contrib/relative_path.sh | grep CRLF`" ]; then
-  dos2unix contrib/relative_path.sh deps/jldownload deps/find_python_for_llvm 2>&1
+  dos2unix contrib/relative_path.sh deps/jldownload deps/find_python_for_llvm base/version_git.sh 2>&1
 fi
 
 # Add -C (caching) to CONFIGURE_COMMON in deps/Makefile for slightly faster configure scripts
@@ -58,14 +58,14 @@ if [ `arch` = x86_64 ]; then
   bsdtar -xf openblas.7z
   mv lib/libopenblas.dll usr/bin
   chmod +x usr/bin/libopenblas.dll
-  # Also needs msvcr90.dll?
-  #cp /cygdrive/c/Windows/System32/drivers/msvcr90.dll usr/bin
   echo "USE_SYSTEM_BLAS = 1" >> Make.user
   echo "USE_SYSTEM_LAPACK = 1" >> Make.user
   echo "LIBBLAS = -L$PWD/usr/bin -lopenblas" >> Make.user
   echo "LIBBLASNAME = libopenblas" >> Make.user
   echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
   echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
+  # apparently this openblas library was not build with 64bit integer support
+  echo "USE_BLAS64 = 0" >> Make.user
   
   # Download readline binary
   wget ftp://rpmfind.net/linux/fedora/linux/releases/20/Everything/x86_64/os/Packages/m/mingw64-readline-6.2-3.fc20.noarch.rpm >> get-deps.log 2>&1
@@ -80,6 +80,7 @@ if [ `arch` = x86_64 ]; then
   wget ftp://rpmfind.net/linux/fedora/linux/releases/18/Everything/x86_64/os/Packages/m/mingw64-pcre-8.31-1.fc18.noarch.rpm >> get-deps.log 2>&1
   bsdtar -xf mingw64-pcre-8.31-1.fc18.noarch.rpm
   echo "USE_SYSTEM_PCRE = 1" >> Make.user
+  echo "override PCRE_CONFIG = $PWD/usr/bin/pcre-config" >> Make.user
   
   # Download fftw binary
   wget ftp://rpmfind.net/linux/fedora/linux/releases/20/Everything/x86_64/os/Packages/m/mingw64-fftw-3.3.3-2.fc20.noarch.rpm >> get-deps.log 2>&1
