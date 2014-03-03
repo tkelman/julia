@@ -103,16 +103,16 @@ else
   echo "XC_HOST = i686-pc-mingw32" > Make.user
   echo "override BUILD_MACHINE = i686-pc-cygwin" >> Make.user
   
-  make -C deps get-llvm get-openblas get-lapack get-readline get-pcre \
+  make -C deps get-llvm get-readline get-pcre \
     get-fftw get-gmp get-mpfr get-zlib > get-deps.log 2>&1
-  # OpenBlas uses HOSTCC to compile getarch, but we might not have Cygwin GCC installed
-  if [ -z `which gcc 2>/dev/null` ]; then
-    echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
-  fi
+fi
+# OpenBlas uses HOSTCC to compile getarch, but we might not have Cygwin GCC installed
+if [ -z `which gcc 2>/dev/null` ]; then
+  echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
 fi
 
 #make -C deps getall >> get-deps.log 2>&1
-make -C deps get-uv get-double-conversion get-openlibm get-openspecfun get-random \
+make -C deps get-openblas get-lapack get-uv get-double-conversion get-openlibm get-openspecfun get-random \
   get-suitesparse get-arpack get-unwind get-osxunwind get-patchelf get-utf8proc >> get-deps.log 2>&1
 
 if [ -n "`file deps/libuv/missing | grep CRLF`" ]; then
