@@ -1,7 +1,6 @@
 #!/bin/sh
 # Script to cross-compile Julia from Cygwin to MinGW assuming
 # the following packages are installed:
-# - dos2unix
 # - make
 # - wget
 # - bsdtar
@@ -21,14 +20,12 @@
 # Stop on error
 set -e
 
-# Screen output from all downloads is redirected to a log file to
-# avoid filling up the AppVeyor logs with progress bars
-
-# The frequent use of 2>&1 is so AppVeyor doesn't highlight
-# so many normal messages as errors
 if [ -n "`file contrib/relative_path.sh | grep CRLF`" ]; then
-  dos2unix contrib/relative_path.sh deps/jldownload \
-    deps/find_python_for_llvm base/version_git.sh 2>&1
+  # fix line endings
+  for f in contrib/relative_path.sh base_version_git.sh; do
+    tr -d '\r' < $f > $f.d2u
+    mv $f.d2u $f
+  done
 fi
 
 # Add -C (caching) to CONFIGURE_COMMON in deps/Makefile for
@@ -42,12 +39,14 @@ if [ `arch` = x86_64 ]; then
   # Download LLVM binary
   f=llvm-3.3-w64-bin-x86_64-20130804.7z
   if ! [ -e $f ]; then
+    # Screen output (including stderr 2>&1) from all downloads is redirected
+    # to a file to avoid filling up the AppVeyor log with progress bars.
     wget https://sourceforge.net/projects/mingw-w64-dgn/files/others/$f > get-deps.log 2>&1
   fi
   bsdtar -xf $f
   if [ -d usr ]; then
-    for i in bin lib include; do
-      mkdir -p usr/$i
+    for f in bin lib include; do
+      mkdir -p usr/$f
     done
     mv llvm/bin/* usr/bin
     mv llvm/lib/*.a usr/lib
@@ -95,8 +94,8 @@ if [ `arch` = x86_64 ]; then
   # Modify prefix in pcre-config
   sed -i "s|prefix=/usr/x86_64-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
   
-  # skip all of the dependencies!
-  echo 'override STAGE1_DEPS = ' >> Make.user
+  # Only need to build libuv for now, until Windows binaries get updated with latest bump
+  echo 'override STAGE1_DEPS = uv' >> Make.user
   echo 'override STAGE2_DEPS = ' >> Make.user
   echo 'override STAGE3_DEPS = ' >> Make.user
 else
@@ -110,13 +109,21 @@ if [ -z `which gcc 2>/dev/null` ]; then
   echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
 fi
 
-# remove libjulia.dll if it was copied from downloaded binary
+# Remove libjulia.dll if it was copied from downloaded binary
 [ -e usr/bin/libjulia.dll ] && rm usr/bin/libjulia.dll
 [ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
 
-# modify deps/utf8proc_Makefile.patch to silence warning on library creation
+# Modify deps/utf8proc_Makefile.patch to silence warning on library creation
 #sed -i 's/$(AR) rs/$(AR) crs/' deps/utf8proc_Makefile.patch
 
-#make -C deps get-utf8proc >> get-deps.log 2>&1
+make -C deps get-uv >> get-deps.log 2>&1
+#if [ -n "`file deps/libuv/missing | grep CRLF`" ]; then
+  # fix line endings
+#  for f in configure missing config.sub config.guess depcomp; do
+#    tr -d '\r' < deps/libuv/$f > deps/libuv/$f.d2u
+#    mv deps/libuv/$f.d2u deps/libuv/$f
+#  done
+#fi
+
 make -j 4
 make testall
