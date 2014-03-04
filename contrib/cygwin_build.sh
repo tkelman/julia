@@ -44,7 +44,7 @@ if [ `arch` = x86_64 ]; then
   if ! [ -e $f ]; then
     wget https://sourceforge.net/projects/mingw-w64-dgn/files/others/$f > get-deps.log 2>&1
   fi
-  7z x $f
+  bsdtar -xf $f
   if [ -d usr ]; then
     for i in bin lib include; do
       mkdir -p usr/$i
@@ -75,6 +75,8 @@ if [ `arch` = x86_64 ]; then
   #echo "USE_BLAS64 = 0" >> Make.user
   echo "override READLINE = -lreadline -lhistory" >> Make.user
   #echo "override PCRE_CONFIG = $PWD/usr/bin/pcre-config" >> Make.user
+  # skip suitesparse-wrapper, the only thing currently in STAGE3_DEPS, since we already have it
+  echo "override STAGE3_DEPS = " >> Make.user
 else
   echo "XC_HOST = i686-pc-mingw32" > Make.user
   echo "override BUILD_MACHINE = i686-pc-cygwin" >> Make.user
