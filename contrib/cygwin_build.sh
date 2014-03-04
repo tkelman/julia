@@ -36,8 +36,8 @@ fi
 sed -i 's/CONFIGURE_COMMON = --prefix/CONFIGURE_COMMON = -C --prefix/' deps/Makefile
 
 if [ `arch` = x86_64 ]; then
-  echo "XC_HOST = x86_64-w64-mingw32" > Make.user
-  echo "override BUILD_MACHINE = x86_64-pc-cygwin" >> Make.user
+  echo 'XC_HOST = x86_64-w64-mingw32' > Make.user
+  echo 'override BUILD_MACHINE = x86_64-pc-cygwin' >> Make.user
   
   # Download LLVM binary
   f=llvm-3.3-w64-bin-x86_64-20130804.7z
@@ -58,9 +58,9 @@ if [ `arch` = x86_64 ]; then
   else
     mv llvm usr
   fi
-  echo "USE_SYSTEM_LLVM = 1" >> Make.user
-  echo "LLVM_CONFIG = $PWD/usr/bin/llvm-config" >> Make.user
-  echo "LLVM_LLC = $PWD/usr/bin/llc" >> Make.user
+  echo 'USE_SYSTEM_LLVM = 1' >> Make.user
+  echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
+  echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
   # This binary version doesn't include libgtest or libgtest_main for some reason
   x86_64-w64-mingw32-ar cr usr/lib/libgtest.a
   x86_64-w64-mingw32-ar cr usr/lib/libgtest_main.a
@@ -68,11 +68,11 @@ if [ `arch` = x86_64 ]; then
   for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR PCRE LIBUNWIND READLINE GRISU OPENLIBM RMATH OPENSPECFUN LIBUV; do
     echo "USE_SYSTEM_$lib = 1" >> Make.user
   done
-  echo "LIBBLAS = -L$PWD/usr/bin -lopenblas" >> Make.user
-  echo "LIBBLASNAME = libopenblas" >> Make.user
+  echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
+  echo 'LIBBLASNAME = libopenblas' >> Make.user
   echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
   echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
-  #echo "USE_BLAS64 = 0" >> Make.user
+  echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
   
   # Download MinGW binaries from Fedora rpm's for readline,
   # libtermcap (dependency of readline), and pcre (for pcre-config)
@@ -82,8 +82,8 @@ if [ `arch` = x86_64 ]; then
     fi
     bsdtar -xf mingw64-$f.noarch.rpm
   done
-  echo "override READLINE = -lreadline -lhistory" >> Make.user
-  echo "override PCRE_CONFIG = $PWD/usr/bin/pcre-config" >> Make.user
+  echo 'override READLINE = -lreadline -lhistory' >> Make.user
+  echo 'override PCRE_CONFIG = $(JULIAHOME)/usr/bin/pcre-config' >> Make.user
   
   # Move all downloaded bin, lib, and include files into build tree
   mv usr/x86_64-w64-mingw32/sys-root/mingw/bin/* usr/bin
@@ -96,12 +96,12 @@ if [ `arch` = x86_64 ]; then
   sed -i "s|prefix=/usr/x86_64-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
   
   # skip all of the dependencies!
-  echo "override STAGE1_DEPS = " >> Make.user
-  echo "override STAGE2_DEPS = " >> Make.user
-  echo "override STAGE3_DEPS = " >> Make.user
+  echo 'override STAGE1_DEPS = ' >> Make.user
+  echo 'override STAGE2_DEPS = ' >> Make.user
+  echo 'override STAGE3_DEPS = ' >> Make.user
 else
-  echo "XC_HOST = i686-pc-mingw32" > Make.user
-  echo "override BUILD_MACHINE = i686-pc-cygwin" >> Make.user
+  echo 'XC_HOST = i686-pc-mingw32' > Make.user
+  echo 'override BUILD_MACHINE = i686-pc-cygwin' >> Make.user
   
   make -C deps getall > get-deps.log 2>&1
 fi
@@ -113,7 +113,6 @@ fi
 # remove libjulia.dll if it was copied from downloaded binary
 [ -e usr/bin/libjulia.dll ] && rm usr/bin/libjulia.dll
 [ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
-ls usr/bin
 
 # modify deps/utf8proc_Makefile.patch to silence warning on library creation
 #sed -i 's/$(AR) rs/$(AR) crs/' deps/utf8proc_Makefile.patch
