@@ -19,18 +19,6 @@
 # Stop on error
 set -e
 
-if [ -n "`file contrib/relative_path.sh | grep CRLF`" ]; then
-  # Fix line endings
-  for f in contrib/relative_path.sh base/version_git.sh; do
-    tr -d '\r' < $f > $f.d2u
-    mv $f.d2u $f
-  done
-fi
-
-# Add -C (caching) to CONFIGURE_COMMON in deps/Makefile for
-# slightly faster configure scripts
-sed -i 's/CONFIGURE_COMMON = --prefix/CONFIGURE_COMMON = -C --prefix/' deps/Makefile
-
 if [ `arch` = x86_64 ]; then
   echo 'XC_HOST = x86_64-w64-mingw32' > Make.user
   echo 'override BUILD_MACHINE = x86_64-pc-cygwin' >> Make.user
@@ -56,7 +44,6 @@ if [ `arch` = x86_64 ]; then
   else
     mv llvm usr
   fi
-  echo 'USE_SYSTEM_LLVM = 1' >> Make.user
   echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
   echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
   # This binary version doesn't include libgtest or libgtest_main for some reason
@@ -109,20 +96,26 @@ fi
 
 # Only need to build libuv for now, until Windows binaries get updated with latest bump
 echo 'override STAGE1_DEPS = uv' >> Make.user
-echo 'override STAGE2_DEPS = ' >> Make.user
+# Need utf8proc since its headers are not in the binary download
+echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 
-# Modify deps/utf8proc_Makefile.patch to silence warning on library creation
-#sed -i 's/$(AR) rs/$(AR) crs/' deps/utf8proc_Makefile.patch
+# Fix line endings in shell scripts used by Makefile
+for f in contrib/relative_path.sh base/version_git.sh; do
+  tr -d '\r' < $f > $f.d2u
+  mv $f.d2u $f
+done
 
-make -C deps get-uv >> get-deps.log 2>&1
-if [ -n "`file deps/libuv/missing | grep CRLF`" ]; then
-  # Fix line endings
-  for f in configure missing config.sub config.guess depcomp; do
-    tr -d '\r' < deps/libuv/$f > deps/libuv/$f.d2u
-    mv deps/libuv/$f.d2u deps/libuv/$f
-  done
-fi
+make -C deps get-uv get-utf8proc >> get-deps.log 2>&1
+
+# Modify deps/utf8proc_Makefile.patch to silence warning on library creation
+sed -i 's/$(AR) rs/$(AR) crs/' deps/utf8proc_Makefile.patch
+
+# Fix line endings in libuv's configure scripts
+for f in configure missing config.sub config.guess depcomp; do
+  tr -d '\r' < deps/libuv/$f > deps/libuv/$f.d2u
+  mv deps/libuv/$f.d2u deps/libuv/$f
+done
 
 make -j 4
 make testall
