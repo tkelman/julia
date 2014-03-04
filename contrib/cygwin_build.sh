@@ -19,6 +19,12 @@
 # Stop on error
 set -e
 
+# Fix line endings in shell scripts used by Makefile
+for f in contrib/relative_path.sh deps/jldownload base/version_git.sh; do
+  tr -d '\r' < $f > $f.d2u
+  mv $f.d2u $f
+done
+
 if [ `arch` = x86_64 ]; then
   echo 'XC_HOST = x86_64-w64-mingw32' > Make.user
   echo 'override BUILD_MACHINE = x86_64-pc-cygwin' >> Make.user
@@ -103,22 +109,16 @@ echo 'override STAGE1_DEPS = uv' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 
-# Fix line endings in shell scripts used by Makefile
-for f in contrib/relative_path.sh deps/jldownload base/version_git.sh; do
-  tr -d '\r' < $f > $f.d2u
-  mv $f.d2u $f
-done
-
 make -C deps get-uv get-utf8proc
-
-# Modify deps/utf8proc_Makefile.patch to silence warning on library creation
-sed -i 's/$(AR) rs/$(AR) crs/' deps/utf8proc_Makefile.patch
 
 # Fix line endings in libuv's configure scripts
 for f in configure missing config.sub config.guess depcomp; do
   tr -d '\r' < deps/libuv/$f > deps/libuv/$f.d2u
   mv deps/libuv/$f.d2u deps/libuv/$f
 done
+
+# Modify deps/utf8proc_Makefile.patch to silence warning on library creation
+sed -i 's/$(AR) rs/$(AR) crs/' deps/utf8proc_Makefile.patch
 
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
