@@ -1,8 +1,6 @@
 install:
   - cinst 7zip
 # Download most-recent Julia binary for dependencies
-# I would do this in cygwin_build.sh, but need 7-zip to extract the
-# installer and 64-bit Cygwin doesn't yet have the p7zip package
   - ps: (new-object net.webclient).DownloadFile('http://s3.amazonaws.com/julialang/bin/winnt/x64/0.3/julia-0.3.0-prerelease-win64.exe', 'C:\projects\julia-prev.exe')
 # Extract installer, run it silently, output to C:\projects\julia-prev
   - 7z x C:\projects\julia-prev.exe -oC:\projects\julia-prev
@@ -10,13 +8,13 @@ install:
 # Copy dll's and libuv includes from julia-prev to julia/usr
   - mkdir C:\projects\julia\usr\bin
   - copy C:\projects\julia-prev\bin\*.dll C:\projects\julia\usr\bin
-  - mkdir C:\projects\julia\usr\include
-  - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
-  - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
+# Uncomment these once Windows binaries get updated with latest version of libuv
+#  - mkdir C:\projects\julia\usr\include
+#  - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
+#  - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
 # Install Cygwin and build-time dependencies
   - "cinst cyg-get > cyg-get.log"
   - set PATH=%PATH%;C:\cygwin
-  - "cyg-get dos2unix >> cyg-get.log"
   - "cyg-get make >> cyg-get.log"
   - "cyg-get wget >> cyg-get.log"
   - "cyg-get bsdtar >> cyg-get.log"
@@ -24,4 +22,4 @@ install:
   - "cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log"
 
 build_script:
-  C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && dos2unix contrib/cygwin_build.sh 2>&1 && contrib/cygwin_build.sh"
+  C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && sh -o igncr contrib/cygwin_build.sh"
