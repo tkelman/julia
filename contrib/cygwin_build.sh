@@ -4,7 +4,6 @@
 # - make
 # - wget
 # - bsdtar
-# - python (for llvm)
 # - mingw64-x86_64-gcc-g++ (for 64 bit)
 # - mingw64-x86_64-gcc-fortran (for 64 bit)
 # - mingw-gcc-g++ (for 32 bit, not yet tested)
@@ -22,7 +21,7 @@ set -e
 
 if [ -n "`file contrib/relative_path.sh | grep CRLF`" ]; then
   # fix line endings
-  for f in contrib/relative_path.sh base_version_git.sh; do
+  for f in contrib/relative_path.sh base/version_git.sh; do
     tr -d '\r' < $f > $f.d2u
     mv $f.d2u $f
   done
@@ -102,11 +101,12 @@ else
   echo 'XC_HOST = i686-pc-mingw32' > Make.user
   echo 'override BUILD_MACHINE = i686-pc-cygwin' >> Make.user
   
+  # OpenBlas uses HOSTCC to compile getarch, but we might not have Cygwin GCC installed
+  if [ -z `which gcc 2>/dev/null` ]; then
+    echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
+  fi
+  
   make -C deps getall > get-deps.log 2>&1
-fi
-# OpenBlas uses HOSTCC to compile getarch, but we might not have Cygwin GCC installed
-if [ -z `which gcc 2>/dev/null` ]; then
-  echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
 fi
 
 # Remove libjulia.dll if it was copied from downloaded binary
