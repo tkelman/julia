@@ -106,7 +106,7 @@ for f in contrib/relative_path.sh base/version_git.sh; do
   mv $f.d2u $f
 done
 
-make -C deps get-uv get-utf8proc >> get-deps.log 2>&1
+make -C deps get-uv get-utf8proc #>> get-deps.log 2>&1
 
 # Modify deps/utf8proc_Makefile.patch to silence warning on library creation
 sed -i 's/$(AR) rs/$(AR) crs/' deps/utf8proc_Makefile.patch
