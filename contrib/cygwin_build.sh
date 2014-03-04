@@ -101,7 +101,7 @@ echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 
 # Fix line endings in shell scripts used by Makefile
-for f in contrib/relative_path.sh base/version_git.sh; do
+for f in contrib/relative_path.sh deps/jldownload base/version_git.sh; do
   tr -d '\r' < $f > $f.d2u
   mv $f.d2u $f
 done
