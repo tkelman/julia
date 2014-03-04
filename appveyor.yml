@@ -22,4 +22,4 @@ install:
   - "cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log"
 
 build_script:
-  C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && sh -o igncr contrib/cygwin_build.sh"
+  C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && sh -v -o igncr contrib/cygwin_build.sh"
