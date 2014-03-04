@@ -95,8 +95,9 @@ if [ `arch` = x86_64 ]; then
   # Modify prefix in pcre-config
   sed -i "s|prefix=/usr/x86_64-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
   
-  # skip suitesparse-wrapper, the only thing currently in STAGE3_DEPS,
-  #  since we already have it but we don't have suitesparse headers
+  # skip all of the dependencies!
+  echo "override STAGE1_DEPS = " >> Make.user
+  echo "override STAGE2_DEPS = " >> Make.user
   echo "override STAGE3_DEPS = " >> Make.user
 else
   echo "XC_HOST = i686-pc-mingw32" > Make.user
@@ -112,10 +113,11 @@ fi
 # remove libjulia.dll if it was copied from downloaded binary
 [ -e usr/bin/libjulia.dll ] && rm usr/bin/libjulia.dll
 [ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
+ls usr/bin
 
 # modify deps/utf8proc_Makefile.patch to silence warning on library creation
-sed -i 's/$(AR) rs/$(AR) crs/' deps/utf8proc_Makefile.patch
+#sed -i 's/$(AR) rs/$(AR) crs/' deps/utf8proc_Makefile.patch
 
-make -C deps get-utf8proc >> get-deps.log 2>&1
+#make -C deps get-utf8proc >> get-deps.log 2>&1
 make -j 4
 make testall
