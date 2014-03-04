@@ -26,9 +26,7 @@ if [ `arch` = x86_64 ]; then
   # Download LLVM binary
   f=llvm-3.3-w64-bin-x86_64-20130804.7z
   if ! [ -e $f ]; then
-    # Screen output (including stderr 2>&1) from all downloads is redirected
-    # to a file to avoid filling up the AppVeyor log with progress bars.
-    wget https://sourceforge.net/projects/mingw-w64-dgn/files/others/$f > get-deps.log 2>&1
+    wget https://sourceforge.net/projects/mingw-w64-dgn/files/others/$f
   fi
   bsdtar -xf $f
   if [ -d usr ]; then
@@ -54,7 +52,7 @@ if [ `arch` = x86_64 ]; then
   # libtermcap (dependency of readline), and pcre (for pcre-config)
   for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
     if ! [ -e mingw64-$f.noarch.rpm ]; then
-      wget ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw64-$f.noarch.rpm >> get-deps.log 2>&1
+      wget ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw64-$f.noarch.rpm
     fi
     bsdtar -xf mingw64-$f.noarch.rpm
   done
@@ -92,6 +90,9 @@ echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
 if [ -z `which gcc 2>/dev/null` ]; then
   echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
 fi
+# Set UNTRUSTED_SYSTEM_LIBM to 0 since we don't have an openlibm static library
+# (may just need to build from source instead...)
+echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 #echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 
 # Only need to build libuv for now, until Windows binaries get updated with latest bump
@@ -106,7 +107,7 @@ for f in contrib/relative_path.sh deps/jldownload base/version_git.sh; do
   mv $f.d2u $f
 done
 
-make -C deps get-uv get-utf8proc #>> get-deps.log 2>&1
+make -C deps get-uv get-utf8proc
 
 # Modify deps/utf8proc_Makefile.patch to silence warning on library creation
 sed -i 's/$(AR) rs/$(AR) crs/' deps/utf8proc_Makefile.patch
@@ -117,5 +118,11 @@ for f in configure missing config.sub config.guess depcomp; do
   mv deps/libuv/$f.d2u deps/libuv/$f
 done
 
-make -j 4
+# Disable git and enable verbose make in AppVeyor
+if [ -n "$APPVEYOR" ]; then
+ echo 'override NO_GIT = 1' >> Make.user
+ echo 'VERBOSE = 1' >> Make.user
+fi
+
+make -j 4 install
 make testall
