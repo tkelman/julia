@@ -34,7 +34,7 @@ if [ `arch` = x86_64 ]; then
   if ! [ -e $f ]; then
     # Screen output (including stderr 2>&1) from downloads is redirected
     # to a file to avoid filling up the AppVeyor log with progress bars.
-    deps/jldownload https://sourceforge.net/projects/mingw-w64-dgn/files/others/$f 2>&1
+    deps/jldownload https://sourceforge.net/projects/mingw-w64-dgn/files/others/$f > get-deps.log 2>&1
   fi
   bsdtar -xf $f
   if [ -d usr ]; then
@@ -60,7 +60,7 @@ if [ `arch` = x86_64 ]; then
   # libtermcap (dependency of readline), and pcre (for pcre-config)
   for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
     if ! [ -e mingw64-$f.noarch.rpm ]; then
-      deps/jldownload ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw64-$f.noarch.rpm 2>&1
+      deps/jldownload ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw64-$f.noarch.rpm >> get-deps.log 2>&1
     fi
     bsdtar -xf mingw64-$f.noarch.rpm
   done
@@ -116,9 +116,6 @@ for f in configure missing config.sub config.guess depcomp; do
   tr -d '\r' < deps/libuv/$f > deps/libuv/$f.d2u
   mv deps/libuv/$f.d2u deps/libuv/$f
 done
-
-# Modify deps/utf8proc_Makefile.patch to silence warning on library creation
-sed -i 's/$(AR) rs/$(AR) crs/' deps/utf8proc_Makefile.patch
 
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
