@@ -20,7 +20,7 @@
 set -e
 
 if [ -n "`file contrib/relative_path.sh | grep CRLF`" ]; then
-  # fix line endings
+  # Fix line endings
   for f in contrib/relative_path.sh base/version_git.sh; do
     tr -d '\r' < $f > $f.d2u
     mv $f.d2u $f
@@ -63,15 +63,6 @@ if [ `arch` = x86_64 ]; then
   x86_64-w64-mingw32-ar cr usr/lib/libgtest.a
   x86_64-w64-mingw32-ar cr usr/lib/libgtest_main.a
   
-  for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR PCRE LIBUNWIND READLINE GRISU OPENLIBM RMATH OPENSPECFUN LIBUV; do
-    echo "USE_SYSTEM_$lib = 1" >> Make.user
-  done
-  echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
-  echo 'LIBBLASNAME = libopenblas' >> Make.user
-  echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
-  echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
-  echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
-  
   # Download MinGW binaries from Fedora rpm's for readline,
   # libtermcap (dependency of readline), and pcre (for pcre-config)
   for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
@@ -89,41 +80,48 @@ if [ `arch` = x86_64 ]; then
   if ! [ -d usr/include/readline ]; then
     mv usr/x86_64-w64-mingw32/sys-root/mingw/include/* usr/include
   fi
-
   # Modify prefix in pcre-config
   sed -i "s|prefix=/usr/x86_64-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
-  
-  # Only need to build libuv for now, until Windows binaries get updated with latest bump
-  echo 'override STAGE1_DEPS = uv' >> Make.user
-  echo 'override STAGE2_DEPS = ' >> Make.user
-  echo 'override STAGE3_DEPS = ' >> Make.user
 else
   echo 'XC_HOST = i686-pc-mingw32' > Make.user
   echo 'override BUILD_MACHINE = i686-pc-cygwin' >> Make.user
   
-  # OpenBlas uses HOSTCC to compile getarch, but we might not have Cygwin GCC installed
-  if [ -z `which gcc 2>/dev/null` ]; then
-    echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
-  fi
-  
-  make -C deps getall > get-deps.log 2>&1
+  # TODO: 32 bit versions of LLVM, readline, pcre
 fi
 
 # Remove libjulia.dll if it was copied from downloaded binary
 [ -e usr/bin/libjulia.dll ] && rm usr/bin/libjulia.dll
 [ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
 
+for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR PCRE LIBUNWIND READLINE GRISU OPENLIBM RMATH OPENSPECFUN LIBUV; do
+  echo "USE_SYSTEM_$lib = 1" >> Make.user
+done
+echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
+echo 'LIBBLASNAME = libopenblas' >> Make.user
+echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
+echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
+# OpenBlas uses HOSTCC to compile getarch, but we might not have Cygwin GCC installed
+if [ -z `which gcc 2>/dev/null` ]; then
+  echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
+fi
+#echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
+
+# Only need to build libuv for now, until Windows binaries get updated with latest bump
+echo 'override STAGE1_DEPS = uv' >> Make.user
+echo 'override STAGE2_DEPS = ' >> Make.user
+echo 'override STAGE3_DEPS = ' >> Make.user
+
 # Modify deps/utf8proc_Makefile.patch to silence warning on library creation
 #sed -i 's/$(AR) rs/$(AR) crs/' deps/utf8proc_Makefile.patch
 
 make -C deps get-uv >> get-deps.log 2>&1
-#if [ -n "`file deps/libuv/missing | grep CRLF`" ]; then
-  # fix line endings
-#  for f in configure missing config.sub config.guess depcomp; do
-#    tr -d '\r' < deps/libuv/$f > deps/libuv/$f.d2u
-#    mv deps/libuv/$f.d2u deps/libuv/$f
-#  done
-#fi
+if [ -n "`file deps/libuv/missing | grep CRLF`" ]; then
+  # Fix line endings
+  for f in configure missing config.sub config.guess depcomp; do
+    tr -d '\r' < deps/libuv/$f > deps/libuv/$f.d2u
+    mv deps/libuv/$f.d2u deps/libuv/$f
+  done
+fi
 
 make -j 4
 make testall
