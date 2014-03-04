@@ -5,9 +5,11 @@ install:
 # extract installer, run it silently, output to C:\projects\julia-prev
   - 7z x C:\projects\julia-prev.exe -oC:\projects\julia-prev
   - C:\projects\julia-prev\julia-installer.exe /S /D=C:\projects\julia-prev
-# copy dll's from julia-prev/bin to julia/usr/bin
+# copy dll's and libuv includes from julia-prev to julia/usr
   - mkdir C:\projects\julia\usr\bin
   - copy C:\projects\julia-prev\bin\*.dll C:\projects\julia\usr\bin
+  - mkdir C:\projects\julia\usr\include
+  - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
 # install Cygwin and build-time dependencies
   - "cinst cyg-get > cyg-get.log"
   - set PATH=%PATH%;C:\cygwin
