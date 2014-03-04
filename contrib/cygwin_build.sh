@@ -65,7 +65,7 @@ if [ `arch` = x86_64 ]; then
   x86_64-w64-mingw32-ar cr usr/lib/libgtest.a
   x86_64-w64-mingw32-ar cr usr/lib/libgtest_main.a
   
-  for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR PCRE LIBUNWIND READLINE GRISU OPENLIBM RMATH; do
+  for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR PCRE LIBUNWIND READLINE GRISU OPENLIBM RMATH OPENSPECFUN LIBUV; do
     echo "USE_SYSTEM_$lib = 1" >> Make.user
   done
   echo "LIBBLAS = -L$PWD/usr/bin -lopenblas" >> Make.user
@@ -73,9 +73,30 @@ if [ `arch` = x86_64 ]; then
   echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
   echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
   #echo "USE_BLAS64 = 0" >> Make.user
+  
+  # Download MinGW binaries from Fedora rpm's for readline,
+  # libtermcap (dependency of readline), and pcre (for pcre-config)
+  for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
+    if ! [ -e mingw64-$f.noarch.rpm ]; then
+      wget ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw64-$f.noarch.rpm >> get-deps.log 2>&1
+    fi
+    bsdtar -xf mingw64-$f.noarch.rpm
+  done
   echo "override READLINE = -lreadline -lhistory" >> Make.user
-  #echo "override PCRE_CONFIG = $PWD/usr/bin/pcre-config" >> Make.user
-  # skip suitesparse-wrapper, the only thing currently in STAGE3_DEPS, since we already have it
+  echo "override PCRE_CONFIG = $PWD/usr/bin/pcre-config" >> Make.user
+  
+  # Move all downloaded bin, lib, and include files into build tree
+  mv usr/x86_64-w64-mingw32/sys-root/mingw/bin/* usr/bin
+  mv usr/x86_64-w64-mingw32/sys-root/mingw/lib/*.dll.a usr/lib
+  if ! [ -d usr/include/readline ]; then
+    mv usr/x86_64-w64-mingw32/sys-root/mingw/include/* usr/include
+  fi
+
+  # Modify prefix in pcre-config
+  sed -i "s|prefix=/usr/x86_64-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
+  
+  # skip suitesparse-wrapper, the only thing currently in STAGE3_DEPS,
+  #  since we already have it but we don't have suitesparse headers
   echo "override STAGE3_DEPS = " >> Make.user
 else
   echo "XC_HOST = i686-pc-mingw32" > Make.user
