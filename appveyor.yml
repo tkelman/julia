@@ -1,8 +1,11 @@
 install:
+  - cinst 7zip
 # download most-recent Julia binary for dependencies
   - ps: (new-object net.webclient).DownloadFile('http://s3.amazonaws.com/julialang/bin/winnt/x64/0.3/julia-0.3.0-prerelease-win64.exe', 'julia-prev.exe')
+# extract installer
+  - 7z x julia-prev.exe
 # run installer silently, output to C:\projects\julia-prev
-  - julia-prev.exe /S /D=C:\projects\julia-prev
+  - julia-installer.exe /S /D=C:\projects\julia-prev
 # copy dll's from julia-prev/bin to julia/usr/bin
   - mkdir C:\projects\julia\usr\bin
   - copy C:\projects\julia-prev\bin\*.dll C:\projects\julia\usr\bin
