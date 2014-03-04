@@ -21,5 +21,9 @@ install:
   - "cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log"
   - "cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log"
 
+environment:
+  HOMEDRIVE: "C:"
+  HOMEPATH: \Users\appveyor
+
 build_script:
   C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && sh -v -o igncr contrib/cygwin_build.sh 2>&1"
