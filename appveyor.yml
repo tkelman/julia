@@ -1,16 +1,19 @@
 install:
   - cinst 7zip
-# download most-recent Julia binary for dependencies
+# Download most-recent Julia binary for dependencies
+# I would do this in cygwin_build.sh, but need 7-zip to extract the
+# installer and 64-bit Cygwin doesn't yet have the p7zip package
   - ps: (new-object net.webclient).DownloadFile('http://s3.amazonaws.com/julialang/bin/winnt/x64/0.3/julia-0.3.0-prerelease-win64.exe', 'C:\projects\julia-prev.exe')
-# extract installer, run it silently, output to C:\projects\julia-prev
+# Extract installer, run it silently, output to C:\projects\julia-prev
   - 7z x C:\projects\julia-prev.exe -oC:\projects\julia-prev
   - C:\projects\julia-prev\julia-installer.exe /S /D=C:\projects\julia-prev
-# copy dll's and libuv includes from julia-prev to julia/usr
+# Copy dll's and libuv includes from julia-prev to julia/usr
   - mkdir C:\projects\julia\usr\bin
   - copy C:\projects\julia-prev\bin\*.dll C:\projects\julia\usr\bin
   - mkdir C:\projects\julia\usr\include
   - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
-# install Cygwin and build-time dependencies
+  - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
+# Install Cygwin and build-time dependencies
   - "cinst cyg-get > cyg-get.log"
   - set PATH=%PATH%;C:\cygwin
   - "cyg-get dos2unix >> cyg-get.log"
