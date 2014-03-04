@@ -102,14 +102,20 @@ else
   echo "XC_HOST = i686-pc-mingw32" > Make.user
   echo "override BUILD_MACHINE = i686-pc-cygwin" >> Make.user
   
-  make -C deps get-llvm get-openblas get-lapack get-readline get-pcre get-uv get-openspecfun \
-    get-fftw get-gmp get-mpfr get-zlib get-openlibm get-suitesparse get-arpack get-unwind > get-deps.log 2>&1
+  make -C deps getall > get-deps.log 2>&1
 fi
 # OpenBlas uses HOSTCC to compile getarch, but we might not have Cygwin GCC installed
 if [ -z `which gcc 2>/dev/null` ]; then
   echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
 fi
 
-make -C deps get-double-conversion get-random get-osxunwind get-patchelf get-utf8proc >> get-deps.log 2>&1
+# remove libjulia.dll if it was copied from downloaded binary
+[ -e usr/bin/libjulia.dll ] && rm usr/bin/libjulia.dll
+[ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
+
+# modify deps/utf8proc_Makefile.patch to silence warning on library creation
+sed -i 's/$(AR) rs/$(AR) crs/' deps/utf8proc_Makefile.patch
+
+make -C deps get-utf8proc >> get-deps.log 2>&1
 make -j 4
 make testall
