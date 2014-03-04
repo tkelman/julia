@@ -26,7 +26,7 @@ if [ `arch` = x86_64 ]; then
   # Download LLVM binary
   f=llvm-3.3-w64-bin-x86_64-20130804.7z
   if ! [ -e $f ]; then
-    wget https://sourceforge.net/projects/mingw-w64-dgn/files/others/$f
+    wget -q https://sourceforge.net/projects/mingw-w64-dgn/files/others/$f
   fi
   bsdtar -xf $f
   if [ -d usr ]; then
@@ -52,7 +52,7 @@ if [ `arch` = x86_64 ]; then
   # libtermcap (dependency of readline), and pcre (for pcre-config)
   for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
     if ! [ -e mingw64-$f.noarch.rpm ]; then
-      wget ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw64-$f.noarch.rpm
+      wget -q ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw64-$f.noarch.rpm
     fi
     bsdtar -xf mingw64-$f.noarch.rpm
   done
