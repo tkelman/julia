@@ -5,6 +5,7 @@
 # - wget
 # - bsdtar
 # - python (only if building llvm from source)
+# - gcc (only if building llvm from source)
 # - mingw64-x86_64-gcc-g++ (for 64 bit)
 # - mingw64-x86_64-gcc-fortran (for 64 bit)
 # - mingw-gcc-g++ (for 32 bit, not yet tested)
@@ -57,8 +58,6 @@ if [ `arch` = x86_64 ]; then
   # This binary version doesn't include libgtest or libgtest_main for some reason
   #x86_64-w64-mingw32-ar cr usr/lib/libgtest.a
   #x86_64-w64-mingw32-ar cr usr/lib/libgtest_main.a
-  # LLVM from source wants the build system to have a native compiler installed. Lie to it.
-  export ac_cv_prog_BUILD_CC=x86_64-w64-mingw32-gcc
   
   # Download MinGW binaries from Fedora rpm's for readline,
   # libtermcap (dependency of readline), and pcre (for pcre-config)
