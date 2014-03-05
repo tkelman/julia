@@ -4,6 +4,7 @@
 # - make
 # - wget
 # - bsdtar
+# - python (only if building llvm from source)
 # - mingw64-x86_64-gcc-g++ (for 64 bit)
 # - mingw64-x86_64-gcc-fortran (for 64 bit)
 # - mingw-gcc-g++ (for 32 bit, not yet tested)
@@ -21,7 +22,7 @@
 set -e
 
 # Fix line endings in shell scripts used by Makefile
-for f in contrib/relative_path.sh deps/jldownload base/version_git.sh; do
+for f in contrib/relative_path.sh deps/jldownload deps/find_python_for_llvm base/version_git.sh; do
   tr -d '\r' < $f > $f.d2u
   mv $f.d2u $f
 done
@@ -31,31 +32,31 @@ if [ `arch` = x86_64 ]; then
   echo 'override BUILD_MACHINE = x86_64-pc-cygwin' >> Make.user
   
   # Download LLVM binary
-  f=llvm-3.3-w64-bin-x86_64-20130804.7z
-  if ! [ -e $f ]; then
+  #f=llvm-3.3-w64-bin-x86_64-20130804.7z
+  #if ! [ -e $f ]; then
     # Screen output (including stderr 2>&1) from downloads is redirected
     # to a file to avoid filling up the AppVeyor log with progress bars.
-    deps/jldownload https://sourceforge.net/projects/mingw-w64-dgn/files/others/$f > get-deps.log 2>&1
-  fi
-  bsdtar -xf $f
-  if [ -d usr ]; then
+  #  deps/jldownload https://sourceforge.net/projects/mingw-w64-dgn/files/others/$f > get-deps.log 2>&1
+  #fi
+  #bsdtar -xf $f
+  #if [ -d usr ]; then
     for f in bin lib include; do
       mkdir -p usr/$f
     done
-    mv llvm/bin/* usr/bin
-    mv llvm/lib/*.a usr/lib
-    if ! [ -d usr/include/llvm ]; then
-      mv llvm/include/llvm usr/include
-      mv llvm/include/llvm-c usr/include
-    fi
-  else
-    mv llvm usr
-  fi
-  echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
-  echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
+  #  mv llvm/bin/* usr/bin
+  #  mv llvm/lib/*.a usr/lib
+  #  if ! [ -d usr/include/llvm ]; then
+  #    mv llvm/include/llvm usr/include
+  #    mv llvm/include/llvm-c usr/include
+  #  fi
+  #else
+  #  mv llvm usr
+  #fi
+  #echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
+  #echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
   # This binary version doesn't include libgtest or libgtest_main for some reason
-  x86_64-w64-mingw32-ar cr usr/lib/libgtest.a
-  x86_64-w64-mingw32-ar cr usr/lib/libgtest_main.a
+  #x86_64-w64-mingw32-ar cr usr/lib/libgtest.a
+  #x86_64-w64-mingw32-ar cr usr/lib/libgtest_main.a
   
   # Download MinGW binaries from Fedora rpm's for readline,
   # libtermcap (dependency of readline), and pcre (for pcre-config)
@@ -110,7 +111,7 @@ echo 'override STAGE1_DEPS = uv' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 
-make -C deps get-uv get-utf8proc
+make -C deps get-llvm get-uv get-utf8proc
 
 # Fix line endings in libuv's configure scripts
 for f in configure missing config.sub config.guess depcomp; do
