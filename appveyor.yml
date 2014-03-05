@@ -31,7 +31,7 @@ environment:
   HOMEPATH: \Users\appveyor
 
 platform:
-  - x86
+#  - x86 # TODO
   - x64
 
 build_script:
