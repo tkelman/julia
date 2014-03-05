@@ -106,7 +106,7 @@ echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 #echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 
 # Only need to build libuv for now, until Windows binaries get updated with latest bump
-echo 'override STAGE1_DEPS = uv' >> Make.user
+echo 'override STAGE1_DEPS = uv llvm' >> Make.user
 # Need utf8proc since its headers are not in the binary download
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
