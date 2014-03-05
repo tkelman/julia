@@ -1408,4 +1408,18 @@ end
 @test f5906(Hanoi5906{Int}(1)) === nothing
 
 # make sure front end can correctly print values to error messages
-@test expand(parse("\"a\"=1")) == Expr(:error, "invalid assignment location \"\"a\"\"")
+let
+    ex = expand(parse("\"a\"=1"))
+    @test ex == Expr(:error, "invalid assignment location \"\"a\"\"") ||
+          ex == Expr(:error, "invalid assignment location \"#<julia_value>\"")
+end
+
+# issue #6031
+macro m6031(x); x; end
+@test @m6031([2,4,6])[3] == 6
+@test (@m6031 [2,4,6])[2] == 4
+
+# issue #6050
+@test Base.getfield_tfunc({nothing,QuoteNode(:vals)},
+                          Dict{Int64,(Range1{Int64},Range1{Int64})},
+                          :vals) == Array{(Range1{Int64},Range1{Int64}),1}
