@@ -4,6 +4,7 @@
 # - make
 # - wget
 # - bsdtar
+# - binutils (for `strings` in make install)
 # - mingw64-x86_64-gcc-g++ (for 64 bit)
 # - mingw-gcc-g++ (for 32 bit, not yet tested)
 # - mingw64-x86_64-gcc-fortran (for 64 bit, only if building openblas, arpack etc from source)
@@ -127,4 +128,4 @@ if [ -n "$APPVEYOR" ]; then
  echo 'VERBOSE = 1' >> Make.user
 fi
 
-make -j 4 install
+make -j 4
