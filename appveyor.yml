@@ -18,10 +18,12 @@ install:
   - "cyg-get make >> cyg-get.log"
   - "cyg-get wget >> cyg-get.log"
   - "cyg-get bsdtar >> cyg-get.log"
-  - "cyg-get python >> cyg-get.log"
-  - "cyg-get gcc-g++ >> cyg-get.log"
-  - "cyg-get diffutils >> cyg-get.log"
   - "cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log"
+# python, gcc-g++, and diffutils are required to build llvm from source
+#  - "cyg-get python >> cyg-get.log"
+#  - "cyg-get gcc-g++ >> cyg-get.log"
+#  - "cyg-get diffutils >> cyg-get.log"
+# mingw64-x86_64-gcc-fortran is required to build openblas, arpack, etc from source
 #  - "cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log"
 
 environment:
