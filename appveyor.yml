@@ -18,6 +18,7 @@ install:
   - "cyg-get make >> cyg-get.log"
   - "cyg-get wget >> cyg-get.log"
   - "cyg-get bsdtar >> cyg-get.log"
+  - "cyg-get python >> cyg-get.log"
   - "cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log"
   - "cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log"
 
