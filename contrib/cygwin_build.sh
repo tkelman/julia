@@ -58,7 +58,7 @@ if [ `arch` = x86_64 ]; then
   #x86_64-w64-mingw32-ar cr usr/lib/libgtest.a
   #x86_64-w64-mingw32-ar cr usr/lib/libgtest_main.a
   # LLVM from source wants the build system to have a native compiler installed. Lie to it.
-  export BUILD_CC=x86_64-w64-mingw32-gcc
+  export ac_cv_prog_BUILD_CC=x86_64-w64-mingw32-gcc
   
   # Download MinGW binaries from Fedora rpm's for readline,
   # libtermcap (dependency of readline), and pcre (for pcre-config)
