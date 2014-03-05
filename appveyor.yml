@@ -20,6 +20,7 @@ install:
   - "cyg-get bsdtar >> cyg-get.log"
   - "cyg-get python >> cyg-get.log"
   - "cyg-get gcc-g++ >> cyg-get.log"
+  - "cyg-get diffutils >> cyg-get.log"
   - "cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log"
 #  - "cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log"
 
