@@ -124,8 +124,13 @@ done
 
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
- echo 'override NO_GIT = 1' >> Make.user
+ #echo 'override NO_GIT = 1' >> Make.user
  echo 'VERBOSE = 1' >> Make.user
 fi
+
+git --version
+git remote -v
+git branch
+sh -x base/version_git.sh
 
 make -j 4
