@@ -11,10 +11,11 @@
 #
 # This script is intended to be executed from the main julia directory
 # as contrib/cygwin_build.sh. The only part that's absolutely necessary
-# is setting XC_HOST, the rest of this script deals with using binary
-# downloads for as many of Julia's dependencies as possible. Results
-# will be more reliable but take longer if all dependencies are compiled
-# from source as usual.
+# is setting XC_HOST, the rest of this script deals with using binaries
+# for as many of Julia's dependencies as possible. This script assumes
+# all dll's from the most recent binary download of Julia have been
+# copied into usr/bin. Results will be more reliable but take longer
+# if all dependencies are compiled from source as usual.
 
 # Stop on error
 set -e
