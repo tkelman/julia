@@ -1,14 +1,14 @@
 environment:
   HOMEDRIVE: "C:"
   HOMEPATH: \Users\appveyor
-  XC_HOST: "i686-pc-mingw32"
+  XC_HOST: "i686-w64-mingw32"
   JL_URL: "http://s3.amazonaws.com/julialang/bin/winnt/"
   JL_VER: "/0.3/julia-0.3.0-prerelease-win"
 
 install:
   - cinst 7zip
 # Download most-recent Julia binary for dependencies
-  - ps: if ($env:XC_HOST -eq "i686-pc-mingw32") {(new-object net.webclient).DownloadFile($($env:JL_URL+"x86"+$env:JL_VER+"32.exe"), "C:\projects\julia-prev.exe")} else {(new-object net.webclient).DownloadFile($($env:JL_URL+"x64"+$env:JL_VER+"64.exe"), "C:\projects\julia-prev.exe")}
+  - ps: if ($env:XC_HOST -eq "x86_64-w64-mingw32") {(new-object net.webclient).DownloadFile($($env:JL_URL+"x64"+$env:JL_VER+"64.exe"), "C:\projects\julia-prev.exe")} else {(new-object net.webclient).DownloadFile($($env:JL_URL+"x86"+$env:JL_VER+"32.exe"), "C:\projects\julia-prev.exe")}
 # Extract installer, run it silently, output to C:\projects\julia-prev
   - 7z x C:\projects\julia-prev.exe -oC:\projects\julia-prev
   - C:\projects\julia-prev\julia-installer.exe /S /D=C:\projects\julia-prev
@@ -25,13 +25,14 @@ install:
   - "cyg-get make >> cyg-get.log"
   - "cyg-get wget >> cyg-get.log"
   - "cyg-get bsdtar >> cyg-get.log"
-  - "IF %XC_HOST% == i686-pc-mingw32 (cyg-get mingw64-i686-gcc-g++ >> cyg-get.log) ELSE (cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log)"
+  - "IF %XC_HOST% == x86_64-w64-mingw32 (cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log) ELSE (cyg-get mingw64-i686-gcc-g++ >> cyg-get.log)"
 # python, gcc-g++, and diffutils are required to build llvm from source
 #  - "cyg-get python >> cyg-get.log"
 #  - "cyg-get gcc-g++ >> cyg-get.log"
 #  - "cyg-get diffutils >> cyg-get.log"
-# mingw64-x86_64-gcc-fortran is required to build openblas, arpack, etc from source
+# mingw64-{x86_64|i686}-gcc-fortran is required to build openblas, arpack, etc from source
 #  - "cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log"
+#  - "cyg-get mingw64-i686-gcc-fortran >> cyg-get.log"
 
 build_script:
   - C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && sh -o igncr contrib/cygwin_build.sh 2>&1"
