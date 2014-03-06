@@ -25,8 +25,8 @@ install:
   - "cyg-get make >> cyg-get.log"
   - "cyg-get wget >> cyg-get.log"
   - "cyg-get bsdtar >> cyg-get.log"
-  - ps: if ($env:XC_HOST -eq "i686-pc-mingw32") {"cyg-get mingw64-i686-gcc-g++"} else {"cyg-get mingw64-x86_64-gcc-g++"}
-#  - "IF %XC_HOST% == i686-pc-mingw32 (cyg-get mingw64-i686-gcc-g++ >> cyg-get.log) ELSE (cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log)"
+#  - ps: if ($env:XC_HOST -eq "i686-pc-mingw32") {iex "cyg-get mingw64-i686-gcc-g++"} else {iex "cyg-get mingw64-x86_64-gcc-g++"}
+  - "IF %XC_HOST% == i686-pc-mingw32 (cyg-get mingw64-i686-gcc-g++) ELSE (cyg-get mingw64-x86_64-gcc-g++)"
 # python, gcc-g++, and diffutils are required to build llvm from source
 #  - "cyg-get python >> cyg-get.log"
 #  - "cyg-get gcc-g++ >> cyg-get.log"
