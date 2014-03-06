@@ -35,7 +35,7 @@ if [ -z "$XC_HOST" ]; then
   if [ `arch` = x86_64 ]; then
     export XC_HOST=x86_64-w64-mingw32
   else
-    export XC_HOST=i686-pc-mingw32
+    export XC_HOST=i686-w64-mingw32
   fi
 fi
 
