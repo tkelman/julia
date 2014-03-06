@@ -108,6 +108,7 @@ echo 'override STAGE1_DEPS = uv' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 
+git config --global core.eol lf
 make -C deps get-uv get-utf8proc
 
 # Disable git and enable verbose make in AppVeyor
