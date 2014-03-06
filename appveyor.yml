@@ -6,10 +6,10 @@ environment:
 install:
   - cinst 7zip
 # Download most-recent Julia binary for dependencies
-  - ps: (new-object net.webclient).DownloadFile(IF ($XC_HOST -eq "i686-pc-mingw32")
-    {"http://s3.amazonaws.com/julialang/bin/winnt/x86/0.3/julia-0.3.0-prerelease-win32.exe"}
-    ELSE {"http://s3.amazonaws.com/julialang/bin/winnt/x64/0.3/julia-0.3.0-prerelease-win64.exe"},
-    C:\projects\julia-prev.exe)
+  - ps: "(new-object net.webclient).DownloadFile(IF ($XC_HOST -eq 'i686-pc-mingw32')
+    {'http://s3.amazonaws.com/julialang/bin/winnt/x86/0.3/julia-0.3.0-prerelease-win32.exe'}
+    ELSE {'http://s3.amazonaws.com/julialang/bin/winnt/x64/0.3/julia-0.3.0-prerelease-win64.exe'},
+    C:\projects\julia-prev.exe)"
 # Extract installer, run it silently, output to C:\projects\julia-prev
   - 7z x C:\projects\julia-prev.exe -oC:\projects\julia-prev
   - C:\projects\julia-prev\julia-installer.exe /S /D=C:\projects\julia-prev
@@ -26,9 +26,9 @@ install:
   - "cyg-get make >> cyg-get.log"
   - "cyg-get wget >> cyg-get.log"
   - "cyg-get bsdtar >> cyg-get.log"
-  - ps: IF ($XC_HOST -eq "i686-pc-mingw32")
-    {"cyg-get mingw64-i686-gcc-g++ >> cyg-get.log"}
-    ELSE {"cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log"}
+  - ps: "IF ($XC_HOST -eq 'i686-pc-mingw32')
+    {cyg-get mingw64-i686-gcc-g++ >> cyg-get.log}
+    ELSE {cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log}"
 # python, gcc-g++, and diffutils are required to build llvm from source
 #  - "cyg-get python >> cyg-get.log"
 #  - "cyg-get gcc-g++ >> cyg-get.log"
