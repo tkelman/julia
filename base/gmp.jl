@@ -363,25 +363,19 @@ function sum(arr::AbstractArray{BigInt})
     return n
 end
 
-function factorial(bn::BigInt)
-    if bn<0
-        return BigInt(0)
-    else
-        n = uint(bn)
-    end
+function factorial(x::BigInt)
+    x.size < 0 && return BigInt(0)
     z = BigInt()
-    ccall((:__gmpz_fac_ui, :libgmp), Void,
-        (Ptr{BigInt}, Culong), &z, n)
+    ccall((:__gmpz_fac_ui, :libgmp), Void, (Ptr{BigInt}, Culong), &z, x)
     return z
 end
 
 function binomial(n::BigInt, k::Uint)
     z = BigInt()
-    ccall((:__gmpz_bin_ui, :libgmp), Void,
-        (Ptr{BigInt}, Ptr{BigInt}, Culong), &z, &n, k)
+    ccall((:__gmpz_bin_ui, :libgmp), Void, (Ptr{BigInt}, Ptr{BigInt}, Culong), &z, &n, k)
     return z
 end
-binomial(n::BigInt, k::Integer) = k<0 ? throw(DomainError()) : binomial(n, uint(k))
+binomial(n::BigInt, k::Integer) = k < 0 ? throw(DomainError()) : binomial(n, uint(k))
 
 ==(x::BigInt, y::BigInt) = cmp(x,y) == 0
 isequal(x::BigInt, y::BigInt) = cmp(x,y) == 0
@@ -390,16 +384,8 @@ isequal(x::BigInt, y::BigInt) = cmp(x,y) == 0
 <(x::BigInt, y::BigInt) = cmp(x,y) < 0
 >(x::BigInt, y::BigInt) = cmp(x,y) > 0
 
-function string(x::BigInt)
-    lng = ndigits(x) + 2
-    z = Array(Uint8, lng)
-    lng = ccall((:__gmp_snprintf,:libgmp), Int32, (Ptr{Uint8}, Culong, Ptr{Uint8}, Ptr{BigInt}...), z, lng, "%Zd", &x)
-    return bytestring(z[1:lng])
-end
-
-function show(io::IO, x::BigInt)
-    print(io, string(x))
-end
+string(x::BigInt) = dec(x)
+show(io::IO, x::BigInt) = print(io, string(x))
 
 bin(n::BigInt) = base( 2, n)
 oct(n::BigInt) = base( 8, n)
@@ -407,22 +393,18 @@ dec(n::BigInt) = base(10, n)
 hex(n::BigInt) = base(16, n)
 
 function base(b::Integer, n::BigInt)
-    if !(2 <= b <= 62)
-        error("invalid base: $b")
-    end
-    p = ccall((:__gmpz_get_str,:libgmp), Ptr{Uint8}, (Ptr{Uint8}, Cint, Ptr{BigInt}),
-              C_NULL, b, &n)
+    2 <= b <= 62 || error("invalid base: $b")
+    p = ccall((:__gmpz_get_str,:libgmp), Ptr{Uint8}, (Ptr{Uint8}, Cint, Ptr{BigInt}), C_NULL, b, &n)
     len = int(ccall(:strlen, Csize_t, (Ptr{Uint8},), p))
     ASCIIString(pointer_to_array(p,len,true))
 end
 
-function ndigits(x::BigInt, base::Integer=10)
+function ndigits0z(x::BigInt, b::Integer=10)
     # mpz_sizeinbase might return an answer 1 too big
-    n = int(ccall((:__gmpz_sizeinbase,:libgmp), Culong, (Ptr{BigInt}, Int32), &x, base))
-    abs(x) < big(base)^(n-1) ? n-1 : n
+    n = int(ccall((:__gmpz_sizeinbase,:libgmp), Culong, (Ptr{BigInt}, Int32), &x, b))
+    abs(x) < big(b)^(n-1) ? n-1 : n
 end
-
-ndigits0z(x::BigInt, base::Integer=10) = x == 0 ? 0 : ndigits(x)
+ndigits(x::BigInt, b::Integer=10) = x.size == 0 ? 1 : ndigits0z(x,b)
 
 isprime(x::BigInt, reps=25) = ccall((:__gmpz_probab_prime_p,:libgmp), Cint, (Ptr{BigInt}, Cint), &x, reps) > 0
 
@@ -431,7 +413,7 @@ widemul(x::Int128, y::Uint128)  = BigInt(x)*BigInt(y)
 widemul(x::Uint128, y::Int128)  = BigInt(x)*BigInt(y)
 widemul{T<:Integer}(x::T, y::T) = BigInt(x)*BigInt(y)
 
-prevpow2(x::BigInt) = x < 0 ? -prevpow2(-x) : (x <= 2 ? x : one(BigInt) << (ndigits(x, 2)-1))
-nextpow2(x::BigInt) = x < 0 ? -nextpow2(-x) : (x <= 2 ? x : one(BigInt) << ndigits(x-1, 2))
+prevpow2(x::BigInt) = x.size < 0 ? -prevpow2(-x) : (x <= 2 ? x : one(BigInt) << (ndigits(x, 2)-1))
+nextpow2(x::BigInt) = x.size < 0 ? -nextpow2(-x) : (x <= 2 ? x : one(BigInt) << ndigits(x-1, 2))
 
 end # module
