@@ -15,10 +15,9 @@ install:
 # Copy dll's and libuv includes from julia-prev to julia/usr
   - mkdir C:\projects\julia\usr\bin
   - copy C:\projects\julia-prev\bin\*.dll C:\projects\julia\usr\bin
-# Uncomment these once Windows binaries get updated with latest version of libuv
-#  - mkdir C:\projects\julia\usr\include
-#  - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
-#  - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
+  - mkdir C:\projects\julia\usr\include
+  - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
+  - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
 # Install Cygwin and build-time dependencies
   - "cinst cyg-get > cyg-get.log"
   - set PATH=%PATH%;C:\cygwin
