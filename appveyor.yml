@@ -1,7 +1,7 @@
 environment:
   HOMEDRIVE: "C:"
   HOMEPATH: \Users\appveyor
-  XC_HOST: "i686-w64-mingw32"
+  XC_HOST: "x86_64-w64-mingw32"
   JL_URL: "http://s3.amazonaws.com/julialang/bin/winnt/"
   JL_VER: "/0.3/julia-0.3.0-prerelease-win"
 
