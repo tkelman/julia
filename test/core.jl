@@ -1423,3 +1423,27 @@ macro m6031(x); x; end
 @test Base.getfield_tfunc({nothing,QuoteNode(:vals)},
                           Dict{Int64,(Range1{Int64},Range1{Int64})},
                           :vals) == Array{(Range1{Int64},Range1{Int64}),1}
+
+# issue #6068
+x6068 = 1
+function test6068()
+    local a
+    while true
+        a = x6068
+        break
+    end
+    a + 1
+end
+@test test6068() == 2
+
+# issue #6074
+macro X6074()
+    quote
+        global x6074
+        let x6074 = x6074
+            x6074
+        end
+    end
+end
+x6074 = 6074
+@test @X6074() == 6074

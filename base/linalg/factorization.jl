@@ -137,7 +137,7 @@ function lufact!{T}(A::AbstractMatrix{T})
     ipiv = Array(BlasInt, minmn)
     for k = 1:minmn
         # find index max
-        kp = 1
+        kp = k
         amax = real(zero(T))
         for i = k:m
             absi = abs(A[i,k])
@@ -148,11 +148,13 @@ function lufact!{T}(A::AbstractMatrix{T})
         end
         ipiv[k] = kp
         if A[kp,k] != 0
-            # Interchange
-            for i = 1:n
-                tmp = A[k,i]
-                A[k,i] = A[kp,i]
-                A[kp,i] = tmp
+            if k != kp
+                # Interchange
+                for i = 1:n
+                    tmp = A[k,i]
+                    A[k,i] = A[kp,i]
+                    A[kp,i] = tmp
+                end
             end
             # Scale first column
             Akkinv = inv(A[k,k])
@@ -167,9 +169,8 @@ function lufact!{T}(A::AbstractMatrix{T})
             for i = k+1:m
                 A[i,j] -= A[i,k]*A[k,j]
             end
-        end
+        end        
     end
-    if minmn > 0 && A[minmn,minmn] == 0; info = minmn; end
     LU(A, ipiv, convert(BlasInt, info))
 end
 lufact{T<:BlasFloat}(A::StridedMatrix{T}) = lufact!(copy(A))
@@ -351,9 +352,7 @@ size(A::Union(QR,QRCompactWY,QRPivoted)) = size(A.factors)
 size(A::Union(QRPackedQ,QRCompactWYQ), dim::Integer) = 0 < dim ? (dim <= 2 ? size(A.factors, 1) : 1) : throw(BoundsError())
 size(A::Union(QRPackedQ,QRCompactWYQ)) = size(A, 1), size(A, 2)
 
-full{T}(A::Union(QRPackedQ{T},QRCompactWYQ{T}); thin::Bool=true) = A_mul_B!(A, thin ? eye(T, size(A.factors)...) : eye(T, size(A.factors,1)))
-
-print_matrix(io::IO, A::Union(QRPackedQ,QRCompactWYQ), rows::Integer, cols::Integer) = print_matrix(io, full(A, thin=false), rows, cols)
+full{T}(A::Union(QRPackedQ{T},QRCompactWYQ{T}); thin::Bool=true) = A_mul_B!(A, thin ? eye(T, size(A.factors,1), minimum(size(A.factors))) : eye(T, size(A.factors,1)))
 
 ## Multiplication by Q
 ### QB
@@ -602,9 +601,6 @@ immutable HessenbergQ{T} <: AbstractMatrix{T}
 end
 HessenbergQ(A::Hessenberg) = HessenbergQ(A.factors, A.τ)
 size(A::HessenbergQ, args...) = size(A.factors, args...)
-getindex(A::HessenbergQ, i::Real) = getindex(full(A), i)
-getindex(A::HessenbergQ, i::AbstractArray) = getindex(full(A), i)
-getindex(A::HessenbergQ, args...) = getindex(full(A), args...)
 
 function getindex(A::Hessenberg, d::Symbol)
     d == :Q && return HessenbergQ(A)
@@ -613,6 +609,10 @@ function getindex(A::Hessenberg, d::Symbol)
 end
 
 full(A::HessenbergQ) = LAPACK.orghr!(1, size(A.factors, 1), copy(A.factors), A.τ)
+
+# Also printing of QRQs
+print_matrix(io::IO, A::Union(QRPackedQ,QRCompactWYQ,HessenbergQ), rows::Integer, cols::Integer, punct...) = print_matrix(io, full(A), rows, cols, punct...)
+
 
 #######################
 # Eigendecompositions #
