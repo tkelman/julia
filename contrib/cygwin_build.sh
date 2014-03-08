@@ -99,7 +99,7 @@ sed -i "s|prefix=/usr/$XC_HOST/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-con
 [ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
 
 for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR \
-    PCRE LIBUNWIND READLINE GRISU OPENLIBM RMATH OPENSPECFUN; do
+    PCRE LIBUNWIND READLINE GRISU OPENLIBM RMATH OPENSPECFUN LIBUV; do
   echo "USE_SYSTEM_$lib = 1" >> Make.user
 done
 echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
@@ -113,21 +113,14 @@ fi
 # Set UNTRUSTED_SYSTEM_LIBM to 0 since we don't have an openlibm static library
 # (may just need to build from source instead...)
 echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
-#echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
+echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 
-# Only need to build libuv for now, until Windows binaries get updated with latest bump
-echo 'override STAGE1_DEPS = uv' >> Make.user
-# Need utf8proc since its headers are not in the binary download
+# Only dependency needed is utf8proc since its headers are not in the binary download
+echo 'override STAGE1_DEPS = ' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 
-make -C deps get-uv get-utf8proc
-
-# Fix line endings in libuv's configure scripts
-for f in configure missing config.sub config.guess depcomp; do
-  tr -d '\r' < deps/libuv/$f > deps/libuv/$f.d2u
-  mv deps/libuv/$f.d2u deps/libuv/$f
-done
+make -C deps get-utf8proc
 
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
