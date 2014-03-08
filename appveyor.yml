@@ -12,11 +12,11 @@ install:
 # Extract installer, run it silently, output to C:\projects\julia-prev
   - 7z x C:\projects\julia-prev.exe -oC:\projects\julia-prev
   - C:\projects\julia-prev\julia-installer.exe /S /D=C:\projects\julia-prev
-# Copy dll's and libuv includes from julia-prev to julia/usr
+# Copy libs and libuv includes from julia-prev to julia/usr
   - mkdir C:\projects\julia\usr\bin
   - copy C:\projects\julia-prev\bin\*.dll C:\projects\julia\usr\bin
-#  - mkdir C:\projects\julia\usr\lib
-#  - copy C:\projects\julia-prev\lib\julia\*.a C:\projects\julia\usr\lib
+  - mkdir C:\projects\julia\usr\lib
+  - copy C:\projects\julia-prev\lib\julia\*.a C:\projects\julia\usr\lib
   - mkdir C:\projects\julia\usr\include
   - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
   - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
