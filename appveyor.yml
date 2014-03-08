@@ -16,10 +16,10 @@ install:
   - mkdir C:\projects\julia\usr\bin
   - copy C:\projects\julia-prev\bin\*.dll C:\projects\julia\usr\bin
 #  - mkdir C:\projects\julia\usr\lib
-#  - copy C:\projects\julia-prev\lib\*.a C:\projects\julia\usr\lib
+#  - copy C:\projects\julia-prev\lib\julia\*.a C:\projects\julia\usr\lib
   - mkdir C:\projects\julia\usr\include
   - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
-#  - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
+  - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
 # Install Cygwin and build-time dependencies
   - "cinst cyg-get > cyg-get.log"
   - set PATH=%PATH%;C:\cygwin
