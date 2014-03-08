@@ -113,7 +113,7 @@ fi
 # Set UNTRUSTED_SYSTEM_LIBM to 0 since we don't have an openlibm static library
 # (may just need to build from source instead...)
 echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
-echo 'override LIBUV = $(JULIAHOME)/usr/lib/libuv.a' >> Make.user
+#echo 'override LIBUV = $(JULIAHOME)/usr/lib/libuv.a' >> Make.user
 echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 
 # Only dependency needed is utf8proc since its headers are not in the binary download
