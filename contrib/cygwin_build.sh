@@ -121,7 +121,8 @@ echo 'override STAGE1_DEPS = ' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 
-make -C deps get-utf8proc
+# Need some assembly headers from openlibm for _setjmp _longjmp on Windows
+make -C deps get-openlibm get-utf8proc
 
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
