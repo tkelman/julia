@@ -196,7 +196,9 @@ function test_approx_eq_vecs{S<:Real,T<:Real}(a::StridedVecOrMat{S}, b::StridedV
     for i=1:n
         ev1, ev2 = a[:,i], b[:,i]
         deviation = min(abs(norm(ev1-ev2)),abs(norm(ev1+ev2)))
-        @test_approx_eq_eps deviation 0.0 error
+        if !isnan(deviation)
+            @test_approx_eq_eps deviation 0.0 error
+        end
     end
 end
 
@@ -473,7 +475,7 @@ for elty in (Float32, Float64, Complex{Float32}, Complex{Float64})
             A = convert(Matrix{elty}, randn(10,nn))
         else
             A = convert(Matrix{elty}, complex(randn(10,nn),randn(10,nn)))
-        end    ## LU (only equal for real because LAPACK uses difference absolute value when choosing permutations)
+        end    ## LU (only equal for real because LAPACK uses different absolute value when choosing permutations)
         if elty <: Real
             FJulia  = invoke(lufact!, (AbstractMatrix,), copy(A)) 
             FLAPACK = Base.LinAlg.LAPACK.getrf!(copy(A))
