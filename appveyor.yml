@@ -6,12 +6,13 @@ environment:
   JL_VER: "/0.3/julia-0.3.0-prerelease-win"
 
 install:
-  - cinst 7zip
+#  - cinst 7zip
 # Download most-recent Julia binary for dependencies
   - ps: if ($env:XC_HOST -eq "x86_64-w64-mingw32") {(new-object net.webclient).DownloadFile($($env:JL_URL+"x64"+$env:JL_VER+"64.exe"), "C:\projects\julia-prev.exe")} else {(new-object net.webclient).DownloadFile($($env:JL_URL+"x86"+$env:JL_VER+"32.exe"), "C:\projects\julia-prev.exe")}
 # Extract installer, run it silently, output to C:\projects\julia-prev
-  - 7z x C:\projects\julia-prev.exe -oC:\projects\julia-prev
-  - C:\projects\julia-prev\julia-installer.exe /S /D=C:\projects\julia-prev
+  - C:\projects\julia-prev.exe -oC:\projects\julia-prev -y
+#  - 7z x C:\projects\julia-prev.exe -oC:\projects\julia-prev
+#  - C:\projects\julia-prev\julia-installer.exe /S /D=C:\projects\julia-prev
 # Copy libs and libuv includes from julia-prev to julia/usr
   - mkdir C:\projects\julia\usr\bin
   - copy C:\projects\julia-prev\bin\*.dll C:\projects\julia\usr\bin
@@ -36,7 +37,7 @@ install:
 #  - "cyg-get mingw64-i686-gcc-fortran >> cyg-get.log"
 
 build_script:
-  - C:\cygwin\bin\sh.exe -o igncr contrib/cygwin_build.sh 2>&1
+  - C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && sh -o igncr contrib/cygwin_build.sh 2>&1"
 
 test_script:
   - cd test && ..\usr\bin\julia-basic runtests.jl all
