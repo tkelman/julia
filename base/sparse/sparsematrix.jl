@@ -127,28 +127,10 @@ end
 copy(S::SparseMatrixCSC) =
     SparseMatrixCSC(S.m, S.n, copy(S.colptr), copy(S.rowval), copy(S.nzval))
 
-similar(S::SparseMatrixCSC, Tv::NonTupleType) =
-    SparseMatrixCSC(S.m, S.n, similar(S.colptr), similar(S.rowval), Array(Tv, length(S.rowval)))
-
+similar(S::SparseMatrixCSC, Tv::NonTupleType=eltype(S))   = SparseMatrixCSC(S.m, S.n, copy(S.colptr), copy(S.rowval), Array(Tv, length(S.nzval)))
+similar{Tv,Ti,TvNew}(S::SparseMatrixCSC{Tv,Ti}, ::Type{TvNew}, ::Type{Ti}) = similar(S, TvNew)
+similar{Tv,Ti,TvNew,TiNew}(S::SparseMatrixCSC{Tv,Ti}, ::Type{TvNew}, ::Type{TiNew}) = SparseMatrixCSC(S.m, S.n, convert(Array{TiNew},S.colptr), convert(Array{TiNew}, S.rowval), Array(TvNew, length(S.nzval)))
 similar(S::SparseMatrixCSC, Tv::Type, d::(Integer,Integer)) = spzeros(Tv, d[1], d[2])
-
-function similar(A::SparseMatrixCSC, Tv::Type, Ti::Type)
-    colptrA = A.colptr; rowvalA = A.rowval; nzvalA = A.nzval
-
-    colptr = Array(Ti, length(colptrA))
-    rowval = Array(Ti, length(rowvalA))
-    nzval  = Array(Tv, length(nzvalA))
-
-    for i=1:length(colptr)
-        colptr[i] = colptrA[i]
-    end
-
-    for i=1:length(rowval)
-        rowval[i] = rowvalA[i]
-    end
-
-    SparseMatrixCSC(S.m, S.n, similar(S.colptr), similar(S.rowval), Array(Tv, length(S.rowval)))
-end
 
 function convert{Tv,Ti,TvS,TiS}(::Type{SparseMatrixCSC{Tv,Ti}}, S::SparseMatrixCSC{TvS,TiS})
     if Tv == TvS && Ti == TiS
@@ -1247,7 +1229,7 @@ function vcat(X::SparseMatrixCSC...)
             rX2 = X[i].colptr[c + 1] - 1
             rr2 = rr1 + (rX2 - rX1)
 
-            rowval[rr1 : rr2] = X[i].rowval[rX1 : rX2] + mX_sofar
+            rowval[rr1 : rr2] = X[i].rowval[rX1 : rX2] .+ mX_sofar
             nzval[rr1 : rr2] = X[i].nzval[rX1 : rX2]
             mX_sofar += mX[i]
             rr1 = rr2 + 1
@@ -1279,7 +1261,7 @@ function hcat(X::SparseMatrixCSC...)
     nnz_sofar = 0
     nX_sofar = 0
     for i = 1 : num
-        colptr[(1 : nX[i] + 1) + nX_sofar] = X[i].colptr + nnz_sofar
+        colptr[(1 : nX[i] + 1) + nX_sofar] = X[i].colptr .+ nnz_sofar
         rowval[(1 : nnzX[i]) + nnz_sofar] = X[i].rowval
         nzval[(1 : nnzX[i]) + nnz_sofar] = X[i].nzval
         nnz_sofar += nnzX[i]
@@ -1321,8 +1303,8 @@ function blkdiag(X::SparseMatrixCSC...)
     nX_sofar = 0
     mX_sofar = 0
     for i = 1 : num
-        colptr[(1 : nX[i] + 1) + nX_sofar] = X[i].colptr + nnz_sofar
-        rowval[(1 : nnzX[i]) + nnz_sofar] = X[i].rowval + mX_sofar
+        colptr[(1 : nX[i] + 1) + nX_sofar] = X[i].colptr .+ nnz_sofar
+        rowval[(1 : nnzX[i]) + nnz_sofar] = X[i].rowval .+ mX_sofar
         nzval[(1 : nnzX[i]) + nnz_sofar] = X[i].nzval
         nnz_sofar += nnzX[i]
         nX_sofar += nX[i]

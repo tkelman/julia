@@ -255,6 +255,8 @@ convert{T,n}(::Type{Array{T,n}}, x::Array{T,n}) = x
 convert{T,n,S}(::Type{Array{T}}, x::Array{S,n}) = convert(Array{T,n}, x)
 convert{T,n,S}(::Type{Array{T,n}}, x::Array{S,n}) = copy!(similar(x,T), x)
 
+convert{T,S,N}(::Type{AbstractArray{T,N}}, B::StridedArray{S,N}) = copy!(similar(B,T), B)
+
 function collect{C}(T::Type, itr::C)
     if method_exists(length,(C,))
         a = Array(T,length(itr))
@@ -780,7 +782,7 @@ for f in (:+, :-, :div, :mod, :&, :|, :$)
         end
     end
 end
-for f in (:+, :-, :.*, :./, :.%, :div, :mod, :rem, :&, :|, :$)
+for f in (:.+, :.-, :.*, :./, :.%, :div, :mod, :rem, :&, :|, :$)
     @eval begin
         function ($f){T}(A::Number, B::StridedArray{T})
             F = similar(B, promote_array_type(typeof(A),T))
@@ -800,7 +802,7 @@ for f in (:+, :-, :.*, :./, :.%, :div, :mod, :rem, :&, :|, :$)
 end
 
 # functions that should give an Int result for Bool arrays
-for f in (:+, :-)
+for f in (:.+, :.-)
     @eval begin
         function ($f)(A::Bool, B::StridedArray{Bool})
             F = Array(Int, size(B))
@@ -816,12 +818,16 @@ for f in (:+, :-)
             end
             return F
         end
+    end
+end
+for f in (:+, :-)
+    @eval begin
         function ($f)(A::StridedArray{Bool}, B::StridedArray{Bool})
             F = Array(Int, promote_shape(size(A), size(B)))
             for i=1:length(A)
                 @inbounds F[i] = ($f)(A[i], B[i])
             end
-            return F
+            return F        
         end
     end
 end

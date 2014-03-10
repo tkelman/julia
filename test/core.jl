@@ -61,6 +61,8 @@ let T = TypeVar(:T,true)
                         (Type{Array{T,N}}, Array{S,N})) == (Type{Vector{Complex128}},Vector)
     @test typeintersect((Type{Vector{Complex128}}, AbstractArray),
                         (Type{Array{T,N}}, Array{S,N})) == (Type{Vector{Complex128}},Vector)
+
+    @test typeintersect(Type{Array{T}}, Type{AbstractArray{T}}) === None
 end
 let N = TypeVar(:N,true)
     @test isequal(typeintersect((NTuple{N,Integer},NTuple{N,Integer}),
@@ -1447,3 +1449,8 @@ macro X6074()
 end
 x6074 = 6074
 @test @X6074() == 6074
+
+# issue #5536
+test5536(a::Union(Real, AbstractArray)...) = "Splatting"
+test5536(a::Union(Real, AbstractArray)) = "Non-splatting"
+@test test5536(5) == "Non-splatting"

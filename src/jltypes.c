@@ -515,7 +515,7 @@ static jl_value_t *intersect_tag(jl_datatype_t *a, jl_datatype_t *b,
                 int tva = jl_has_typevars_(ap,0);
                 int tvb = jl_has_typevars_(bp,0);
                 if (tva || tvb) {
-                    if ((tva&&tvb) || jl_subtype_invariant(ap,bp,0) ||
+                    if (jl_subtype_invariant(ap,bp,0) ||
                         jl_subtype_invariant(bp,ap,0)) {
                         ti = jl_type_intersect(ap,bp,penv,eqc,invariant);
                     }
@@ -1926,8 +1926,15 @@ static int jl_tuple_subtype_(jl_value_t **child, size_t cl,
         if (pseq) pe = jl_tparam0(pe);
 
         if (!jl_subtype_le(ce, pe, ta, morespecific, invariant)) {
-            if (!mode || !type_eqv_(ce, pe))
+            if (type_eqv_(ce,pe)) {
+                if (ci==cl-1 && pi==pl-1 && !cseq && pseq) {
+                    return 1;
+                }
+                if (!mode) return 0;
+            }
+            else {
                 return 0;
+            }
         }
 
         if (mode && cseq && !pseq)
