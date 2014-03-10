@@ -28,6 +28,7 @@ set -e
 for f in contrib/relative_path.sh deps/jldownload deps/find_python_for_llvm base/version_git.sh; do
   tr -d '\r' < $f > $f.d2u
   mv $f.d2u $f
+  chmod +x $f
 done
 
 # If XC_HOST environment variable not set, choose based on arch
@@ -75,22 +76,17 @@ echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
 $XC_HOST-ar cr usr/lib/libgtest.a
 $XC_HOST-ar cr usr/lib/libgtest_main.a
 
-echo 'Downloading readline, libtermcap, pcre binaries'
-for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
-  if ! [ -e mingw$bits-$f.noarch.rpm ]; then
-    deps/jldownload ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw$bits-$f.noarch.rpm >> get-deps.log 2>&1
-  fi
-  bsdtar -xf mingw$bits-$f.noarch.rpm
-done
-echo 'override READLINE = -lreadline -lhistory' >> Make.user
+echo 'Downloading pcre binary'
+f=pcre-8.34-1.fc21
+if ! [ -e mingw$bits-$f.noarch.rpm ]; then
+  deps/jldownload ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw$bits-$f.noarch.rpm >> get-deps.log 2>&1
+fi
+bsdtar -xf mingw$bits-$f.noarch.rpm
 echo 'override PCRE_CONFIG = $(JULIAHOME)/usr/bin/pcre-config' >> Make.user
-
-# Move all downloaded bin, lib, and include files into build tree
+# Move downloaded bin, lib, and include files into build tree
 mv usr/$XC_HOST/sys-root/mingw/bin/* usr/bin
 mv usr/$XC_HOST/sys-root/mingw/lib/*.dll.a usr/lib
-if ! [ -d usr/include/readline ]; then
-  mv usr/$XC_HOST/sys-root/mingw/include/* usr/include
-fi
+mv usr/$XC_HOST/sys-root/mingw/include/* usr/include
 # Modify prefix in pcre-config
 sed -i "s|prefix=/usr/$XC_HOST/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
 
@@ -99,7 +95,7 @@ sed -i "s|prefix=/usr/$XC_HOST/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-con
 [ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
 
 for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR \
-    PCRE LIBUNWIND READLINE GRISU OPENLIBM RMATH OPENSPECFUN LIBUV; do
+    PCRE LIBUNWIND GRISU RMATH OPENSPECFUN LIBUV; do
   echo "USE_SYSTEM_$lib = 1" >> Make.user
 done
 echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
@@ -110,19 +106,17 @@ echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
 if [ -z `which gcc 2>/dev/null` ]; then
   echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
 fi
-# Set UNTRUSTED_SYSTEM_LIBM to 0 since we don't have an openlibm static library
-# (may just need to build from source instead...)
-echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 echo 'override LIBUV = $(JULIAHOME)/usr/lib/libuv.a' >> Make.user
 echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 
-# Only dependency needed is utf8proc since its headers are not in the binary download
-echo 'override STAGE1_DEPS = ' >> Make.user
+# Remaining dependencies:
+# openlibm and readline since we need these as static libraries to work properly
+# (not included as part of Julia Windows binaries yet)
+# utf8proc since its headers are not in the binary download
+echo 'override STAGE1_DEPS = openlibm readline' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
-
-# Need some assembly headers from openlibm for _setjmp _longjmp on Windows
-make -C deps get-openlibm get-utf8proc
+make -C deps get-openlibm get-readline get-utf8proc >> get-deps.log 2>&1
 
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
