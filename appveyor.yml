@@ -32,8 +32,8 @@ install:
 #  - "cyg-get python >> cyg-get.log"
 #  - "cyg-get gcc-g++ >> cyg-get.log"
 #  - "cyg-get diffutils >> cyg-get.log"
-# mingw64-{x86_64|i686}-gcc-fortran is required to build openblas, arpack, etc from source
-#  - "IF %XC_HOST% == x86_64-w64-mingw32 (cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log) ELSE (cyg-get mingw64-i686-gcc-fortran >> cyg-get.log)"
+# mingw64-{x86_64|i686}-gcc-fortran is required to build openlibm, openblas, arpack, etc from source
+  - "IF %XC_HOST% == x86_64-w64-mingw32 (cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log) ELSE (cyg-get mingw64-i686-gcc-fortran >> cyg-get.log)"
 
 build_script:
   - C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && sh -o igncr contrib/cygwin_build.sh 2>&1"
