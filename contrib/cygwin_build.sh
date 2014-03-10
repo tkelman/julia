@@ -35,8 +35,10 @@ done
 if [ -z "$XC_HOST" ]; then
   if [ `arch` = x86_64 ]; then
     export XC_HOST=x86_64-w64-mingw32
+    export AR=x86_64-w64-mingw32-ar
   else
     export XC_HOST=i686-w64-mingw32
+    export AR=i686-w64-mingw32-ar
   fi
 fi
 
@@ -76,7 +78,7 @@ echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
 $XC_HOST-ar cr usr/lib/libgtest.a
 $XC_HOST-ar cr usr/lib/libgtest_main.a
 
-echo 'Downloading pcre binary'
+echo 'Downloading PCRE binary'
 f=pcre-8.34-1.fc21
 if ! [ -e mingw$bits-$f.noarch.rpm ]; then
   deps/jldownload ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw$bits-$f.noarch.rpm >> get-deps.log 2>&1
@@ -116,6 +118,7 @@ echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 echo 'override STAGE1_DEPS = openlibm readline' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
+echo 'Downloading openlibm, readline, utf8proc sources'
 make -C deps get-openlibm get-readline get-utf8proc >> get-deps.log 2>&1
 
 # Disable git and enable verbose make in AppVeyor
@@ -124,4 +127,4 @@ if [ -n "$APPVEYOR" ]; then
  echo 'VERBOSE = 1' >> Make.user
 fi
 
-make -j 4
+make -j 4 testall
