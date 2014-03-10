@@ -405,11 +405,11 @@ Syntax
 
 .. function:: parse(str, start; greedy=true, raise=true)
 
-   Parse the expression string and return an expression (which could later be passed to eval for execution). Start is the index of the first character to start parsing (default is 1). If greedy is true (default), parse will try to consume as much input as it can; otherwise, it will stop as soon as it has parsed a valid token. If raise is true (default), parse errors will raise an error; otherwise, parse will return the error as an expression object.
+   Parse the expression string and return an expression (which could later be passed to eval for execution). Start is the index of the first character to start parsing. If ``greedy`` is true (default), ``parse`` will try to consume as much input as it can; otherwise, it will stop as soon as it has parsed a valid expression. If ``raise`` is true (default), syntax errors will raise an error; otherwise, ``parse`` will return an expression that will raise an error upon evaluation.
 
 .. function:: parse(str; raise=true)
 
-   Parse the whole string greedily, returning a single expression.  An error is thrown if there are additional characters after the first expression.
+   Parse the whole string greedily, returning a single expression.  An error is thrown if there are additional characters after the first expression. If ``raise`` is true (default), syntax errors will raise an error; otherwise, ``parse`` will return an expression that will raise an error upon evaluation.
 
 Iteration
 ---------
@@ -3589,6 +3589,10 @@ All mathematical operations and functions are supported for arrays
    ``f`` unless it is also listed in the ``As``, as in ``broadcast!(f, A, A, B)`` to perform
    ``A[:] = broadcast(f, A, B)``.
 
+.. function:: bitbroadcast(f, As...)
+
+   Like ``broadcast``, but allocates a ``BitArray`` to store the result, rather then an ``Array``.
+
 .. function:: broadcast_function(f)
 
    Returns a function ``broadcast_f`` such that ``broadcast_function(f)(As...) === broadcast(f, As...)``. Most useful in the form ``const broadcast_f = broadcast_function(f)``.
@@ -4070,7 +4074,8 @@ Statistics
 Signal Processing
 -----------------
 
-FFT functions in Julia are largely implemented by calling functions from `FFTW <http://www.fftw.org>`_
+Fast Fourier transform (FFT) functions in Julia are largely implemented by
+calling functions from `FFTW <http://www.fftw.org>`_.
 
 .. function:: fft(A [, dims])
 
@@ -4082,8 +4087,16 @@ FFT functions in Julia are largely implemented by calling functions from `FFTW <
    greater efficiency.
 
    A one-dimensional FFT computes the one-dimensional discrete Fourier
-   transform (DFT) as defined by :math:`\operatorname{DFT}[k] = \sum_{n=1}^{\operatorname{length}(A)} \exp\left(-i\frac{2\pi (n-1)(k-1)}{\operatorname{length}(A)} \right) A[n]`.  A multidimensional FFT simply performs this operation
-   along each transformed dimension of ``A``.
+   transform (DFT) as defined by
+   
+   .. math::
+
+      \operatorname{DFT}(A)[k] = \sum_{n=1}^{\operatorname{length}(A)}
+      \exp\left(-i\frac{2\pi (n-1)(k-1)}{\operatorname{length}(A)} \right)
+      A[n].
+   
+   A multidimensional FFT simply performs this operation along each transformed
+   dimension of ``A``.
 
 .. function:: fft!(A [, dims])
 
@@ -4094,13 +4107,16 @@ FFT functions in Julia are largely implemented by calling functions from `FFTW <
 
    Multidimensional inverse FFT.
 
-   A one-dimensional backward FFT computes
-   :math:`\operatorname{BDFT}[k] =
-   \sum_{n=1}^{\operatorname{length}(A)} \exp\left(+i\frac{2\pi
-   (n-1)(k-1)}{\operatorname{length}(A)} \right) A[n]`.  A
-   multidimensional backward FFT simply performs this operation along
-   each transformed dimension of ``A``.  The inverse FFT computes
-   the same thing divided by the product of the transformed dimensions.
+   A one-dimensional inverse FFT computes
+
+   .. math::
+
+      \operatorname{IDFT}(A)[k] = \frac{1}{\operatorname{length}(A)}
+      \sum_{n=1}^{\operatorname{length}(A)} \exp\left(+i\frac{2\pi (n-1)(k-1)}
+      {\operatorname{length}(A)} \right) A[n].
+
+   A multidimensional inverse FFT simply performs this operation along each
+   transformed dimension of ``A``.
 
 .. function:: ifft!(A [, dims])
 
@@ -4108,12 +4124,15 @@ FFT functions in Julia are largely implemented by calling functions from `FFTW <
 
 .. function:: bfft(A [, dims])
 
-   Similar to :func:`ifft`, but computes an unnormalized inverse
-   (backward) transform, which must be divided by the product of the sizes
-   of the transformed dimensions in order to obtain the inverse.  (This is
-   slightly more efficient than :func:`ifft` because it omits a scaling
-   step, which in some applications can be combined with other
-   computational steps elsewhere.)
+   Similar to :func:`ifft`, but computes an unnormalized inverse (backward)
+   transform, which must be divided by the product of the sizes of the
+   transformed dimensions in order to obtain the inverse. (This is slightly
+   more efficient than :func:`ifft` because it omits a scaling step, which in
+   some applications can be combined with other computational steps elsewhere.)
+
+   .. math::
+
+      \operatorname{BDFT}(A)[k] = \operatorname{length}(A) \operatorname{IDFT}(A)[k]
 
 .. function:: bfft!(A [, dims])
 

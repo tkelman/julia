@@ -283,13 +283,14 @@ end
 bool(x::AbstractArray{Bool}) = x
 bool(x::AbstractArray) = copy!(similar(x,Bool), x)
 
-for (f,t) in ((:float16,    Float16),
+convert{T,S,N}(::Type{AbstractArray{T,N}}, A::Array{S,N}) = convert(Array{T,N}, A)
+
+for (f,T) in ((:float16,    Float16),
               (:float32,    Float32),
               (:float64,    Float64),
               (:complex64,  Complex64),
               (:complex128, Complex128))
-    @eval ($f)(x::AbstractArray{$t}) = x
-    @eval ($f)(x::AbstractArray) = copy!(similar(x,$t), x)
+    @eval ($f)(x::AbstractArray) = convert(AbstractArray{$T}, x)
 end
 
 float{T<:FloatingPoint}(x::AbstractArray{T}) = x
@@ -325,11 +326,9 @@ imag{T<:Real}(x::AbstractArray{T}) = zero(x)
 *(A::Number, B::AbstractArray) = A .* B
 *(A::AbstractArray, B::Number) = A .* B
 
-/(A::Number, B::AbstractArray) = A ./ B
 /(A::AbstractArray, B::Number) = A ./ B
 
 \(A::Number, B::AbstractArray) = B ./ A
-\(A::AbstractArray, B::Number) = B ./ A
 
 ./(x::Number,y::AbstractArray )         = throw(MethodError(./, (x,y)))
 ./(x::AbstractArray, y::Number)         = throw(MethodError(./, (x,y)))
@@ -397,7 +396,7 @@ function circshift(a, shiftamts)
     for i=1:n
         s = size(a,i)
         d = i<=length(shiftamts) ? shiftamts[i] : 0
-        I[i] = d==0 ? (1:s) : mod([-d:s-1-d], s)+1
+        I[i] = d==0 ? (1:s) : mod([-d:s-1-d], s).+1
     end
     a[I...]::typeof(a)
 end
@@ -1182,10 +1181,6 @@ function mapslices(f::Function, A::AbstractArray, dims::AbstractVector)
     dimsA = [size(A)...]
     ndimsA = ndims(A)
     alldims = [1:ndimsA]
-
-    if dims == alldims
-        return f(A)
-    end
 
     otherdims = setdiff(alldims, dims)
 
