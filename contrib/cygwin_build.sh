@@ -35,12 +35,11 @@ done
 if [ -z "$XC_HOST" ]; then
   if [ `arch` = x86_64 ]; then
     export XC_HOST=x86_64-w64-mingw32
-    export AR=x86_64-w64-mingw32-ar
   else
     export XC_HOST=i686-w64-mingw32
-    export AR=i686-w64-mingw32-ar
   fi
 fi
+export AR="$XC_HOST-ar"
 
 echo "override BUILD_MACHINE = `arch`-pc-cygwin" > Make.user
 
