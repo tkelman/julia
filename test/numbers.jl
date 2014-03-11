@@ -1737,18 +1737,22 @@ end
 
 for T = (Uint8,Int8,Uint16,Int16,Uint32,Int32,Uint64,Int64,Uint128,Int128)
     for n = 1:2:1000
-    println("line 1740 n=$n T=$T")
         @test convert(T,n*(n^typemax(T))) == one(T)
         n = rand(T) | one(T)
         @test convert(T,n*(n^typemax(T))) == one(T)
     end
 end
-
+println("line 1745")
 @test false*pi === 0.0
+println("line 1747")
 @test pi*false === 0.0
+println("line 1749")
 @test true*pi === float64(pi)
+println("line 1751")
 @test pi*true === float64(pi)
-
+println("line 1753")
 # issue #5881
 @test bits(true) == "00000001"
+println("line 1756")
 @test bits(false) == "00000000"
+println("line 1758")
