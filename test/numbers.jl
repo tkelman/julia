@@ -1751,4 +1751,3 @@ end
 # issue #5881
 @test bits(true) == "00000001"
 @test bits(false) == "00000000"
-println("wtfbbq? changing the return type of the script makes it succeed?")
