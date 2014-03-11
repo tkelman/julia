@@ -16,7 +16,6 @@ close(open(file,"w")) # like touch, but lets the operating system update the tim
 @test !islink(file)
 @test isreadable(file)
 @test iswritable(file)
-println("line 19")
 # Here's something else that might be UNIX-specific?
 run(`chmod -w $file`)
 @test !iswritable(file)
@@ -39,7 +38,7 @@ mv(file, newfile)
 @test !ispath(file)
 @test isfile(newfile)
 file = newfile
-println("line 42")
+
 # Test renaming directories
 a_tmpdir = mktempdir()
 b_tmpdir = joinpath(dir, "b_tmpdir")
@@ -57,7 +56,7 @@ b_stat = stat(b_tmpdir)
 @test Base.samefile(a_stat, b_stat)
 
 rmdir(b_tmpdir)
-println("line 60")
+
 #######################################################################
 # This section tests file watchers.                                   #
 #######################################################################
@@ -75,7 +74,7 @@ function test_timeout(tval)
     @test !tr
     @test tval <= t_elapsed
 end
-println("line 78")
+
 function test_touch(slval)
     tval = slval*1.1
     channel = RemoteRef()
@@ -102,7 +101,7 @@ function test_monitor(slval)
     @test FsMonitorPassed
     close(fm)
 end
-println("line 105")
+
 function test_monitor_wait(tval)
     fm = watch_file(file)
     @async begin
@@ -115,7 +114,7 @@ function test_monitor_wait(tval)
     @test fname == basename(file)
     @test events.changed
 end
-println("line 118")
+
 # Commented out the tests below due to issues 3015, 3016 and 3020
 test_timeout(0.1)
 test_timeout(1)
@@ -129,7 +128,7 @@ test_monitor_wait(0.1)
 ##########
 #  mmap  #
 ##########
-println("line 132")
+
 s = open(file, "w")
 write(s, "Hello World\n")
 close(s)
@@ -149,7 +148,7 @@ str = readline(s)
 close(s)
 @test beginswith(str, "Hellx World")
 c=nothing; gc(); gc(); # cause munmap finalizer to run & free resources
-println("line 152")
+
 s = open(file, "w")
 write(s, [0xffffffffffffffff,
           0xffffffffffffffff,
@@ -174,7 +173,7 @@ b = mmap_bitarray((17,19), s)
 @test b == b0
 close(s)
 b=nothing; b0=nothing; gc(); gc(); # cause munmap finalizer to run & free resources
-println("line 177")
+
 #######################################################################
 # This section tests temporary file and directory creation.           #
 #######################################################################
@@ -197,7 +196,7 @@ emptyf = open(emptyfile)
 @test isempty(readlines(emptyf))
 close(emptyf)
 rm(emptyfile)
-println("line 200")
+
 # Test copy file
 afile = joinpath(dir, "a.txt")
 touch(afile)
@@ -206,7 +205,7 @@ write(af, "This is indeed a test")
 
 bfile = joinpath(dir, "b.txt")
 cp(afile, bfile)
-println("line 209")
+
 a_stat = stat(afile)
 b_stat = stat(bfile)
 @test a_stat.mode == b_stat.mode
@@ -219,7 +218,7 @@ rm(bfile)
 ###################
 # FILE* interface #
 ###################
-println("line 222")
+
 f = open(file, "w")
 write(f, "Hello, world!")
 close(f)
@@ -232,12 +231,23 @@ str = ccall(:fread, Csize_t, (Ptr{Void}, Csize_t, Csize_t, Ptr{Void}), buf, 1, 8
 seek(FILEp, 5)
 @test position(FILEp) == 5
 close(f)
-println("line 235")
+
 ############
 # Clean up #
 ############
+println("line 238 about to rm(file)")
+println(file)
+println(typeof(file))
 rm(file)
+println("line 242 about to rmdir(dir)")
+println(dir)
+println(typeof(dir))
 rmdir(dir)
-println("line 241")
+println("line 246 about to test !ispath(file)")
+println(file)
+println(typeof(file))
 @test !ispath(file)
+println("line 250 about to test !ispath(dir)")
+println(dir)
+println(typeof(dir))
 @test !ispath(dir)
