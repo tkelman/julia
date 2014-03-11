@@ -35,7 +35,7 @@ install:
 
 build_script:
 #  - C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && sh -o igncr contrib/cygwin_build.sh"
-  - cd test && C:\projects\julia-prev\bin\julia-debug-readline runtests.jl all
+  - cd C:\projects\julia-prev\share\julia\test && C:\projects\julia-prev\bin\julia-debug-readline runtests.jl all
 
 #test_script:
 #  - cd test && ..\usr\bin\julia-basic runtests.jl all
