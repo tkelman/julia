@@ -25,7 +25,7 @@ install:
   - "cyg-get make >> cyg-get.log"
   - "cyg-get wget >> cyg-get.log"
   - "cyg-get bsdtar >> cyg-get.log"
-  - "if %XC_HOST% == x86_64-w64-mingw32 (cyg-get mingw64-x86_64-gcc-g++) else (cyg-get mingw64-i686-gcc-g++)"
+  - ps: if ($env:XC_HOST -eq "x86_64-w64-mingw32") {cyg-get mingw64-x86_64-gcc-g++} else {cyg-get mingw64-i686-gcc-g++}
 # python, gcc-g++, and diffutils are required to build llvm from source
 #  - "cyg-get python >> cyg-get.log"
 #  - "cyg-get gcc-g++ >> cyg-get.log"
@@ -34,7 +34,7 @@ install:
 #  - "if %XC_HOST% == x86_64-w64-mingw32 (cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log) else (cyg-get mingw64-i686-gcc-fortran >> cyg-get.log)"
 
 build_script:
-  - C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && sh -o igncr contrib/cygwin_build.sh 2>&1"
+  - C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && sh -o igncr contrib/cygwin_build.sh"
 
 test_script:
   - cd test && ..\usr\bin\julia-basic runtests.jl all
