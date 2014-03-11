@@ -1774,4 +1774,3 @@ end
 @test widen(BigInt) === BigInt
 
 @test widemul(typemax(Int64),typemax(Int64)) == 85070591730234615847396907784232501249
-println("wtfbbq? changing the return type of the script makes it succeed?")
