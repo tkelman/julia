@@ -2,6 +2,9 @@ language: cpp
 compiler: 
     - clang
     - gcc
+branches:
+  except:
+    - appveyor
 notifications:
     email: false
     irc:

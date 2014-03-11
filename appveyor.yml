@@ -1,0 +1,41 @@
+environment:
+  JL_URL: "http://s3.amazonaws.com/julialang/bin/winnt/"
+  JL_VER: "/0.3/julia-0.3.0-prerelease-win"
+  
+  matrix:
+  - XC_HOST: "i686-w64-mingw32"
+#  - XC_HOST: "x86_64-w64-mingw32"
+
+install:
+# Download most-recent Julia binary for dependencies
+  - ps: if ($env:XC_HOST -eq "x86_64-w64-mingw32") {(new-object net.webclient).DownloadFile($($env:JL_URL+"x64"+$env:JL_VER+"64.exe"), "C:\projects\julia-prev.exe")} else {(new-object net.webclient).DownloadFile($($env:JL_URL+"x86"+$env:JL_VER+"32.exe"), "C:\projects\julia-prev.exe")}
+# Run installer silently, output to C:\projects\julia-prev
+  - C:\projects\julia-prev.exe /S /D=C:\projects\julia-prev
+# Copy libs and libuv includes from julia-prev to julia/usr
+#  - mkdir C:\projects\julia\usr\bin
+#  - copy C:\projects\julia-prev\bin\*.dll C:\projects\julia\usr\bin
+#  - mkdir C:\projects\julia\usr\lib
+#  - copy C:\projects\julia-prev\lib\julia\*.a C:\projects\julia\usr\lib
+#  - mkdir C:\projects\julia\usr\include
+#  - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
+#  - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
+# Install Cygwin and build-time dependencies
+#  - "cinst cyg-get > cyg-get.log"
+#  - set PATH=%PATH%;C:\cygwin
+#  - "cyg-get make >> cyg-get.log"
+#  - "cyg-get wget >> cyg-get.log"
+#  - "cyg-get bsdtar >> cyg-get.log"
+#  - ps: 'if ($env:XC_HOST -eq "x86_64-w64-mingw32") {cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log} else {cyg-get mingw64-i686-gcc-g++ >> cyg-get.log}'
+# python, gcc-g++, and diffutils are required to build llvm from source
+#  - "cyg-get python >> cyg-get.log"
+#  - "cyg-get gcc-g++ >> cyg-get.log"
+#  - "cyg-get diffutils >> cyg-get.log"
+# mingw64-{x86_64|i686}-gcc-fortran is required to build openlibm, openblas, arpack, etc from source
+#  - ps: 'if ($env:XC_HOST -eq "x86_64-w64-mingw32") {cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log} else {cyg-get mingw64-i686-gcc-fortran >> cyg-get.log}'
+
+build_script:
+#  - C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && sh -o igncr contrib/cygwin_build.sh"
+  - cd C:\projects\julia-prev\share\julia\test && C:\projects\julia-prev\bin\julia-debug-readline runtests.jl all
+
+#test_script:
+#  - cd test && ..\usr\bin\julia-basic runtests.jl all
