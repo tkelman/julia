@@ -43,6 +43,12 @@ export AR="$XC_HOST-ar"
 
 echo "override BUILD_MACHINE = `arch`-pc-cygwin" > Make.user
 
+# If no Fortran compiler installed, override with name of C compiler
+# (this only fixes the unnecessary invocation of FC in openlibm)
+if [ -z "`which $XC_HOST-gfortran`" ]; then
+  echo 'override FC = $(XC_HOST)-gcc' >> Make.user
+fi
+
 echo 'Downloading LLVM binary'
 if [ $XC_HOST = x86_64-w64-mingw32 ]; then
   f=llvm-3.3-w64-bin-x86_64-20130804.7z
@@ -100,7 +106,7 @@ sed -i "s|prefix=/usr/$XC_HOST/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-con
 [ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
 
 for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR \
-    PCRE LIBUNWIND READLINE OPENLIBM GRISU RMATH OPENSPECFUN LIBUV; do
+    PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV; do
   echo "USE_SYSTEM_$lib = 1" >> Make.user
 done
 echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
@@ -111,9 +117,6 @@ echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
 if [ -z `which gcc 2>/dev/null` ]; then
   echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
 fi
-# Set UNTRUSTED_SYSTEM_LIBM to 0 since we don't have an openlibm static library
-# (may just need to build from source instead...)
-echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 echo 'override LIBUV = $(JULIAHOME)/usr/lib/libuv.a' >> Make.user
 echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 
@@ -121,10 +124,10 @@ echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 # openlibm and readline since we need these as static libraries to work properly
 # (not included as part of Julia Windows binaries yet)
 # utf8proc since its headers are not in the binary download
-echo 'override STAGE1_DEPS = ' >> Make.user
+echo 'override STAGE1_DEPS = openlibm' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
-echo 'Downloading openlibm, readline, utf8proc sources'
+echo 'Downloading openlibm, utf8proc sources'
 make -C deps get-openlibm get-utf8proc >> get-deps.log 2>&1
 
 # Disable git and enable verbose make in AppVeyor
