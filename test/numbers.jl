@@ -94,7 +94,7 @@ end
 @test 9223372036854775808(10) == 92233720368547758080
 @test 170141183460469231731687303715884105728(10) ==
     1701411834604692317316873037158841057280
-println("line 97")
+
 # definition and printing of extreme integers
 @test bin(typemin(Uint8)) == "0"
 @test bin(typemax(Uint8)) == "1"^8
@@ -197,7 +197,7 @@ println("line 97")
 @test base(3,typemax(Int8)) == "11201"
 @test base(12,typemin(Int8)) == "-a8"
 @test base(12,typemax(Int8)) == "a7"
-println("line 200")
+
 @test bin(typemin(Int16)) == "-1"*"0"^15
 @test bin(typemax(Int16)) == "1"^15
 @test oct(typemin(Int16)) == "-100000"
@@ -289,7 +289,7 @@ println("line 200")
 @test repr(NaN32) == "NaN32"
 @test repr(-NaN32) == "NaN32"
 @test repr(float32(pi)) == "3.1415927f0"
-println("line 292")
+
 # signs
 @test sign(1) == 1
 @test sign(-1) == -1
@@ -404,7 +404,7 @@ println("line 292")
 @test  isless(-1.0,+Inf)
 @test  isless(-1.0,-NaN)
 @test  isless(-1.0,+NaN)
-println("line 407")
+
 @test !isless(-0.0,-Inf)
 @test !isless(-0.0,-1.0)
 @test !isless(-0.0,-0.0)
@@ -487,7 +487,7 @@ for x=-5:5, y=-5:5
     @test (x> y)==(int64(x)> float64(y))
     @test (x<=y)==(int64(x)<=float64(y))
     @test (x>=y)==(int64(x)>=float64(y))
-println("line 490, x=$x, y=$y")
+
     if x >= 0
         @test (x==y)==(uint64(x)==float64(y))
         @test (x!=y)==(uint64(x)!=float64(y))
@@ -594,7 +594,7 @@ for x=int64(2)^53-2:int64(2)^53+5,
     @test -y != u
     @test -y <  u
     @test -y <= u
-println("line 597, x=$x")
+
     c = _cmp_(x,y)
     if c < 0
         @test !(x == y)
@@ -706,7 +706,7 @@ end
 @test float32(typemin(Uint128)) == 0.0f0
 @test float64(typemax(Uint128)) == 2.0^128
 @test float32(typemax(Uint128)) == 2.0f0^128
-println("line 709")
+
 @test int128(-2.0^127) == typemin(Int128)
 @test float64(uint128(3.7e19)) == 3.7e19
 @test float64(uint128(3.7e30)) == 3.7e30
@@ -797,7 +797,7 @@ end
 @test (Complex(1,2) + 1//2) * 0.5 == Complex(0.75,1.0)
 @test (Complex(1,2)/Complex(2.5,3.0))*Complex(2.5,3.0) == Complex(1,2)
 @test 0.7 < real(sqrt(Complex(0,1))) < 0.707107
-println("line 800")
+
 for T in {Int8,Int16,Int32,Int64,Int128}
     @test abs(typemin(T)) == -typemin(T)
     for x in {typemin(T),convert(T,-1),zero(T),one(T),typemax(T)}
@@ -906,7 +906,7 @@ for yr = {
             @test fld(-x,+y) == -3
             @test fld(-x,-y) == +2
         end
-println("line 909")
+
         # check everything else in terms of div & fld
         d = div(x,y)
         f = fld(x,y)
@@ -996,7 +996,7 @@ end
 @test div(typemin(Int64)+3,-1) ==  9223372036854775805
 @test div(typemin(Int64)+3,-2) ==  4611686018427387902
 @test div(typemin(Int64)+3,-7) ==  1317624576693539400
-println("line 999")
+
 @test fld(typemax(Int64)  , 1) ==  9223372036854775807
 @test fld(typemax(Int64)  , 2) ==  4611686018427387903
 @test fld(typemax(Int64)  , 7) ==  1317624576693539401
@@ -1102,7 +1102,7 @@ end
 @test signed(div(typemax(Uint),typemin(Int)+1))      == -2
 @test signed(div(typemax(Uint),typemin(Int)>>1))     == -3
 @test signed(div(typemax(Uint),(typemin(Int)>>1)+1)) == -4
-println("line 1105")
+
 @test fld(typemax(Uint64)  , 1) ==  typemax(Uint64)
 @test fld(typemax(Uint64)  ,-1) == -typemax(Uint64)
 @test fld(typemax(Uint64)-1, 1) ==  typemax(Uint64)-1
@@ -1205,7 +1205,7 @@ end
 @test       iround(Int32, -2.1474836f9) == typemin(Int32)
 @test_throws iround(Uint32, 4.2949673f9)
 @test       iround(Uint32, 4.294967f9) == 0xffffff00
-println("line 1208")
+
 for n = 1:100
     m = 1
     for (p,k) in factor(n)
@@ -1297,7 +1297,7 @@ end
     340282366920938463463374607431768211456
 
 # hexadecimal literals
-println("line 1300")
+
 @test isa(0x00,Uint8)
 @test isa(0x000,Uint16)
 @test isa(0x0000,Uint16)
@@ -1399,7 +1399,7 @@ println("line 1300")
 @test 0xf.1P1 === 30.125
 @test 0xf.fP0 === 15.9375
 @test 0xf.fP1 === 31.875
-println("line 1402")
+
 @test -0x1.0p2 === -4.0
 
 # eps / realmin / realmax
@@ -1469,7 +1469,7 @@ approx_eq(a, b) = approx_eq(a, b, 1e-6)
 @test convert(Rational{Int32},0.5) === int32(1)//int32(2)
 
 # primes
-println("line 1472")
+
 @test Base.primes(10000) == [
     2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
     73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151,
@@ -1597,7 +1597,7 @@ end
 @test  isprime(10000000019)
 @test !isprime(10000000021)
 @test !isprime(10000000023)
-println("line 1600")
+
 @test !isprime(9223372036854775779)
 @test !isprime(9223372036854775781)
 @test  isprime(9223372036854775783)
@@ -1698,7 +1698,7 @@ for i = -100:100
     @test nextpow2(i) == nextpow2(big(i))
     @test prevpow2(i) == prevpow2(big(i))
 end
-println("line 1701")
+
 @test nextpow(2,1) == 1
 @test prevpow(2,1) == 1
 @test nextpow(3,243) == 243
@@ -1737,6 +1737,7 @@ end
 
 for T = (Uint8,Int8,Uint16,Int16,Uint32,Int32,Uint64,Int64,Uint128,Int128)
     for n = 1:2:1000
+    println("line 1740 n=$n T=$T")
         @test convert(T,n*(n^typemax(T))) == one(T)
         n = rand(T) | one(T)
         @test convert(T,n*(n^typemax(T))) == one(T)
