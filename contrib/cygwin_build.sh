@@ -45,7 +45,7 @@ echo "override BUILD_MACHINE = `arch`-pc-cygwin" > Make.user
 
 # If no Fortran compiler installed, override with name of C compiler
 # (this only fixes the unnecessary invocation of FC in openlibm)
-if [ -z "`which $XC_HOST-gfortran`" ]; then
+if [ -z "`which $XC_HOST-gfortran 2>/dev/null`" ]; then
   echo 'override FC = $(XC_HOST)-gcc' >> Make.user
 fi
 
