@@ -1742,18 +1742,14 @@ for T = (Uint8,Int8,Uint16,Int16,Uint32,Int32,Uint64,Int64,Uint128,Int128)
         @test convert(T,n*(n^typemax(T))) == one(T)
     end
 end
-println("line 1745")
+
 @test false*pi === 0.0
-println("line 1747")
 @test pi*false === 0.0
-println("line 1749")
 @test true*pi === float64(pi)
-println("line 1751")
 @test pi*true === float64(pi)
-println("line 1753")
+
 # issue #5881
 @test bits(true) == "00000001"
-println("line 1756")
 @test bits(false) == "00000000"
 
 # edge cases of intrinsics
@@ -1778,3 +1774,4 @@ end
 @test widen(BigInt) === BigInt
 
 @test widemul(typemax(Int64),typemax(Int64)) == 85070591730234615847396907784232501249
+println("wtfbbq? changing the return type of the script makes it succeed?")
