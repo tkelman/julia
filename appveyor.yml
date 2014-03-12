@@ -23,6 +23,10 @@ install:
   - mkdir C:\projects\julia\usr\include
   - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
   - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
+# Copy msys dll and sort.exe from msysgit (otherwise test/spawn.jl is unhappy)
+  - mkdir C:\projects\julia\usr\Git\bin
+  - copy C:\projects\julia-prev\Git\bin\msys-1.0.dll C:\projects\julia\usr\Git\bin
+  - copy C:\projects\julia-prev\Git\bin\sort.exe C:\projects\julia\usr\Git\bin
 # Install Cygwin and build-time dependencies
   - "cinst cyg-get > cyg-get.log"
   - set PATH=%PATH%;C:\cygwin
