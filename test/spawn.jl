@@ -12,15 +12,17 @@
 yes = `perl -le 'while (1) {print STDOUT "y"}'`
 
 #### Examples used in the manual ####
-
+println(ENV["PATH"])
+eol = readall(`echo` |> `sort`)     # on Windows, whether this is \r\n or \n
+@test eol == "\n" || eol == "\r\n"  # depends on which `sort` gets called
 @test readall(`echo hello | sort`) == "hello | sort\n"
-@test readall(`echo hello` |> `sort`) == "hello\n"
+@test readall(`echo hello` |> `sort`) == "hello$eol"
 @test length(spawn(`echo hello` |> `sort`).processes) == 2
 
 out = readall(`echo hello` & `echo world`)
 @test search(out,"world") != (0,0)
 @test search(out,"hello") != (0,0)
-@test readall((`echo hello` & `echo world`) |> `sort`)=="hello\nworld\n"
+@test readall((`echo hello` & `echo world`) |> `sort`)=="hello$(eol)world$(eol)"
 
 @test (run(`printf "       \033[34m[stdio passthrough ok]\033[0m\n"`); true)
 
