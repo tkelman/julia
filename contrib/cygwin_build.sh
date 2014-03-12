@@ -114,7 +114,7 @@ echo 'LIBBLASNAME = libopenblas' >> Make.user
 echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
 echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
 # OpenBlas uses HOSTCC to compile getarch, but we might not have Cygwin GCC installed
-if [ -z `which gcc 2>/dev/null` ]; then
+if [ -z "`which gcc 2>/dev/null`" ]; then
   echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
 fi
 echo 'override LIBUV = $(JULIAHOME)/usr/lib/libuv.a' >> Make.user
@@ -136,6 +136,6 @@ if [ -n "$APPVEYOR" ]; then
  echo 'VERBOSE = 1' >> Make.user
 fi
 
-make -j 4
-make -C test file
-make testall
+make -j 4 debug
+#make -C test file
+#make testall
