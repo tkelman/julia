@@ -136,6 +136,6 @@ if [ -n "$APPVEYOR" ]; then
  echo 'VERBOSE = 1' >> Make.user
 fi
 
-make -j 4 debug
+make -j 4 debug release
 #make -C test file
 #make testall
