@@ -24,13 +24,6 @@
 # Stop on error
 set -e
 
-# Fix line endings in shell scripts used by Makefile
-for f in contrib/relative_path.sh deps/jldownload deps/find_python_for_llvm base/version_git.sh; do
-  tr -d '\r' < $f > $f.d2u
-  mv $f.d2u $f
-  chmod +x $f
-done
-
 # If XC_HOST environment variable not set, choose based on arch
 if [ -z "$XC_HOST" ]; then
   if [ `arch` = x86_64 ]; then
@@ -136,6 +129,6 @@ if [ -n "$APPVEYOR" ]; then
  echo 'VERBOSE = 1' >> Make.user
 fi
 
-make -j 4 debug release
+make -j 4
 #make -C test file
 #make testall

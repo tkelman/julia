@@ -6,6 +6,10 @@ environment:
   - XC_HOST: "i686-w64-mingw32"
 #  - XC_HOST: "x86_64-w64-mingw32"
 
+init:
+# Carriage returns are bad
+  - git config --global core.eol lf
+
 install:
 # Download most-recent Julia binary for dependencies
   - ps: if ($env:XC_HOST -eq "x86_64-w64-mingw32") {(new-object net.webclient).DownloadFile($($env:JL_URL+"x64"+$env:JL_VER+"64.exe"), "C:\projects\julia-prev.exe")} else {(new-object net.webclient).DownloadFile($($env:JL_URL+"x86"+$env:JL_VER+"32.exe"), "C:\projects\julia-prev.exe")}
@@ -34,7 +38,7 @@ install:
 #  - ps: 'if ($env:XC_HOST -eq "x86_64-w64-mingw32") {cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log} else {cyg-get mingw64-i686-gcc-fortran >> cyg-get.log}'
 
 build_script:
-  - C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && sh -o igncr contrib/cygwin_build.sh"
+  - C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && contrib/cygwin_build.sh"
 
 test_script:
-  - cd test && ..\usr\bin\julia-debug-readline runtests.jl all
+  - cd test && ..\usr\bin\julia-readline runtests.jl all
