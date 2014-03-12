@@ -99,10 +99,10 @@ A = reshape(1:120, 3, 5, 8)
 sA = sub(A, 2, 1:5, :)
 @test parent(sA) == A
 @test parentindexes(sA) == (2:2, 1:5, 1:8)
-@test Base.parentdims(sA) == 1:3
+@test Base.parentdims(sA) == [1:3]
 @test size(sA) == (1, 5, 8)
 @test_throws sA[2, 1:8]
-@test sA[1, 2, 1:8][:] == 5:15:120
+@test sA[1, 2, 1:8][:] == [5:15:120]
 sA[2:5:end] = -1
 @test all(sA[2:5:end] .== -1)
 @test all(A[5:15:120] .== -1)
@@ -110,19 +110,19 @@ sA[2:5:end] = -1
 @test stride(sA,3) == 15
 @test stride(sA,4) == 120
 sA = sub(A, 1:3, 1:5, 5)
-@test Base.parentdims(sA) == 1:2
+@test Base.parentdims(sA) == [1:2]
 sA[1:3,1:5] = -2
 @test all(A[:,:,5] .== -2)
 sA[:] = -3
 @test all(A[:,:,5] .== -3)
 @test strides(sA) == (1,3)
 sA = sub(A, 1:3, 3, 2:5)
-@test Base.parentdims(sA) == 1:3
+@test Base.parentdims(sA) == [1:3]
 @test size(sA) == (3,1,4)
 @test sA == A[1:3,3,2:5]
 @test sA[:] == A[1:3,3,2:5][:]
 sA = sub(A, 1:2:3, 1:3:5, 1:2:8)
-@test Base.parentdims(sA) == 1:3
+@test Base.parentdims(sA) == [1:3]
 @test strides(sA) == (2,9,30)
 @test sA[:] == A[1:2:3, 1:3:5, 1:2:8][:]
 
@@ -138,17 +138,17 @@ A = reshape(1:120, 3, 5, 8)
 sA = slice(A, 2, :, 1:8)
 @test parent(sA) == A
 @test parentindexes(sA) == (2, 1:5, 1:8)
-@test Base.parentdims(sA) == 2:3
+@test Base.parentdims(sA) == [2:3]
 @test size(sA) == (5, 8)
 @test strides(sA) == (3,15)
-@test sA[2, 1:8][:] == 5:15:120
-@test sA[:,1] == 2:3:14
-@test sA[2:5:end] == 5:15:110
+@test sA[2, 1:8][:] == [5:15:120]
+@test sA[:,1] == [2:3:14]
+@test sA[2:5:end] == [5:15:110]
 sA[2:5:end] = -1
 @test all(sA[2:5:end] .== -1)
 @test all(A[5:15:120] .== -1)
 sA = slice(A, 1:3, 1:5, 5)
-@test Base.parentdims(sA) == 1:2
+@test Base.parentdims(sA) == [1:2]
 @test size(sA) == (3,5)
 @test strides(sA) == (1,3)
 sA = slice(A, 1:2:3, 3, 1:2:8)
@@ -198,7 +198,7 @@ let
     X = get(A, -5:5, nan(Float32))
     @test eltype(X) == Float32
     @test isnan(X) == [trues(6),falses(5)]
-    @test X[7:11] == 1:5
+    @test X[7:11] == [1:5]
     X = get(A, (2:4, 9:-2:-13), 0)
     Xv = zeros(Int, 3, 12)
     Xv[1:2, 2:5] = A[2:3, 7:-2:1]
@@ -366,6 +366,35 @@ for i=1:16
 end
 
 @test sum(z) == sum(z,(1,2,3,4))[1] == 136
+
+# check variants of summation for type-stability and other issues (#6069)
+sum2(itr) = invoke(sum, (Any,), itr)
+plus(x,y) = x + y
+plus() = 0
+sum3(A) = reduce(plus, A)
+sum4(itr) = invoke(reduce, (Function, Any), plus, itr)
+sum5(A) = reduce(plus, 0, A)
+sum6(itr) = invoke(reduce, (Function, Int, Any), plus, 0, itr)
+sum7(A) = mapreduce(x->x, plus, A)
+sum8(itr) = invoke(mapreduce, (Function, Function, Any), x->x, plus, itr)
+sum9(A) = mapreduce(x->x, plus, 0, A)
+sum10(itr) = invoke(mapreduce, (Function, Function, Int, Any), x->x,plus,0,itr)
+for f in (sum2, sum3, sum4, sum5, sum6, sum7, sum8, sum9, sum10)
+    @test sum(z) == f(z)
+    @test sum(Int[]) == f(Int[]) == 0
+    @test sum(Int[7]) == f(Int[7]) == 7
+    if f == sum3 || f == sum4 || f == sum7 || f == sum8
+        @test typeof(f(Int8[])) == typeof(f(Int8[1 7]))
+    else
+        @test typeof(f(Int8[])) == typeof(f(Int8[1])) == typeof(f(Int8[1 7]))
+    end
+end
+@test typeof(sum(Int8[])) == typeof(sum(Int8[1])) == typeof(sum(Int8[1 7]))
+
+prod2(itr) = invoke(prod, (Any,), itr)
+@test prod(Int[]) == prod2(Int[]) == 1
+@test prod(Int[7]) == prod2(Int[7]) == 7
+@test typeof(prod(Int8[])) == typeof(prod(Int8[1])) == typeof(prod(Int8[1 7])) == typeof(prod2(Int8[])) == typeof(prod2(Int8[1])) == typeof(prod2(Int8[1 7]))
 
 v = cell(2,2,1,1)
 v[1,1,1,1] = 28.0

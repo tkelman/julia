@@ -123,7 +123,7 @@ t_func[eval(Core.Intrinsics,:select_value)] =
 t_func[is] = (2, 2, cmp_tfunc)
 t_func[issubtype] = (2, 2, cmp_tfunc)
 t_func[isa] = (2, 2, cmp_tfunc)
-t_func[isdefined] = (1, 2, (args...)->Bool)
+t_func[isdefined] = (1, Inf, (args...)->Bool)
 t_func[Union] = (0, Inf,
                  (args...)->(if all(isType,args)
                                  Type{Union(map(t->t.parameters[1],args)...)}
@@ -285,6 +285,9 @@ const tupleref_tfunc = function (A, t, i)
         else
             types = t
         end
+        if !isa(types, Type)
+            return Any
+        end
         T = reduce(tmerge, None, types)
         if wrapType
             return isleaftype(T) ? Type{T} : Type{TypeVar(:_,T)}
@@ -379,14 +382,16 @@ const getfield_tfunc = function (A, s0, name)
         end
         if isType(s0)
             sp = s0.parameters[1]
-            if fld === :parameters && isleaftype(sp.parameters)
-                return Type{sp.parameters}
-            end
-            if fld === :types && isleaftype(sp.types)
-                return Type{sp.types}
-            end
-            if fld === :super && isleaftype(sp)
-                return Type{sp.super}
+            if isa(sp,DataType) && !any(x->isa(x,TypeVar), sp.parameters)
+                if fld === :parameters
+                    return Type{sp.parameters}
+                end
+                if fld === :types
+                    return Type{sp.types}
+                end
+                if fld === :super
+                    return Type{sp.super}
+                end
             end
         end
         for i=1:length(s.names)
@@ -1763,7 +1768,11 @@ function exprtype(x::ANY)
         end
         return abstract_eval(x, (), sv)
     elseif isa(x,QuoteNode)
-        return typeof(x.value)
+        v = x.value
+        if isa(v,Type)
+            return Type{v}
+        end
+        return typeof(v)
     elseif isa(x,Type)
         return Type{x}
     elseif isa(x,LambdaStaticData)
@@ -2149,6 +2158,8 @@ function inlining_pass(e::Expr, sv, ast)
                     if isa(aarg,Expr) && is_known_call(aarg, tuple, sv)
                         # apply(f,tuple(x,y,...)) => f(x,y,...)
                         newargs[i-2] = aarg.args[2:end]
+                    elseif isa(aarg, Tuple)
+                        newargs[i-2] = { QuoteNode(x) for x in aarg }
                     elseif isa(t,Tuple) && !isvatuple(t) && effect_free(aarg,sv)
                         # apply(f,t::(x,y)) => f(t[1],t[2])
                         newargs[i-2] = { mk_tupleref(aarg,j) for j=1:length(t) }

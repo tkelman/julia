@@ -156,9 +156,9 @@ Library improvements
         the same length.  This generalizes and replaces `normfro` ([#6057]),
         and `norm` is now type-stable ([#6056]).
 
-      * + and - now only works when the sizes of the arrays are the same, i.e. the 
-        operations no longer do broadcasting. New `UniformScaling` type and identity
-        `I` constant (#5810).
+      * `+` and `-` now require the sizes of the arrays to be the
+        same: the operations no longer do broadcasting. New
+        `UniformScaling` matrix type and identity `I` constant (#5810).
 
     * Sparse linear algebra
 
@@ -213,6 +213,9 @@ Library improvements
 
   * Constructors for collections (`Set`, `Dict`, etc.) now generally accept a
     single iterable argument giving the elements of the collection ([#4996], [#4871])
+
+  * Ranges and arrays with the same elements are now unequal. This allows hashing
+    and comparing ranges to be faster. ([#5778])
 
 Deprecated or removed
 ---------------------
@@ -307,6 +310,14 @@ Deprecated or removed
 [#2333]: https://github.com/JuliaLang/julia/issues/2333
 [#5636]: https://github.com/JuliaLang/julia/issues/5636
 [#1268]: https://github.com/JuliaLang/julia/issues/1268
+[#5677]: https://github.com/JuliaLang/julia/issues/5677
+[#5545]: https://github.com/JuliaLang/julia/issues/5545
+[#6057]: https://github.com/JuliaLang/julia/issues/6057
+[#6056]: https://github.com/JuliaLang/julia/issues/6056
+[#3344]: https://github.com/JuliaLang/julia/issues/3344
+[#5737]: https://github.com/JuliaLang/julia/issues/5737
+[#6073]: https://github.com/JuliaLang/julia/issues/6073
+[#5778]: https://github.com/JuliaLang/julia/issues/5778
 
 Julia v0.2.0 Release Notes
 ==========================

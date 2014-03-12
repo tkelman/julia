@@ -13,7 +13,9 @@ end
 function A_mul_B!(α::Number, A::SparseMatrixCSC, x::AbstractVector, β::Number, y::AbstractVector)
     A.n == length(x) || throw(DimensionMismatch(""))
     A.m == length(y) || throw(DimensionMismatch(""))
-    for i = 1:A.m; y[i] *= β; end
+    if β != 1
+        β != 0 ? scale!(y,β) : fill!(y,zero(eltype(y)))
+    end
     nzv = A.nzval
     rv = A.rowval
     for col = 1 : A.n
@@ -28,7 +30,7 @@ A_mul_B!(y::AbstractVector, A::SparseMatrixCSC, x::AbstractVector) = A_mul_B!(on
 
 function *{TA,S,Tx}(A::SparseMatrixCSC{TA,S}, x::AbstractVector{Tx})
     T = promote_type(TA,Tx)
-    A_mul_B!(one(T), A, x, zero(T), zeros(T, A.m))
+    A_mul_B!(one(T), A, x, zero(T), Array(T, A.m))
 end
 
 function Ac_mul_B!(α::Number, A::SparseMatrixCSC, x::AbstractVector, β::Number, y::AbstractVector)
@@ -36,9 +38,16 @@ function Ac_mul_B!(α::Number, A::SparseMatrixCSC, x::AbstractVector, β::Number
     A.m == length(x) || throw(DimensionMismatch(""))
     nzv = A.nzval
     rv = A.rowval
+    zro = zero(eltype(y))
     @inbounds begin
         for i = 1 : A.n
-            y[i] *= β
+            if β != 1
+                if β != 0
+                    y[i] *= β
+                else
+                    y[i] = zro
+                end
+            end
             tmp = zero(eltype(y))
             for j = A.colptr[i] : (A.colptr[i+1]-1)
                 tmp += conj(nzv[j])*x[rv[j]]
@@ -54,9 +63,16 @@ function At_mul_B!(α::Number, A::SparseMatrixCSC, x::AbstractVector, β::Number
     A.m == length(x) || throw(DimensionMismatch(""))
     nzv = A.nzval
     rv = A.rowval
+    zro = zero(eltype(y))
     @inbounds begin
         for i = 1 : A.n
-            y[i] *= β
+            if β != 1
+                if β != 0
+                    y[i] *= β
+                else
+                    y[i] = zro
+                end
+            end
             tmp = zero(eltype(y))
             for j = A.colptr[i] : (A.colptr[i+1]-1)
                 tmp += nzv[j]*x[rv[j]]
@@ -69,11 +85,11 @@ end
 At_mul_B!(y::AbstractVector, A::SparseMatrixCSC, x::AbstractVector) = At_mul_B!(one(eltype(x)), A, x, zero(eltype(y)), y)
 function Ac_mul_B{TA,S,Tx}(A::SparseMatrixCSC{TA,S}, x::AbstractVector{Tx})
     T = promote_type(TA, Tx)
-    Ac_mul_B!(one(T), A, x, zero(T), zeros(T, A.n))
+    Ac_mul_B!(one(T), A, x, zero(T), Array(T, A.n))
 end
 function At_mul_B{TA,S,Tx}(A::SparseMatrixCSC{TA,S}, x::AbstractVector{Tx})
     T = promote_type(TA, Tx)
-    At_mul_B!(one(T), A, x, zero(T), zeros(T, A.n))
+    At_mul_B!(one(T), A, x, zero(T), Array(T, A.n))
 end
 
 *(X::BitArray{1}, A::SparseMatrixCSC) = invoke(*, (AbstractVector, SparseMatrixCSC), X, A)
@@ -462,28 +478,31 @@ vecnorm(A::SparseMatrixCSC, p::Real=2) = vecnorm(A.nzval, p)
 function norm(A::SparseMatrixCSC,p::Real=1)
     m, n = size(A)
     if m == 0 || n == 0 || isempty(A)
-        return real(zero(eltype(A))) 
+        return float(real(zero(eltype(A))))
     elseif m == 1 || n == 1
         return norm(reshape(full(A), length(A)), p)
-    elseif p==1
-        nA = real(zero(eltype(A))) 
-        for j=1:n
-            colSum = real(zero(eltype(A))) 
-            for i = A.colptr[j]:A.colptr[j+1]-1
-                colSum += abs(A.nzval[i])
-            end
-            nA = max(nA, colSum)
-        end
-    elseif p==Inf
-        rowSum = zeros(typeof(real(A[1])),m)
-        for i=1:length(A.nzval)
-            rowSum[A.rowval[i]] += abs(A.nzval[i])
-        end
-        nA = maximum(rowSum)
     else
-        throw(ArgumentError("invalid p-norm p=$p. Valid: 1, Inf"))
+        Tnorm = typeof(float(real(zero(eltype(A)))))
+        Tsum = promote_type(Float64,Tnorm)
+        if p==1
+            nA::Tsum = 0
+            for j=1:n
+                colSum::Tsum = 0
+                for i = A.colptr[j]:A.colptr[j+1]-1
+                    colSum += abs(A.nzval[i])
+                end
+                nA = max(nA, colSum)
+            end
+            return convert(Tnorm, nA)
+        elseif p==Inf
+            rowSum = zeros(Tsum,m)
+            for i=1:length(A.nzval)
+                rowSum[A.rowval[i]] += abs(A.nzval[i])
+            end
+            return convert(Tnorm, maximum(rowSum))
+        end
     end
-    return nA
+    throw(ArgumentError("invalid p-norm p=$p. Valid: 1, Inf"))
 end
 
 # TODO
