@@ -8,7 +8,7 @@ environment:
 
 init:
 # Carriage returns are bad
-  - git config --global core.eol lf
+  - git config --global core.autocrlf input
 
 install:
 # Download most-recent Julia binary for dependencies
