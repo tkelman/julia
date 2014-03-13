@@ -53,7 +53,7 @@ fi
 if ! [ -e $f ]; then
   # Screen output (including stderr 2>&1) from downloads is redirected
   # to a file to avoid filling up the AppVeyor log with progress bars.
-  deps/jldownload https://sourceforge.net/projects/mingw-w64-dgn/files/others/$f > get-deps.log 2>&1
+  deps/jldownload https://sourceforge.net/projects/mingw-w64-dgn/files/others/$f
 fi
 echo 'Extracting LLVM binary'
 bsdtar -xf $f
