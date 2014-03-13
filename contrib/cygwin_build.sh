@@ -76,6 +76,14 @@ echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
 $XC_HOST-ar cr usr/lib/libgtest.a
 $XC_HOST-ar cr usr/lib/libgtest_main.a
 
+echo 'Downloading UnxUtils for printf'
+deps/jldownload http://sourceforge.net/projects/unxutils/files/unxutils/current/UnxUtils.zip >> get-deps.log 2>&1
+bsdtar -xf UnxUtils.zip usr/local/wbin/printf.exe
+mv usr/local/wbin/printf.exe usr/bin
+chmod +x usr/bin/printf.exe
+# Simple echo.exe with LF line endings instead of CRLF
+$XC_HOST-gcc -o usr/bin/echo contrib/windows/echo.c
+
 echo 'Downloading readline, libtermcap, pcre binaries'
 for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
   if ! [ -e mingw$bits-$f.noarch.rpm ]; then
@@ -133,6 +141,3 @@ make -j 4
 make -j 4 debug
 #make -C test file
 #make testall
-
-# Simple echo.exe
-$XC_HOST-gcc -o usr/bin/echo contrib/windows/echo.c
