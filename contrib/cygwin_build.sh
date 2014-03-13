@@ -139,5 +139,5 @@ fi
 
 make -j 4
 make -j 4 debug
-make -C test file spawn
-make testall
+#make -C test file spawn
+#make testall
