@@ -133,3 +133,6 @@ make -j 4
 make -j 4 debug
 #make -C test file
 #make testall
+
+# Simple echo.exe
+$XC_HOST-gcc -o usr/bin/echo contrib/windows/echo.c

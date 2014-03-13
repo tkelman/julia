@@ -23,7 +23,7 @@ install:
   - mkdir C:\projects\julia\usr\include
   - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
   - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
-# Copy msys dll and sort.exe from msysgit (otherwise test/spawn.jl is unhappy)
+# Copy msys dll and some of coreutils from msysgit for test/spawn.jl and test/file.jl
   - mkdir C:\projects\julia\usr\Git\bin
   - copy C:\projects\julia-prev\Git\bin\msys-1.0.dll C:\projects\julia\usr\Git\bin
   - copy C:\projects\julia-prev\Git\bin\sort.exe C:\projects\julia\usr\Git\bin
@@ -45,4 +45,5 @@ build_script:
   - C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && contrib/cygwin_build.sh"
 
 test_script:
-  - cd test && call ..\usr\bin\julia-debug-basic runtests.jl all
+  - cd test && ..\usr\bin\julia-debug-basic runtests.jl spawn file
+  - ..\usr\bin\julia-debug-basic runtests.jl all
