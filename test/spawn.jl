@@ -37,7 +37,7 @@ begin
     p = wait(a)
     kill(p)
 end
-
+println("On line 40 of test/spawn.jl")
 @test_throws run(`foo_is_not_a_valid_command`)
 
 if false
@@ -60,7 +60,7 @@ if false
     @test  success(ignorestatus(`false` |> `false`))
     @test  success(ignorestatus(`false` & `false`))
 end
-
+println("On line 63 of test/spawn.jl")
 # STDIN Redirection
 file = tempname()
 run(`echo hello world` |> file)
@@ -84,7 +84,7 @@ end
 readall(setenv(`sh -c "echo \$TEST"`,["TEST=Hello World"])) == "Hello World\n"
 readall(setenv(`sh -c "echo \$TEST"`,["TEST"=>"Hello World"])) == "Hello World\n"
 readall(setenv(`sh -c "pwd"`;dir="/")) == readall(setenv(`sh -c "cd / && pwd"`))
-
+println("On line 87 of test/spawn.jl")
 # Here we test that if we close a stream with pending writes, we don't lose the writes.
 str = ""
 for i=1:1000
@@ -101,7 +101,7 @@ file = tempname()
 stdin, proc = writesto(`cat -` |> file)
 write(stdin, str)
 close(stdin)
-
+println("On line 104 of test/spawn.jl")
 # issue #3373
 # fixing up Conditions after interruptions
 r = RemoteRef()
@@ -123,7 +123,7 @@ yield()
 exename=joinpath(JULIA_HOME,(ccall(:jl_is_debugbuild,Cint,())==0?"julia-basic":"julia-debug-basic"))
 @test readall(`$exename -f -e 'println(STDERR,"Hello World")'` .> `cat`) == "Hello World\n"
 
-
+println("On line 126 of test/spawn.jl")
 # issue #5904
 @test run(ignorestatus(`false`) |> `true`) === nothing
 
