@@ -35,12 +35,12 @@ bytestring(s::Array{Uint8,1}) = bytestring(pointer(s),length(s))
 bytestring(s::String...) = print_to_string(s...)
 
 function bytestring(p::Union(Ptr{Uint8},Ptr{Int8}))
-    p == C_NULL ? error("cannot convert NULL to string line 38") :
+    p == C_NULL ? error("cannot convert NULL to string") :
     ccall(:jl_cstr_to_string, ByteString, (Ptr{Uint8},), p)
 end
 
 function bytestring(p::Union(Ptr{Uint8},Ptr{Int8}),len::Integer)
-    p == C_NULL ? error("cannot convert NULL to string line 43") :
+    p == C_NULL ? error("cannot convert NULL to string") :
     ccall(:jl_pchar_to_string, ByteString, (Ptr{Uint8},Int), p, len)
 end
 

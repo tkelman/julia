@@ -235,19 +235,8 @@ close(f)
 ############
 # Clean up #
 ############
-println("line 238 about to rm(file)")
-println(file)
-println(typeof(file))
 rm(file)
-println("line 242 about to rmdir(dir)")
-println(dir)
-println(typeof(dir))
 rmdir(dir)
-println("line 246 about to test !ispath(file)")
-println(file)
-println(typeof(file))
-@test !ispath(file)
-println("line 250 about to test !ispath(dir)")
-println(dir)
-println(typeof(dir))
-@test !ispath(dir)
+# The following fail on Windows with "stat: operation not permitted (EPERM)"
+@unix_only @test !ispath(file)
+@unix_only @test !ispath(dir)
