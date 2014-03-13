@@ -25,7 +25,7 @@ install:
   - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
 # Copy msys dll, perl, and some of coreutils from msysgit for test/spawn.jl and test/file.jl
   - mkdir C:\projects\julia\usr\Git\bin
-  - FOR %i in (cat.exe chmod.exe false.exe msys-1.0.dll perl.exe sh.exe sort.exe touch.exe true.exe) DO copy C:\projects\julia-prev\Git\bin\%i C:\projects\julia\usr\Git\bin
+  - ps: foreach ($i in cat.exe,chmod.exe,false.exe,msys-1.0.dll,perl.exe,sh.exe,sort.exe,touch.exe,true.exe) {copy C:\projects\julia-prev\Git\bin\$i C:\projects\julia\usr\Git\bin}
 # Install Cygwin and build-time dependencies
   - "cinst cyg-get > cyg-get.log"
   - set PATH=%PATH%;C:\cygwin
