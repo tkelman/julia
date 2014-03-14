@@ -138,8 +138,9 @@ make -C deps get-openlibm utf8proc-v1.1.6/Makefile >> get-deps.log 2>&1
 
 if [ -n "$USE_MSVC" ]; then
   # Fix MSVC compilation issues
-  sed -i 's/-Wno-strict-aliasing//' src/Makefile
-  sed -i 's/-Wno-strict-aliasing//' src/support/Makefile
+  sed -i 's/-Wall -Wno-strict-aliasing//' src/Makefile
+  sed -i 's/-Wall -Wno-strict-aliasing//' src/support/Makefile
+  sed -i 's/$(LLVM_CONFIG) --cxxflags/$(LLVM_CONFIG) --cxxflags | sed "s/-Woverloaded-virtual -Wcast-qual//"/g' src/Makefile
   sed -i 's/char bool/char _bool/' deps/utf8proc-v1.1.6/utf8proc.h
   sed -i 's/false, true/_false, _true/' deps/utf8proc-v1.1.6/utf8proc.h
   sed -i 's/buffer = malloc/buffer = (int32_t *) malloc/' deps/utf8proc-v1.1.6/utf8proc.c
