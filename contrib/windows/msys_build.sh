@@ -1,65 +1,40 @@
 #!/bin/sh
-# Script to compile Julia in MSYS, assuming 7zip is installed and on the path
+# Script to compile Julia in MSYS, assuming 7zip is installed and on the path,
+# and dependency dll's have been copied into usr/bin (see appveyor.yml)
 
 # Stop on error
 set -e
-
-# If HOST environment variable not set, choose based on uname -m
-if [ -z "$HOST" ]; then
-  if [ `uname -m` = x86_64 ]; then
-    export HOST=x86_64-w64-mingw32
-  else
-    export HOST=i686-w64-mingw32
-  fi
-fi
 
 for f in bin lib include Git/bin; do
   mkdir -p usr/$f
 done
 
-echo "" > Make.user
-if [ $HOST = x86_64-w64-mingw32 ]; then
+# If ARCH environment variable not set, choose based on uname -m
+if [ -z "$ARCH" ]; then
+  export ARCH=`uname -m`
+fi
+if [ $ARCH = x86_64 ]; then
   bits=64
   exc=seh
-  echo 'override ARCH = x86_64' >> Make.user
 else
   bits=32
   exc=sjlj
-  echo 'override ARCH = i686' >> Make.user
 fi
 
-mingw=http://sourceforge.net/projects/mingw
 echo "" > get-deps.log
+mingw=http://sourceforge.net/projects/mingw
 if [ -z "`which gcc 2>/dev/null`" ]; then
-  echo "Downloading $HOST compilers"
+  echo "Downloading $ARCH-w64-mingw32 compilers"
   f=x$bits-4.8.1-release-win32-$exc-rev5.7z
   if ! [ -e $f ]; then
     # Screen output (including stderr 2>&1) from downloads is redirected
     # to a file to avoid filling up the AppVeyor log with progress bars.
     deps/jldownload ${mingw}builds/files/host-windows/releases/4.8.1/$bits-bit/threads-win32/$exc/$f >> get-deps.log 2>&1
   fi
-  echo "Extracting $HOST compilers"
+  echo "Extracting $ARCH-w64-mingw32 compilers"
   7z x -y $f >> get-deps.log
   export PATH=$PATH:$PWD/mingw$bits/bin
 fi
-
-# If no Fortran compiler installed, override with name of C compiler
-# (this only fixes the unnecessary invocation of FC in openlibm)
-if [ -z "`which gfortran 2>/dev/null`" ]; then
-  echo 'override FC = gcc' >> Make.user
-fi
-
-# compile and ar-lib scripts to use MSVC instead of MinGW compiler
-#deps/jldownload compile http://git.savannah.gnu.org/cgit/automake.git/plain/lib/compile?id=v1.14.1 >> get-deps.log 2>&1
-#deps/jldownload ar-lib http://git.savannah.gnu.org/cgit/automake.git/plain/lib/ar-lib?id=v1.14.1 >> get-deps.log 2>&1
-#chmod +x compile
-#chmod +x ar-lib
-#echo "override CC = $PWD/compile cl" >> Make.user
-#echo 'override CXX = $(CC)' >> Make.user
-#echo 'override FC = $(CC)' >> Make.user
-#export AR="$PWD/ar-lib lib"
-export AR=ar
-#echo "override AR = $AR" >> Make.user
 
 for f in /make/make-3.81-3/make-3.81-3-msys-1.0.13-bin.tar \
          /gettext/gettext-0.18.1.1-1/libintl-0.18.1.1-1-msys-1.0.17-dll-8.tar \
@@ -77,15 +52,12 @@ if [ -z "`which make 2>/dev/null`" ]; then
   cp bin/*.dll /usr/bin
 fi
 mv bin/*.dll usr/Git/bin
+mv bin/cat.exe usr/Git/bin
 mv bin/echo.exe usr/Git/bin
 mv bin/printf.exe usr/Git/bin
 
 echo 'Downloading LLVM binary'
-if [ $HOST = x86_64-w64-mingw32 ]; then
-  f=llvm-3.3-w64-bin-x86_64-20130804.7z
-else
-  f=llvm-3.3-w32-bin-i686-20130804.7z
-fi
+f=llvm-3.3-w$bits-bin-$ARCH-20130804.7z
 if ! [ -e $f ]; then
   deps/jldownload ${mingw}-w64-dgn/files/others/$f >> get-deps.log 2>&1
 fi
@@ -97,11 +69,11 @@ if ! [ -d usr/include/llvm ]; then
   mv llvm/include/llvm usr/include
   mv llvm/include/llvm-c usr/include
 fi
-echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
+echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' > Make.user
 echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
 # This binary version doesn't include libgtest or libgtest_main for some reason
-$AR cr usr/lib/libgtest.a
-$AR cr usr/lib/libgtest_main.a
+ar cr usr/lib/libgtest.a
+ar cr usr/lib/libgtest_main.a
 
 echo 'Downloading readline, termcap, pcre binaries'
 for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
@@ -114,13 +86,13 @@ done
 echo 'override READLINE = -lreadline -lhistory' >> Make.user
 echo 'override PCRE_CONFIG = $(JULIAHOME)/usr/bin/pcre-config' >> Make.user
 # Move downloaded bin, lib, and include files into build tree
-mv usr/$HOST/sys-root/mingw/bin/* usr/bin
-mv usr/$HOST/sys-root/mingw/lib/*.dll.a usr/lib
+mv usr/$ARCH-w64-mingw32/sys-root/mingw/bin/* usr/bin
+mv usr/$ARCH-w64-mingw32/sys-root/mingw/lib/*.dll.a usr/lib
 if ! [ -d usr/include/readline ]; then
-  mv usr/$HOST/sys-root/mingw/include/* usr/include
+  mv usr/$ARCH-w64-mingw32/sys-root/mingw/include/* usr/include
 fi
 # Modify prefix in pcre-config
-sed -i "s|prefix=/usr/$HOST/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
+sed -i "s|prefix=/usr/$ARCH-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
 
 # Remove libjulia.dll if it was copied from downloaded binary
 [ -e usr/bin/libjulia.dll ] && rm usr/bin/libjulia.dll
@@ -138,17 +110,14 @@ echo 'override LIBUV = $(JULIAHOME)/usr/lib/libuv.a' >> Make.user
 echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 
 # Remaining dependencies:
-# openlibm and readline since we need these as static libraries to work properly
-# (not included as part of Julia Windows binaries yet)
+# openlibm (and readline?) since we need these as static libraries to
+# work properly (not included as part of Julia Windows binaries yet)
 # utf8proc since its headers are not in the binary download
 echo 'override STAGE1_DEPS = openlibm' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 echo 'Downloading openlibm, utf8proc sources'
 make -C deps get-openlibm get-utf8proc >> get-deps.log 2>&1
-
-# Flags MSVC dislikes
-#sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
 
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
@@ -158,4 +127,3 @@ fi
 
 make -j 4
 make -j 4 debug
-#make testall
