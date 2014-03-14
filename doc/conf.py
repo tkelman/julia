@@ -21,6 +21,7 @@ juliadoc_dir = '{0}/juliadoc/'.format(os.path.abspath('.'))
 sys.path.append(juliadoc_dir)
 
 import juliadoc
+import sphinx_rtd_theme
 
 # -- General configuration -----------------------------------------------------
 
@@ -49,7 +50,7 @@ master_doc = 'index'
 # General information about the project.
 project = u'Julia Language'
 AUTHORS = u"Jeff Bezanson, Stefan Karpinski, Viral Shah, Alan Edelman, et al."
-copyright = u'2012-2013, '+AUTHORS
+copyright = u'2012-2014, '+AUTHORS
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -112,7 +113,8 @@ html_theme = 'julia'
 #html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = [juliadoc.get_theme_dir()]
+html_theme_path = [juliadoc.get_theme_dir(),
+                   sphinx_rtd_theme.get_html_theme_path()]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".

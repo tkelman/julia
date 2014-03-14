@@ -161,7 +161,9 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
 .. function:: bkfact(A) -> BunchKaufman
 
-   Compute the Bunch-Kaufman factorization of a real symmetric or complex Hermitian matrix ``A`` and return a ``BunchKaufman`` object. The following functions are available for ``BunchKaufman`` objects: ``size``, ``\``, ``inv``, ``issym``, ``ishermitian``.
+   Compute the Bunch-Kaufman [Bunch1977]_ factorization of a real symmetric or complex Hermitian matrix ``A`` and return a ``BunchKaufman`` object. The following functions are available for ``BunchKaufman`` objects: ``size``, ``\``, ``inv``, ``issym``, ``ishermitian``.
+
+   .. [Bunch1977] J R Bunch and L Kaufman, Some stable methods for calculating inertia and solving symmetric linear systems, Mathematics of Computation 31:137 (1977), 163-179. `url<http://www.ams.org/journals/mcom/1977-31-137/S0025-5718-1977-0428694-0>`_.
 
 .. function:: bkfact!(A) -> BunchKaufman
 
@@ -306,9 +308,9 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    Scale an array ``A`` by a scalar ``b``, returning a new array.
 
-   If ``A`` is a matrix and ``b`` is a vector, then ``scale!(A,b)``
+   If ``A`` is a matrix and ``b`` is a vector, then ``scale(A,b)``
    scales each column ``i`` of ``A`` by ``b[i]`` (similar to
-   ``A*diagm(b)``), while ``scale!(b,A)`` scales each row ``i`` of
+   ``A*diagm(b)``), while ``scale(b,A)`` scales each row ``i`` of
    ``A`` by ``b[i]`` (similar to ``diagm(b)*A``), returning a new array.
 
    Note: for large ``A``, ``scale`` can be much faster than ``A .* b`` or
@@ -316,7 +318,7 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
 .. function:: scale!(A, b), scale!(b, A)
 
-   Scale an array ``A`` by a scalar ``b``, similar to ``scale`` but
+   Scale an array ``A`` by a scalar ``b``, similar to :func:`scale` but
    overwriting ``A`` in-place.
 
    If ``A`` is a matrix and ``b`` is a vector, then ``scale!(A,b)``

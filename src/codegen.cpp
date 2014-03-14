@@ -116,8 +116,6 @@ void __attribute__(()) __stack_chk_fail()
 }
 }
 
-#define CONDITION_REQUIRES_BOOL
-
 #define DISABLE_FLOAT16
 
 // llvm state
@@ -2223,12 +2221,10 @@ static void emit_assignment(jl_value_t *l, jl_value_t *r, jl_codectx_t *ctx)
 static Value *emit_condition(jl_value_t *cond, const std::string &msg, jl_codectx_t *ctx)
 {
     Value *condV = emit_unboxed(cond, ctx);
-#ifdef CONDITION_REQUIRES_BOOL
     if (expr_type(cond, ctx) != (jl_value_t*)jl_bool_type &&
         condV->getType() != T_int1) {
         emit_typecheck(condV, (jl_value_t*)jl_bool_type, msg, ctx);
     }
-#endif
     if (condV->getType() == T_int1) {
         return builder.CreateXor(condV, ConstantInt::get(T_int1,1));
     }
@@ -2589,7 +2585,8 @@ static Value *emit_expr(jl_value_t *expr, jl_codectx_t *ctx, bool isboxed,
         builder.SetInsertPoint(tryblk);
     }
     else if (head == boundscheck_sym) {
-        if (jl_array_len(ex->args) > 0) {
+        if (jl_array_len(ex->args) > 0 &&
+            jl_compileropts.check_bounds == JL_COMPILEROPT_CHECK_BOUNDS_DEFAULT) {
             jl_value_t *arg = args[0];
             if (arg == jl_true) {
                 ctx->boundsCheck.push_back(true);
