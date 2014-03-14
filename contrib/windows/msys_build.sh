@@ -44,7 +44,7 @@ else
   deps/jldownload ar-lib http://git.savannah.gnu.org/cgit/automake.git/plain/lib/ar-lib?id=v1.14.1 >> get-deps.log 2>&1
   chmod +x compile
   chmod +x ar-lib
-  echo "override CC = $PWD/compile cl /TP" >> Make.user
+  echo "override CC = $PWD/compile cl -TP" >> Make.user
   echo 'override CXX = $(CC)' >> Make.user
   echo 'override FC = $(CC)' >> Make.user
   export AR="$PWD/ar-lib lib"
@@ -117,7 +117,7 @@ sed -i "s|prefix=/usr/$ARCH-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin
 [ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
 
 for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR \
-    PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV OPENLIBM; do
+    PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV; do
   echo "USE_SYSTEM_$lib = 1" >> Make.user
 done
 echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
@@ -127,13 +127,13 @@ echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
 echo 'override LIBUV = $(JULIAHOME)/usr/lib/libuv.a' >> Make.user
 echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 # Since we don't have a static library for openlibm
-echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
+#echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 
 # Remaining dependencies:
 # openlibm (and readline?) since we need these as static libraries to
 # work properly (not included as part of Julia Windows binaries yet)
 # utf8proc since its headers are not in the binary download
-echo 'override STAGE1_DEPS = ' >> Make.user
+echo 'override STAGE1_DEPS = openlibm' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 echo 'Downloading openlibm, utf8proc sources'
