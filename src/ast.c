@@ -226,13 +226,20 @@ static jl_value_t *scm_to_julia_(value_t e, int eo)
             }
             i64 = conv_to_int64(cp_data(cp), nt);
         }
+        if (
 #ifdef _P64
-        return (jl_value_t*)jl_box_int64(i64);
+            jl_compileropts.int_literals==32
 #else
-        if (i64 > (int64_t)S32_MAX || i64 < (int64_t)S32_MIN)
-            return (jl_value_t*)jl_box_int64(i64);
-        return (jl_value_t*)jl_box_int32((int32_t)i64);
+            jl_compileropts.int_literals!=64
 #endif
+            ) {
+            if (i64 > (int64_t)S32_MAX || i64 < (int64_t)S32_MIN)
+                return (jl_value_t*)jl_box_int64(i64);
+            return (jl_value_t*)jl_box_int32((int32_t)i64);
+        }
+        else {
+            return (jl_value_t*)jl_box_int64(i64);
+        }
     }
     if (issymbol(e)) {
         if (e == true_sym)
@@ -477,6 +484,8 @@ jl_value_t *jl_parse_next(void)
     if (c == FL_EOF)
         return NULL;
     if (iscons(c)) {
+        if (cdr_(c) == FL_EOF)
+            return NULL;
         value_t a = car_(c);
         if (isfixnum(a)) {
             jl_lineno = numval(a);

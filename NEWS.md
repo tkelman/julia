@@ -31,6 +31,10 @@ New language features
     the module is first loaded, and on process startup if a pre-compiled
     version of the module is present ([#1268]).
 
+  * Multi-line comments ([#69], [#6128]): `#= .... =#` 
+
+  * --bounds-check=yes|no compiler option
+
 Library improvements
 --------------------
 
