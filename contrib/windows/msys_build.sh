@@ -74,24 +74,24 @@ mv bin/cat.exe usr/Git/bin
 mv bin/echo.exe usr/Git/bin
 mv bin/printf.exe usr/Git/bin
 
-echo 'Downloading LLVM binary'
-f=llvm-3.3-w$bits-bin-$ARCH-20130804.7z
-if ! [ -e $f ]; then
-  deps/jldownload $mingw-w64-dgn/files/others/$f >> get-deps.log 2>&1
-fi
-echo 'Extracting LLVM binary'
-7z x -y $f >> get-deps.log
-mv llvm/bin/* usr/bin
-mv llvm/lib/*.a usr/lib
-if ! [ -d usr/include/llvm ]; then
-  mv llvm/include/llvm usr/include
-  mv llvm/include/llvm-c usr/include
-fi
-echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
-echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
+#echo 'Downloading LLVM binary'
+#f=llvm-3.3-w$bits-bin-$ARCH-20130804.7z
+#if ! [ -e $f ]; then
+#  deps/jldownload $mingw-w64-dgn/files/others/$f >> get-deps.log 2>&1
+#fi
+#echo 'Extracting LLVM binary'
+#7z x -y $f >> get-deps.log
+#mv llvm/bin/* usr/bin
+#mv llvm/lib/*.a usr/lib
+#if ! [ -d usr/include/llvm ]; then
+#  mv llvm/include/llvm usr/include
+#  mv llvm/include/llvm-c usr/include
+#fi
+#echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
+#echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
 # This binary version doesn't include libgtest or libgtest_main for some reason
-$AR cr usr/lib/libgtest.a
-$AR cr usr/lib/libgtest_main.a
+#$AR cr usr/lib/libgtest.a
+#$AR cr usr/lib/libgtest_main.a
 
 echo 'Downloading readline, termcap, pcre binaries'
 for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
@@ -143,6 +143,8 @@ if [ -n "$USE_MSVC" ]; then
   # Fix MSVC compilation issues
   sed -i 's/char bool/char _bool/' deps/utf8proc-v1.1.6/utf8proc.h
   sed -i 's/false, true/_false, _true/' deps/utf8proc-v1.1.6/utf8proc.h
+  sed -i 's/buffer = malloc/buffer = (int32_t *) malloc/' deps/utf8proc-v1.1.6/utf8proc.c
+  sed -i 's/newptr = realloc/newptr = (int32_t *) realloc/' deps/utf8proc-v1.1.6/utf8proc.c
   #sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
 fi
 
