@@ -26,22 +26,8 @@ install:
 # Copy msys dll, perl, and some of coreutils from msysgit for test/spawn.jl and test/file.jl
   - mkdir C:\projects\julia\usr\Git\bin
   - ps: foreach ($i in "chmod.exe","false.exe","msys-1.0.dll","perl.exe","sh.exe","sort.exe","touch.exe","true.exe") {copy C:\projects\julia-prev\Git\bin\$i C:\projects\julia\usr\Git\bin}
-# Install Cygwin and build-time dependencies
-#  - "cinst cyg-get > cyg-get.log"
-#  - set PATH=%PATH%;C:\cygwin
-#  - "cyg-get make >> cyg-get.log"
-#  - "cyg-get wget >> cyg-get.log"
-#  - "cyg-get bsdtar >> cyg-get.log"
-#  - ps: 'if ($env:XC_HOST -eq "x86_64-w64-mingw32") {cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log} else {cyg-get mingw64-i686-gcc-g++ >> cyg-get.log}'
-# python, gcc-g++, and diffutils are required to build llvm from source
-#  - "cyg-get python >> cyg-get.log"
-#  - "cyg-get gcc-g++ >> cyg-get.log"
-#  - "cyg-get diffutils >> cyg-get.log"
-# mingw64-{x86_64|i686}-gcc-fortran is required to build openlibm, openblas, arpack, etc from source
-#  - ps: 'if ($env:XC_HOST -eq "x86_64-w64-mingw32") {cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log} else {cyg-get mingw64-i686-gcc-fortran >> cyg-get.log}'
 
 build_script:
-#  - C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && contrib/windows/cygwin_build.sh"
   - C:\projects\julia-prev\Git\bin\sh.exe --login -c "cd /c/projects/julia && contrib/windows/msys_build.sh"
 
 test_script:
