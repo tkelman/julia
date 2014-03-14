@@ -22,18 +22,33 @@ else
 fi
 
 echo "" > get-deps.log
+echo "" > Make.user
 mingw=http://sourceforge.net/projects/mingw
-if [ -z "`which gcc 2>/dev/null`" ]; then
-  echo "Downloading $ARCH-w64-mingw32 compilers"
-  f=x$bits-4.8.1-release-win32-$exc-rev5.7z
-  if ! [ -e $f ]; then
-    # Screen output (including stderr 2>&1) from downloads is redirected
-    # to a file to avoid filling up the AppVeyor log with progress bars.
-    deps/jldownload ${mingw}builds/files/host-windows/releases/4.8.1/$bits-bit/threads-win32/$exc/$f >> get-deps.log 2>&1
+if [ -z "$USE_MSVC" ]; then
+  if [ -z "`which gcc 2>/dev/null`" ]; then
+    echo "Downloading $ARCH-w64-mingw32 compilers"
+    f=x$bits-4.8.1-release-win32-$exc-rev5.7z
+    if ! [ -e $f ]; then
+      # Screen output (including stderr 2>&1) from downloads is redirected
+      # to a file to avoid filling up the AppVeyor log with progress bars.
+      deps/jldownload ${mingw}builds/files/host-windows/releases/4.8.1/$bits-bit/threads-win32/$exc/$f >> get-deps.log 2>&1
+    fi
+    echo "Extracting $ARCH-w64-mingw32 compilers"
+    7z x -y $f >> get-deps.log
+    export PATH=$PATH:$PWD/mingw$bits/bin
   fi
-  echo "Extracting $ARCH-w64-mingw32 compilers"
-  7z x -y $f >> get-deps.log
-  export PATH=$PATH:$PWD/mingw$bits/bin
+  export AR=ar
+else
+  # compile and ar-lib scripts to use MSVC instead of MinGW compiler
+  deps/jldownload compile http://git.savannah.gnu.org/cgit/automake.git/plain/lib/compile?id=v1.14.1 >> get-deps.log 2>&1
+  deps/jldownload ar-lib http://git.savannah.gnu.org/cgit/automake.git/plain/lib/ar-lib?id=v1.14.1 >> get-deps.log 2>&1
+  chmod +x compile
+  chmod +x ar-lib
+  echo "override CC = $PWD/compile cl" >> Make.user
+  echo 'override CXX = $(CC)' >> Make.user
+  echo 'override FC = $(CC)' >> Make.user
+  export AR="$PWD/ar-lib lib"
+  echo "override AR = $AR" >> Make.user
 fi
 
 for f in /make/make-3.81-3/make-3.81-3-msys-1.0.13-bin.tar \
@@ -69,11 +84,11 @@ if ! [ -d usr/include/llvm ]; then
   mv llvm/include/llvm usr/include
   mv llvm/include/llvm-c usr/include
 fi
-echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' > Make.user
+echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
 echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
 # This binary version doesn't include libgtest or libgtest_main for some reason
-ar cr usr/lib/libgtest.a
-ar cr usr/lib/libgtest_main.a
+$AR cr usr/lib/libgtest.a
+$AR cr usr/lib/libgtest_main.a
 
 echo 'Downloading readline, termcap, pcre binaries'
 for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
@@ -108,6 +123,8 @@ echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
 echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
 echo 'override LIBUV = $(JULIAHOME)/usr/lib/libuv.a' >> Make.user
 echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
+# Since we don't have a static library for openlibm
+echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 
 # Remaining dependencies:
 # openlibm (and readline?) since we need these as static libraries to
