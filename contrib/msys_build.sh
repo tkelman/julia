@@ -157,4 +157,5 @@ if [ -n "$APPVEYOR" ]; then
 fi
 
 make -j 4
+make -j 4 debug
 #make testall
