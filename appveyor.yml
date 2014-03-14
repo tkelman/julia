@@ -28,6 +28,7 @@ install:
   - ps: foreach ($i in "chmod.exe","false.exe","msys-1.0.dll","perl.exe","sh.exe","sort.exe","touch.exe","true.exe") {copy C:\projects\julia-prev\Git\bin\$i C:\projects\julia\usr\Git\bin}
 
 build_script:
+#  - '"%VS120COMNTOOLS%\..\..\VC\bin\vcvars32.bat"'
   - C:\projects\julia-prev\Git\bin\sh.exe --login -c "cd /c/projects/julia && contrib/windows/msys_build.sh"
 
 test_script:
