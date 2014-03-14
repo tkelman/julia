@@ -44,7 +44,7 @@ else
   deps/jldownload ar-lib http://git.savannah.gnu.org/cgit/automake.git/plain/lib/ar-lib?id=v1.14.1 >> get-deps.log 2>&1
   chmod +x compile
   chmod +x ar-lib
-  echo "override CC = $PWD/compile cl -TP -Y" >> Make.user
+  echo "override CC = $PWD/compile cl -TP -Y-" >> Make.user
   echo 'override CXX = $(CC)' >> Make.user
   echo 'override FC = $(CC)' >> Make.user
   export AR="$PWD/ar-lib lib"
