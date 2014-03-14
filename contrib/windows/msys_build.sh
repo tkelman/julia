@@ -139,6 +139,13 @@ echo 'override STAGE3_DEPS = ' >> Make.user
 echo 'Downloading openlibm, utf8proc sources'
 make -C deps get-openlibm get-utf8proc >> get-deps.log 2>&1
 
+if [ -n "$USE_MSVC" ]; then
+  # Fix MSVC compilation issues
+  sed -i 's/char bool/char _bool/' deps/utf8proc-v1.1.6/utf8proc.h
+  sed -i 's/false, true/_false, _true/' deps/utf8proc-v1.1.6/utf8proc.h
+  sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
+fi
+
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
  echo 'override NO_GIT = 1' >> Make.user
