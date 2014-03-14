@@ -137,7 +137,7 @@ echo 'override STAGE1_DEPS = openlibm' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 echo 'Downloading openlibm, utf8proc sources'
-make -C deps get-openlibm get-utf8proc >> get-deps.log 2>&1
+make -C deps get-openlibm utf8proc-v1.1.6/Makefile >> get-deps.log 2>&1
 
 if [ -n "$USE_MSVC" ]; then
   # Fix MSVC compilation issues
