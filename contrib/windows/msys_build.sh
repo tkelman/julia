@@ -49,6 +49,9 @@ else
   echo 'override FC = $(CC)' >> Make.user
   export AR="$PWD/ar-lib lib"
   echo "override AR = $AR" >> Make.user
+
+  # Flags MSVC doesn't like
+  sed -i 's/-Wno-strict-aliasing//' julia/src/Makefile
 fi
 
 for f in /make/make-3.81-3/make-3.81-3-msys-1.0.13-bin.tar \
@@ -74,7 +77,7 @@ mv bin/printf.exe usr/Git/bin
 echo 'Downloading LLVM binary'
 f=llvm-3.3-w$bits-bin-$ARCH-20130804.7z
 if ! [ -e $f ]; then
-  deps/jldownload ${mingw}-w64-dgn/files/others/$f >> get-deps.log 2>&1
+  deps/jldownload $mingw-w64-dgn/files/others/$f >> get-deps.log 2>&1
 fi
 echo 'Extracting LLVM binary'
 7z x -y $f >> get-deps.log
@@ -134,7 +137,7 @@ echo 'override STAGE1_DEPS = ' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 echo 'Downloading openlibm, utf8proc sources'
-make -C deps get-openlibm get-utf8proc #>> get-deps.log 2>&1
+make -C deps get-openlibm get-utf8proc >> get-deps.log 2>&1
 
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
