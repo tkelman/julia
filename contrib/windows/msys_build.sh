@@ -20,9 +20,9 @@ else
   bits=32
   exc=sjlj
 fi
+echo "override ARCH = $ARCH" > Make.user
 
 echo "" > get-deps.log
-echo "" > Make.user
 mingw=http://sourceforge.net/projects/mingw
 if [ -z "$USE_MSVC" ]; then
   if [ -z "`which gcc 2>/dev/null`" ]; then
@@ -134,7 +134,7 @@ echo 'override STAGE1_DEPS = ' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 echo 'Downloading openlibm, utf8proc sources'
-make -C deps get-openlibm get-utf8proc >> get-deps.log 2>&1
+make -C deps get-openlibm get-utf8proc #>> get-deps.log 2>&1
 
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
