@@ -49,9 +49,6 @@ else
   echo 'override FC = $(CC)' >> Make.user
   export AR="$PWD/ar-lib lib"
   echo "override AR = $AR" >> Make.user
-
-  # Flags MSVC doesn't like
-  sed -i 's/-Wno-strict-aliasing//' src/Makefile
 fi
 
 for f in /make/make-3.81-3/make-3.81-3-msys-1.0.13-bin.tar \
@@ -141,6 +138,8 @@ make -C deps get-openlibm utf8proc-v1.1.6/Makefile >> get-deps.log 2>&1
 
 if [ -n "$USE_MSVC" ]; then
   # Fix MSVC compilation issues
+  sed -i 's/-Wno-strict-aliasing//' src/Makefile
+  sed -i 's/-Wno-strict-aliasing//' src/support/Makefile
   sed -i 's/char bool/char _bool/' deps/utf8proc-v1.1.6/utf8proc.h
   sed -i 's/false, true/_false, _true/' deps/utf8proc-v1.1.6/utf8proc.h
   sed -i 's/buffer = malloc/buffer = (int32_t *) malloc/' deps/utf8proc-v1.1.6/utf8proc.c
