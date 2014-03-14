@@ -51,7 +51,7 @@ else
   echo "override AR = $AR" >> Make.user
 
   # Flags MSVC doesn't like
-  sed -i 's/-Wno-strict-aliasing//' julia/src/Makefile
+  sed -i 's/-Wno-strict-aliasing//' src/Makefile
 fi
 
 for f in /make/make-3.81-3/make-3.81-3-msys-1.0.13-bin.tar \
