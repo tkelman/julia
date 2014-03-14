@@ -3,7 +3,7 @@ environment:
   JL_VER: "/0.3/julia-0.3.0-prerelease-win"
   
   matrix:
-  - HOST: "i686-w64-mingw32"
+  - XC_HOST: "i686-w64-mingw32"
 #  - HOST: "x86_64-w64-mingw32"
 
 init:
@@ -12,7 +12,7 @@ init:
 
 install:
 # Download most-recent Julia binary for dependencies
-  - ps: if ($env:HOST -eq "x86_64-w64-mingw32") {(new-object net.webclient).DownloadFile($($env:JL_URL+"x64"+$env:JL_VER+"64.exe"), "C:\projects\julia-prev.exe")} else {(new-object net.webclient).DownloadFile($($env:JL_URL+"x86"+$env:JL_VER+"32.exe"), "C:\projects\julia-prev.exe")}
+  - ps: if ($env:XC_HOST -eq "x86_64-w64-mingw32") {(new-object net.webclient).DownloadFile($($env:JL_URL+"x64"+$env:JL_VER+"64.exe"), "C:\projects\julia-prev.exe")} else {(new-object net.webclient).DownloadFile($($env:JL_URL+"x86"+$env:JL_VER+"32.exe"), "C:\projects\julia-prev.exe")}
 # Run installer silently, output to C:\projects\julia-prev
   - C:\projects\julia-prev.exe /S /D=C:\projects\julia-prev
 # Copy libs and libuv includes from julia-prev to julia/usr
@@ -27,12 +27,12 @@ install:
   - mkdir C:\projects\julia\usr\Git\bin
   - ps: foreach ($i in "cat.exe","chmod.exe","false.exe","msys-1.0.dll","perl.exe","sh.exe","sort.exe","touch.exe","true.exe") {copy C:\projects\julia-prev\Git\bin\$i C:\projects\julia\usr\Git\bin}
 # Install Cygwin and build-time dependencies
-#  - "cinst cyg-get > cyg-get.log"
-#  - set PATH=%PATH%;C:\cygwin
-#  - "cyg-get make >> cyg-get.log"
-#  - "cyg-get wget >> cyg-get.log"
-#  - "cyg-get bsdtar >> cyg-get.log"
-#  - ps: 'if ($env:XC_HOST -eq "x86_64-w64-mingw32") {cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log} else {cyg-get mingw64-i686-gcc-g++ >> cyg-get.log}'
+  - "cinst cyg-get > cyg-get.log"
+  - set PATH=%PATH%;C:\cygwin
+  - "cyg-get make >> cyg-get.log"
+  - "cyg-get wget >> cyg-get.log"
+  - "cyg-get bsdtar >> cyg-get.log"
+  - ps: 'if ($env:XC_HOST -eq "x86_64-w64-mingw32") {cyg-get mingw64-x86_64-gcc-g++ >> cyg-get.log} else {cyg-get mingw64-i686-gcc-g++ >> cyg-get.log}'
 # python, gcc-g++, and diffutils are required to build llvm from source
 #  - "cyg-get python >> cyg-get.log"
 #  - "cyg-get gcc-g++ >> cyg-get.log"
@@ -41,8 +41,8 @@ install:
 #  - ps: 'if ($env:XC_HOST -eq "x86_64-w64-mingw32") {cyg-get mingw64-x86_64-gcc-fortran >> cyg-get.log} else {cyg-get mingw64-i686-gcc-fortran >> cyg-get.log}'
 
 build_script:
-#  - C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && contrib/cygwin_build.sh"
-  - C:\projects\julia-prev\Git\bin\sh.exe --login -c "cd /c/projects/julia && contrib/msys_build.sh"
+  - C:\cygwin\bin\sh.exe --login -c "cd /cygdrive/c/projects/julia && contrib/cygwin_build.sh"
+#  - C:\projects\julia-prev\Git\bin\sh.exe --login -c "cd /c/projects/julia && contrib/msys_build.sh"
 
 test_script:
   - cd test && ..\usr\bin\julia-basic runtests.jl all
