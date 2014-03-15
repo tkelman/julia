@@ -4,7 +4,7 @@ compiler:
     - gcc
 branches:
   except:
-    - appveyor
+    - appveyor2
 notifications:
     email: false
     irc:
