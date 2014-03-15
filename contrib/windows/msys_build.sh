@@ -69,10 +69,15 @@ else
   echo "override AR = $AR" >> Make.user
 fi
 
-for f in /make/make-3.81-3/make-3.81-3-msys-1.0.13-bin.tar \
-         /gettext/gettext-0.18.1.1-1/libintl-0.18.1.1-1-msys-1.0.17-dll-8.tar \
-         /libiconv/libiconv-1.14-1/libiconv-1.14-1-msys-1.0.17-dll-2.tar \
-         /coreutils/coreutils-5.97-3/coreutils-5.97-3-msys-1.0.13-bin.tar; do
+if [ -z "`which make 2>/dev/null`" ]; then
+  download="/make/make-3.81-3/make-3.81-3-msys-1.0.13-bin.tar"
+else
+  download=""
+fi
+for f in $download \
+    /gettext/gettext-0.18.1.1-1/libintl-0.18.1.1-1-msys-1.0.17-dll-8.tar \
+    /libiconv/libiconv-1.14-1/libiconv-1.14-1-msys-1.0.17-dll-2.tar \
+    /coreutils/coreutils-5.97-3/coreutils-5.97-3-msys-1.0.13-bin.tar; do
   echo "Downloading `basename $f`"
   if ! [ -e `basename $f.lzma` ]; then
     deps/jldownload $mingw/files/MSYS/Base$f.lzma >> get-deps.log 2>&1
@@ -82,7 +87,7 @@ for f in /make/make-3.81-3/make-3.81-3-msys-1.0.13-bin.tar \
     7z x -y `basename $f.lzma` >> get-deps.log
     tar -xf `basename $f`
   else
-    bsdtar -xf `basename $f`
+    bsdtar -xf `basename $f.lzma`
   fi
 done
 if [ -z "`which make 2>/dev/null`" ]; then
