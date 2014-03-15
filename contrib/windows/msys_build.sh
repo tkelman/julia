@@ -6,7 +6,7 @@
 cd `dirname "$0"`/../..
 # Stop on error
 set -e
-pwd
+
 for f in bin lib include Git/bin; do
   mkdir -p usr/$f
 done
