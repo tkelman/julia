@@ -24,10 +24,26 @@ else
 fi
 echo "override ARCH = $ARCH" > Make.user
 
+# Set XC_HOST if in Cygwin
+if [ -n "`uname | grep CYGWIN`" ]
+  if [ -z "$XC_HOST" ]; then
+    export XC_HOST=$ARCH-w64-mingw32
+  fi
+  echo "override BUILD_MACHINE = $ARCH-pc-cygwin" > Make.user
+  # If no Fortran compiler installed, override with name of C compiler
+  # (this only fixes the unnecessary invocation of FC in openlibm)
+  if [ -z "`which $XC_HOST-gfortran 2>/dev/null`" ]; then
+    echo 'override FC = $(XC_HOST)-gcc' >> Make.user
+  fi
+  CROSS_COMPILE=$XC_HOST-
+else
+  CROSS_COMPILE=
+fi
+
 echo "" > get-deps.log
 mingw=http://sourceforge.net/projects/mingw
 if [ -z "$USE_MSVC" ]; then
-  if [ -z "`which gcc 2>/dev/null`" ]; then
+  if [ -z "`which ${CROSS_COMPILE}gcc 2>/dev/null`" ]; then
     echo "Downloading $ARCH-w64-mingw32 compilers"
     f=x$bits-4.8.1-release-win32-$exc-rev5.7z
     if ! [ -e $f ]; then
@@ -39,7 +55,7 @@ if [ -z "$USE_MSVC" ]; then
     7z x -y $f >> get-deps.log
     export PATH=$PATH:$PWD/mingw$bits/bin
   fi
-  export AR=ar
+  export AR=${CROSS_COMPILE}ar
 else
   # compile and ar-lib scripts to use MSVC instead of MinGW compiler
   deps/jldownload compile http://git.savannah.gnu.org/cgit/automake.git/plain/lib/compile?id=v1.14.1 >> get-deps.log 2>&1
@@ -61,8 +77,13 @@ for f in /make/make-3.81-3/make-3.81-3-msys-1.0.13-bin.tar \
   if ! [ -e `basename $f.lzma` ]; then
     deps/jldownload $mingw/files/MSYS/Base$f.lzma >> get-deps.log 2>&1
   fi
-  7z x -y `basename $f.lzma` >> get-deps.log
-  tar -xf `basename $f`
+  # Use bsdtar in Cygwin (maybe faster?)
+  if [ -z "`which bsdtar 2>/dev/null`" ]; then
+    7z x -y `basename $f.lzma` >> get-deps.log
+    tar -xf `basename $f`
+  else
+    bsdtar -xf `basename $f`
+  fi
 done
 if [ -z "`which make 2>/dev/null`" ]; then
   mv bin/make.exe /usr/bin
@@ -79,7 +100,12 @@ if ! [ -e $f ]; then
   deps/jldownload $mingw-w64-dgn/files/others/$f >> get-deps.log 2>&1
 fi
 echo 'Extracting LLVM binary'
-7z x -y $f >> get-deps.log
+# Use bsdtar in Cygwin (maybe faster?)
+if [ -z "`which bsdtar 2>/dev/null`" ]; then
+  7z x -y $f >> get-deps.log
+else
+  bsdtar -xf $f
+fi
 mv llvm/bin/* usr/bin
 mv llvm/lib/*.a usr/lib
 if ! [ -d usr/include/llvm ]; then
@@ -97,8 +123,13 @@ for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
   if ! [ -e mingw$bits-$f.noarch.rpm ]; then
     deps/jldownload ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw$bits-$f.noarch.rpm >> get-deps.log 2>&1
   fi
-  7z x -y mingw$bits-$f.noarch.rpm >> get-deps.log
-  7z x -y mingw$bits-$f.noarch.cpio >> get-deps.log
+  # Use bsdtar in Cygwin (maybe faster?)
+  if [ -z "`which bsdtar 2>/dev/null`" ]; then
+    7z x -y mingw$bits-$f.noarch.rpm >> get-deps.log
+    7z x -y mingw$bits-$f.noarch.cpio >> get-deps.log
+  else
+    bsdtar -xf mingw$bits-$f.noarch.rpm
+  fi
 done
 echo 'override READLINE = -lreadline -lhistory' >> Make.user
 echo 'override PCRE_CONFIG = $(JULIAHOME)/usr/bin/pcre-config' >> Make.user
