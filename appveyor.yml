@@ -33,4 +33,4 @@ build_script:
   - C:\projects\julia-prev\Git\bin\sh.exe --login /c/projects/julia/contrib/windows/msys_build.sh
 
 test_script:
-  - cd test && ..\usr\bin\julia-debug-basic runtests.jl all
+  - cd test && ..\usr\bin\julia-basic runtests.jl all
