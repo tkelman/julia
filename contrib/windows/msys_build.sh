@@ -158,4 +158,4 @@ fi
 make -j 4
 make -j 4 debug
 # remove precompiled system image
-rm usr/lib/julia/sys.dll
+#rm usr/lib/julia/sys.dll
