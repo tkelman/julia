@@ -27,7 +27,7 @@ echo "override ARCH = $ARCH" > Make.user
 # Set XC_HOST if in Cygwin
 if [ -n "`uname | grep CYGWIN`" ]
   if [ -z "$XC_HOST" ]; then
-    export XC_HOST=$ARCH-w64-mingw32
+    export XC_HOST="$ARCH-w64-mingw32"
   fi
   echo "override BUILD_MACHINE = $ARCH-pc-cygwin" > Make.user
   # If no Fortran compiler installed, override with name of C compiler
@@ -35,9 +35,9 @@ if [ -n "`uname | grep CYGWIN`" ]
   if [ -z "`which $XC_HOST-gfortran 2>/dev/null`" ]; then
     echo 'override FC = $(XC_HOST)-gcc' >> Make.user
   fi
-  CROSS_COMPILE=$XC_HOST-
+  CROSS_COMPILE="$XC_HOST-"
 else
-  CROSS_COMPILE=
+  CROSS_COMPILE=""
 fi
 
 echo "" > get-deps.log
