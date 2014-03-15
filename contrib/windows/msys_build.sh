@@ -32,7 +32,7 @@ if [ -z "$USE_MSVC" ]; then
     if ! [ -e $f ]; then
       # Screen output (including stderr 2>&1) from downloads is redirected
       # to a file to avoid filling up the AppVeyor log with progress bars.
-      deps/jldownload ${mingw}builds/files/host-windows/releases/4.8.1/$bits-bit/threads-win32/$exc/$f >> get-deps.log 2>&1
+      deps/jldownload ${mingw}builds/files/host-windows/releases/4.8.1/$bits-bit/threads-win32/$exc/$f #>> get-deps.log 2>&1
     fi
     echo "Extracting $ARCH-w64-mingw32 compilers"
     7z x -y $f >> get-deps.log
