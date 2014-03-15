@@ -28,17 +28,17 @@ install:
   - mkdir C:\projects\julia\usr\Git\bin
   - ps: foreach ($i in "chmod.exe","false.exe","msys-1.0.dll","perl.exe","sh.exe","sort.exe","touch.exe","true.exe") {copy C:\projects\julia-prev\Git\bin\$i C:\projects\julia\usr\Git\bin}
 # Install Cygwin and build-time dependencies (copy curl from msysgit)
-  - "cinst cyg-get > cyg-get.log"
-  - set PATH=%PATH%;C:\cygwin
-  - ps: foreach ($i in "curl*","libcrypto.dll","libssl.dll") {copy C:\projects\julia-prev\Git\bin\$i C:\cygwin\bin}
-  - "cyg-get make >> cyg-get.log"
-  - "cyg-get bsdtar >> cyg-get.log"
-  - "cyg-get mingw64-%ARCH%-gcc-g++ >> cyg-get.log"
+#  - "cinst cyg-get > cyg-get.log"
+#  - set PATH=%PATH%;C:\cygwin
+#  - ps: foreach ($i in "curl*","libcrypto.dll","libssl.dll") {copy C:\projects\julia-prev\Git\bin\$i C:\cygwin\bin}
+#  - "cyg-get make >> cyg-get.log"
+#  - "cyg-get bsdtar >> cyg-get.log"
+#  - "cyg-get mingw64-%ARCH%-gcc-g++ >> cyg-get.log"
 
 build_script:
 #  - '"%VS120COMNTOOLS%\..\..\VC\bin\vcvars32.bat"'
-#  - C:\projects\julia-prev\Git\bin\sh.exe --login /c/projects/julia/contrib/windows/msys_build.sh
-  - C:\cygwin\bin\sh.exe --login /cygdrive/c/projects/julia/contrib/windows/msys_build.sh
+  - C:\projects\julia-prev\Git\bin\sh.exe --login /c/projects/julia/contrib/windows/msys_build.sh
+#  - C:\cygwin\bin\sh.exe --login /cygdrive/c/projects/julia/contrib/windows/msys_build.sh
 
 test_script:
   - cd test && ..\usr\bin\julia-basic runtests.jl all
