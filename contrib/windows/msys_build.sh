@@ -5,7 +5,8 @@
 # Stop on error
 set -e
 # Run in top-level Julia directory
-cd $(dirname "$0")/../..
+cd `dirname "$0"`/../..
+pwd
 for f in bin lib include Git/bin; do
   mkdir -p usr/$f
 done
