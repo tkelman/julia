@@ -4,11 +4,12 @@
 
 # Stop on error
 set -e
-
+# Run in top-level Julia directory
+cd $(dirname "$0")/../..
 for f in bin lib include Git/bin; do
   mkdir -p usr/$f
 done
-
+echo "ARCH is $ARCH"
 # If ARCH environment variable not set, choose based on uname -m
 if [ -z "$ARCH" ]; then
   export ARCH=`uname -m`
