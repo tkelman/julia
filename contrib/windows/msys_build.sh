@@ -25,7 +25,7 @@ fi
 echo "override ARCH = $ARCH" > Make.user
 
 # Set XC_HOST if in Cygwin
-if [ -n "`uname | grep CYGWIN`" ]
+if [ -n "`uname | grep CYGWIN`" ]; then
   if [ -z "$XC_HOST" ]; then
     export XC_HOST="$ARCH-w64-mingw32"
   fi
