@@ -116,7 +116,7 @@ sed -i "s|prefix=/usr/$ARCH-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin
 [ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
 
 for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR \
-    PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV OPENLIBM; do
+    PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV; do
   echo "USE_SYSTEM_$lib = 1" >> Make.user
 done
 echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
@@ -125,20 +125,23 @@ echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
 echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
 echo 'override LIBUV = $(JULIAHOME)/usr/lib/libuv.a' >> Make.user
 echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
-# Since we don't have a static library for openlibm
-echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 
 # Remaining dependencies:
 # openlibm (and readline?) since we need these as static libraries to
 # work properly (not included as part of Julia Windows binaries yet)
 # utf8proc since its headers are not in the binary download
-echo 'override STAGE1_DEPS = ' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 echo 'Downloading openlibm, utf8proc sources'
 make -C deps get-openlibm utf8proc-v1.1.6/Makefile >> get-deps.log 2>&1
 
 if [ -n "$USE_MSVC" ]; then
+  # Openlibm doesn't build well with MSVC right now
+  echo "USE_SYSTEM_OPENLIBM = 1" >> Make.user
+  echo 'override STAGE1_DEPS = ' >> Make.user
+  # Since we don't have a static library for openlibm
+  echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
+
   # Fix MSVC compilation issues
   sed -i 's/-Wall -Wno-strict-aliasing//' src/Makefile
   sed -i 's/-Wall -Wno-strict-aliasing//' src/support/Makefile
@@ -149,6 +152,8 @@ if [ -n "$USE_MSVC" ]; then
   sed -i 's/buffer = malloc/buffer = (int32_t *) malloc/' deps/utf8proc-v1.1.6/utf8proc.c
   sed -i 's/newptr = realloc/newptr = (int32_t *) realloc/' deps/utf8proc-v1.1.6/utf8proc.c
   #sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
+else
+  echo 'override STAGE1_DEPS = openlibm' >> Make.user
 fi
 
 # Disable git and enable verbose make in AppVeyor
@@ -158,6 +163,6 @@ if [ -n "$APPVEYOR" ]; then
 fi
 
 make -j 4
-make -j 4 debug
+#make -j 4 debug
 # remove precompiled system image
-#rm usr/lib/julia/sys.dll
+rm usr/lib/julia/sys.dll
