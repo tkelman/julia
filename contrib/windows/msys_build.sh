@@ -1,16 +1,11 @@
 #!/bin/sh
 # Script to compile Julia in MSYS assuming 7zip is installed and on the path,
-# or Cygwin assuming make, wget, bsdtar, and mingw64-$ARCH-gcc-g++ are installed,
-# and dependency dll's have been copied into usr/bin (see appveyor.yml)
+# or Cygwin assuming make, wget, bsdtar, and mingw64-$ARCH-gcc-g++ are installed
 
 # Run in top-level Julia directory
 cd `dirname "$0"`/../..
 # Stop on error
 set -e
-
-for f in bin lib include Git/bin; do
-  mkdir -p usr/$f
-done
 
 # If ARCH environment variable not set, choose based on uname -m
 if [ -z "$ARCH" ]; then
@@ -74,15 +69,40 @@ else
   echo "override AR = $AR" >> Make.user
 fi
 
+#f=llvm-3.3-w$bits-bin-$ARCH-20130804.7z
+for f in juliadeps-$ARCH-w64-mingw32.7z llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z; do
+  if ! [ -e $f ]; then
+    echo "Downloading $f"
+    #deps/jldownload $mingw-w64-dgn/files/others/$f >> get-deps.log 2>&1
+    deps/jldownload http://sourceforge.net/projects/juliadeps-win/files/$f >> get-deps.log 2>&1
+  fi
+  echo "Extracting $f"
+  # Use bsdtar in Cygwin (maybe faster?)
+  if [ -z "`which bsdtar 2>/dev/null`" ]; then
+    7z x -y $f >> get-deps.log
+  else
+    bsdtar -xf $f
+  fi
+done
+#mv llvm/bin/* usr/bin
+#mv llvm/lib/*.a usr/lib
+#if ! [ -d usr/include/llvm ]; then
+#  mv llvm/include/llvm usr/include
+#  mv llvm/include/llvm-c usr/include
+#fi
+echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
+echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
+# The binary version doesn't include libgtest or libgtest_main
+$AR cr usr/lib/libgtest.a
+$AR cr usr/lib/libgtest_main.a
+
 if [ -z "`which make 2>/dev/null`" ]; then
-  download="/make/make-3.81-3/make-3.81-3-msys-1.0.13-bin.tar"
+  download="/make/make-3.81-2/make-3.81-2-msys-1.0.11-bin.tar"
 else
   download=""
 fi
 for f in $download \
-    /gettext/gettext-0.18.1.1-1/libintl-0.18.1.1-1-msys-1.0.17-dll-8.tar \
-    /libiconv/libiconv-1.14-1/libiconv-1.14-1-msys-1.0.17-dll-2.tar \
-    /coreutils/coreutils-5.97-3/coreutils-5.97-3-msys-1.0.13-bin.tar; do
+    /coreutils/coreutils-5.97-2/coreutils-5.97-2-msys-1.0.11-bin.tar; do
   echo "Downloading `basename $f`"
   if ! [ -e `basename $f.lzma` ]; then
     deps/jldownload $mingw/files/MSYS/Base$f.lzma >> get-deps.log 2>&1
@@ -97,42 +117,14 @@ for f in $download \
 done
 if [ -z "`which make 2>/dev/null`" ]; then
   mv bin/make.exe /usr/bin
-  cp bin/*.dll /usr/bin
 fi
-mv bin/*.dll usr/Git/bin
-mv bin/cat.exe usr/Git/bin
-mv bin/echo.exe usr/Git/bin
-mv bin/printf.exe usr/Git/bin
+for i in cat chmod echo false printf sh sort touch true; do
+  mv bin/$i.exe usr/Git/bin
+done
 
-echo 'Downloading LLVM binary'
-#f=llvm-3.3-w$bits-bin-$ARCH-20130804.7z
-f=llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z
-if ! [ -e $f ]; then
-  #deps/jldownload $mingw-w64-dgn/files/others/$f >> get-deps.log 2>&1
-  deps/jldownload http://sourceforge.net/projects/juliadeps-win/files/$f >> get-deps.log 2>&1
-fi
-echo 'Extracting LLVM binary'
-# Use bsdtar in Cygwin (maybe faster?)
-if [ -z "`which bsdtar 2>/dev/null`" ]; then
-  7z x -y $f >> get-deps.log
-else
-  bsdtar -xf $f
-fi
-#mv llvm/bin/* usr/bin
-#mv llvm/lib/*.a usr/lib
-#if ! [ -d usr/include/llvm ]; then
-#  mv llvm/include/llvm usr/include
-#  mv llvm/include/llvm-c usr/include
-#fi
-echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
-echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
-# The binary version doesn't include libgtest or libgtest_main
-$AR cr usr/lib/libgtest.a
-$AR cr usr/lib/libgtest_main.a
-
-echo 'Downloading readline, termcap, pcre binaries'
 for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
   if ! [ -e mingw$bits-$f.noarch.rpm ]; then
+    echo "Downloading $f"
     deps/jldownload ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw$bits-$f.noarch.rpm >> get-deps.log 2>&1
   fi
   # Use bsdtar in Cygwin (maybe faster?)
@@ -153,10 +145,6 @@ if ! [ -d usr/include/readline ]; then
 fi
 # Modify prefix in pcre-config
 sed -i "s|prefix=/usr/$ARCH-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
-
-# Remove libjulia.dll if it was copied from downloaded binary
-[ -e usr/bin/libjulia.dll ] && rm usr/bin/libjulia.dll
-[ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
 
 for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR \
     PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV; do
