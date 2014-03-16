@@ -1,5 +1,6 @@
 #!/bin/sh
-# Script to compile Julia in MSYS, assuming 7zip is installed and on the path,
+# Script to compile Julia in MSYS assuming 7zip is installed and on the path,
+# or Cygwin assuming make, wget, bsdtar, and mingw64-$ARCH-gcc-g++ are installed,
 # and dependency dll's have been copied into usr/bin (see appveyor.yml)
 
 # Run in top-level Julia directory
@@ -36,6 +37,10 @@ if [ -n "`uname | grep CYGWIN`" ]; then
     echo 'override FC = $(XC_HOST)-gcc' >> Make.user
   fi
   CROSS_COMPILE="$XC_HOST-"
+  # Set HOSTCC if we don't have Cygwin gcc installed
+  if [ -z "`which gcc 2>/dev/null`" ]; then
+    echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
+  fi
 else
   CROSS_COMPILE=""
 fi
@@ -173,7 +178,7 @@ make -C deps get-openlibm utf8proc-v1.1.6/Makefile >> get-deps.log 2>&1
 
 if [ -n "$USE_MSVC" ]; then
   # Openlibm doesn't build well with MSVC right now
-  echo "USE_SYSTEM_OPENLIBM = 1" >> Make.user
+  echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
   echo 'override STAGE1_DEPS = ' >> Make.user
   # Since we don't have a static library for openlibm
   echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
