@@ -36,6 +36,9 @@ export
     Complex64,
     Complex32,
     DArray,
+    DenseMatrix,
+    DenseVecOrMat,
+    DenseVector,
     DevNull,
     Diagonal,
     Dict,
@@ -445,6 +448,7 @@ export
     uint64,
     uint8,
     unsigned,
+    widemul,
     zero,
 
 # specfun
@@ -979,6 +983,7 @@ export
     super,
     typeintersect,
     typejoin,
+    widen,
 
 # syntax
     esc,

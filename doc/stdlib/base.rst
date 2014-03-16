@@ -1,5 +1,9 @@
 .. currentmodule:: Base
 
+**********************
+ The Standard Library
+**********************
+
 Introduction
 ------------
 
@@ -226,6 +230,15 @@ All Objects
 .. function:: oftype(x, y)
 
    Convert ``y`` to the type of ``x``.
+
+.. function:: widen(type | x)
+
+   If the argument is a type, return a "larger" type (for numeric types, this will be
+   a type with at least as much range and precision as the argument, and usually more).
+   Otherwise the argument ``x`` is converted to ``widen(typeof(x))``.
+
+   **Example**: ``widen(Int32) === Int64``
+   **Example**: ``widen(1.5f0) === 1.5``
 
 .. function:: identity(x)
 
@@ -624,7 +637,7 @@ Iterable Collections
 
    Determine whether predicate ``p`` returns true for all elements of ``itr``.
 
-   **Example**: ``all((i) -> i>i, [4,5,6]) = true``
+   **Example**: ``all(i->(4<=i<=6), [4,5,6]) = true``
 
 .. function:: map(f, c...) -> collection
 
@@ -2994,6 +3007,10 @@ Mathematical Functions
 .. function:: ndigits(n, b)
 
    Compute the number of digits in number ``n`` written in base ``b``.
+
+.. function:: widemul(x, y)
+
+   Multiply ``x`` and ``y``, giving the result as a larger type.
 
 Data Formats
 ------------

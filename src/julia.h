@@ -384,7 +384,7 @@ extern DLLEXPORT jl_datatype_t *jl_methtable_type;
 extern DLLEXPORT jl_datatype_t *jl_method_type;
 extern DLLEXPORT jl_datatype_t *jl_task_type;
 
-extern jl_tuple_t *jl_null;
+extern DLLEXPORT jl_tuple_t *jl_null;
 #define JL_NULL ((void*)jl_null)
 extern jl_value_t *jl_true;
 extern jl_value_t *jl_false;
@@ -611,8 +611,8 @@ jl_value_t *jl_full_type(jl_value_t *v);
 int jl_is_type(jl_value_t *v);
 DLLEXPORT int jl_is_leaf_type(jl_value_t *v);
 int jl_has_typevars(jl_value_t *v);
-int jl_subtype(jl_value_t *a, jl_value_t *b, int ta);
-int jl_type_morespecific(jl_value_t *a, jl_value_t *b, int ta);
+DLLEXPORT int jl_subtype(jl_value_t *a, jl_value_t *b, int ta);
+int jl_type_morespecific(jl_value_t *a, jl_value_t *b);
 DLLEXPORT int jl_types_equal(jl_value_t *a, jl_value_t *b);
 jl_value_t *jl_type_union(jl_tuple_t *types);
 jl_value_t *jl_type_intersection_matching(jl_value_t *a, jl_value_t *b,
@@ -1294,10 +1294,16 @@ void jl_print_gc_stats(JL_STREAM *s);
 
 typedef struct {
     char *build_path;
-    int code_coverage;
+    int8_t code_coverage;
+    int8_t check_bounds;
+    int int_literals;
 } jl_compileropts_t;
 
 extern DLLEXPORT jl_compileropts_t jl_compileropts;
+
+#define JL_COMPILEROPT_CHECK_BOUNDS_DEFAULT 0
+#define JL_COMPILEROPT_CHECK_BOUNDS_ON 1
+#define JL_COMPILEROPT_CHECK_BOUNDS_OFF 2
 
 #ifdef __cplusplus
 }

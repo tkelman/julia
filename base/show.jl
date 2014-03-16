@@ -71,17 +71,6 @@ function show(io::IO, x::DataType)
     end
 end
 
-function showcompact{T<:Number}(io::IO, x::Vector{T})
-    print(io, "[")
-    if length(x) > 0
-        showcompact(io, x[1])
-        for j in 2:length(x)
-            print(io, ",")
-            showcompact(io, x[j])
-        end
-    end
-    print(io, "]")
-end
 showcompact(io::IO, x) = show(io, x)
 showcompact(x) = showcompact(STDOUT::IO, x)
 
@@ -339,13 +328,16 @@ function show_unquoted(io::IO, ex::SymbolNode, ::Int, ::Int)
     show_expr_type(io, ex.typ)
 end
 
-function show_unquoted(io::IO, ex::QuoteNode, indent::Int, prec::Int)
-    if isa(ex.value, Symbol) && !(ex.value in quoted_syms)
+show_unquoted(io::IO, ex::QuoteNode, indent::Int, prec::Int) =
+    show_unquoted_quote_expr(io, ex.value, indent, prec)
+
+function show_unquoted_quote_expr(io::IO, value, indent::Int, prec::Int)
+    if isa(value, Symbol) && !(value in quoted_syms)
         print(io, ":")
-        print(io, ex.value)
+        print(io, value)
     else
         print(io, ":(")
-        show_unquoted(io, ex.value, indent+indent_width, 0)
+        show_unquoted(io, value, indent+indent_width, 0)
         print(io, ")")
     end
 end
@@ -496,7 +488,7 @@ function show_unquoted(io::IO, ex::Expr, indent::Int, prec::Int)
     elseif is(head, :block) || is(head, :body)
         show_block(io, "begin", ex, indent); print(io, "end")
     elseif is(head, :quote) && nargs == 1
-        show_unquoted(io, args[1], indent)
+        show_unquoted_quote_expr(io, args[1], indent, 0)
     elseif is(head, :gotoifnot) && nargs == 2
         print(io, "unless ")
         show_list(io, args, " goto ", indent)
@@ -1010,7 +1002,7 @@ function showarray(io::IO, X::AbstractArray;
     end
 end
 
-show(io::IO, X::AbstractArray) = showarray(io, X, header=false, limit=false, repr=true)
+show(io::IO, X::AbstractArray) = showarray(io, X, header=_limit_output, repr=!_limit_output)
 
 print(io::IO, X::AbstractArray) = writedlm(io, X)
 

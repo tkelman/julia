@@ -22,7 +22,7 @@ import Base: log, exp, sin, cos, tan, sinh, cosh, tanh, asin,
              acos, atan, asinh, acosh, atanh, sqrt, log2, log10,
              max, min, minmax, ceil, floor, trunc, round, ^, exp2, exp10
 
-import Core.Intrinsics.nan_dom_err
+import Core.Intrinsics: nan_dom_err, sqrt_llvm, box, unbox
 
 # non-type specific math functions
 
@@ -49,25 +49,22 @@ function sinpi(x::Real)
         return nan(x)
     end
 
-    rx = float(rem(x,2))
+    rx = copysign(float(rem(x,2)),x)
     arx = abs(rx)
 
-    if arx == 0.0
-        # return -0.0 iff x == -0.0
-        return x == 0.0 ? x : arx
-    elseif arx < 0.25
+    if arx < oftype(rx,0.25)
         return sin(pi*rx)
-    elseif arx <= 0.75
-        arx = 0.5 - arx
+    elseif arx <= oftype(rx,0.75)
+        arx = oftype(rx,0.5) - arx
         return copysign(cos(pi*arx),rx)
-    elseif arx < 1.25
-        rx = copysign(1.0,rx) - rx
+    elseif arx < oftype(rx,1.25)
+        rx = (one(rx) - arx)*sign(rx)
         return sin(pi*rx)
-    elseif arx <= 1.75
-        arx = 1.5 - arx
+    elseif arx <= oftype(rx,1.75)
+        arx = oftype(rx,1.5) - arx
         return -copysign(cos(pi*arx),rx)
     else
-        rx = rx - copysign(2.0,rx)
+        rx = rx - copysign(oftype(rx,2.0),rx)
         return sin(pi*rx)
     end
 end
@@ -81,19 +78,19 @@ function cospi(x::Real)
 
     rx = abs(float(rem(x,2)))
 
-    if rx <= 0.25
+    if rx <= oftype(rx,0.25)
         return cos(pi*rx)
-    elseif rx < 0.75
-        rx = 0.5 - rx
+    elseif rx < oftype(rx,0.75)
+        rx = oftype(rx,0.5) - rx
         return sin(pi*rx)
-    elseif rx <= 1.25
-        rx = 1.0 - rx
+    elseif rx <= oftype(rx,1.25)
+        rx = one(rx) - rx
         return -cos(pi*rx)
-    elseif rx < 1.75
-        rx = rx - 1.5
+    elseif rx < oftype(rx,1.75)
+        rx = rx - oftype(rx,1.5)
         return sin(pi*rx)
     else
-        rx = 2.0 - rx
+        rx = oftype(rx,2.0) - rx
         return cos(pi*rx)
     end
 end
@@ -172,25 +169,22 @@ function sind(x::Real)
         return nan(x)
     end
 
-    rx = rem(x,360.0)
+    rx = copysign(float(rem(x,360)),x)
     arx = abs(rx)
 
-    if arx == 0.0
-        # return -0.0 iff x == -0.0
-        return x == 0.0 ? 0.0 : arx
-    elseif arx < 45.0
+    if arx < oftype(rx,45.0)
         return sin(deg2rad(rx))
-    elseif arx <= 135.0
-        arx = 90.0 - arx
+    elseif arx <= oftype(rx,135.0)
+        arx = oftype(rx,90.0) - arx
         return copysign(cos(deg2rad(arx)),rx)
-    elseif arx < 225.0
-        rx = copysign(180.0,rx) - rx
+    elseif arx < oftype(rx,225.0)
+        rx = (oftype(rx,180.0) - arx)*sign(rx)
         return sin(deg2rad(rx))
     elseif arx <= 315.0
-        arx = 270.0 - arx
+        arx = oftype(rx,270.0) - arx
         return -copysign(cos(deg2rad(arx)),rx)
     else
-        rx = rx - copysign(360.0,rx)
+        rx = rx - copysign(oftype(rx,360.0),rx)
         return sin(deg2rad(rx))
     end
 end
@@ -203,21 +197,21 @@ function cosd(x::Real)
         return nan(x)
     end
 
-    rx = abs(rem(x,360.0))
+    rx = abs(float(rem(x,360)))
 
-    if rx <= 45.0
+    if rx <= oftype(rx,45.0)
         return cos(deg2rad(rx))
-    elseif rx < 135.0
-        rx = 90.0 - rx
+    elseif rx < oftype(rx,135.0)
+        rx = oftype(rx,90.0) - rx
         return sin(deg2rad(rx))
-    elseif rx <= 225.0
-        rx = 180.0 - rx
+    elseif rx <= oftype(rx,225.0)
+        rx = oftype(rx,180.0) - rx
         return -cos(deg2rad(rx))
-    elseif rx < 315.0
-        rx = rx - 270.0
+    elseif rx < oftype(rx,315.0)
+        rx = rx - oftype(rx,270.0)
         return sin(deg2rad(rx))
     else
-        rx = 360.0 - rx
+        rx = oftype(rx,360.0) - rx
         return cos(deg2rad(rx))
     end
 end
@@ -272,7 +266,7 @@ exp10(x::Integer) = exp10(float(x))
 
 # functions that return NaN on non-NaN argument for domain error
 for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
-          :lgamma, :sqrt, :log1p)
+          :lgamma, :log1p)
     @eval begin
         ($f)(x::Float64) = nan_dom_err(ccall(($(string(f)),libm), Float64, (Float64,), x), x)
         ($f)(x::Float32) = nan_dom_err(ccall(($(string(f,"f")),libm), Float32, (Float32,), x), x)
@@ -280,6 +274,11 @@ for f in (:sin, :cos, :tan, :asin, :acos, :acosh, :atanh, :log, :log2, :log10,
         @vectorize_1arg Number $f
     end
 end
+
+sqrt(x::Float64) = box(Float64,sqrt_llvm(unbox(Float64,x)))
+sqrt(x::Float32) = box(Float32,sqrt_llvm(unbox(Float32,x)))
+sqrt(x::Real) = sqrt(float(x))
+@vectorize_1arg Number sqrt
 
 for f in (:ceil, :trunc, :significand) # :rint, :nearbyint
     @eval begin
@@ -410,8 +409,8 @@ modf(x) = rem(x,one(x)), trunc(x)
 ^(x::Float64, y::Float64) = nan_dom_err(ccall((:pow,libm),  Float64, (Float64,Float64), x, y), x+y)
 ^(x::Float32, y::Float32) = nan_dom_err(ccall((:powf,libm), Float32, (Float32,Float32), x, y), x+y)
 
-^(x::Float64, y::Integer) = x^float64(y)
-^(x::Float32, y::Integer) = x^float32(y)
+^(x::Float64, y::Integer) = ccall((:pow,libm),  Float64, (Float64,Float64), x, y)
+^(x::Float32, y::Integer) = ccall((:powf,libm), Float32, (Float32,Float32), x, y)
 
 # special functions
 

@@ -4,6 +4,10 @@ typealias Vector{T} Array{T,1}
 typealias Matrix{T} Array{T,2}
 typealias VecOrMat{T} Union(Vector{T}, Matrix{T})
 
+typealias DenseVector{T} DenseArray{T,1}
+typealias DenseMatrix{T} DenseArray{T,2}
+typealias DenseVecOrMat{T} Union(DenseVector{T}, DenseMatrix{T})
+
 typealias StoredVector{T} StoredArray{T,1}
 typealias StridedArray{T,N,A<:DenseArray} Union(DenseArray{T,N}, SubArray{T,N,A})
 typealias StridedVector{T,A<:DenseArray}  Union(DenseArray{T,1}, SubArray{T,1,A})
@@ -257,9 +261,11 @@ convert{T,n,S}(::Type{Array{T,n}}, x::Array{S,n}) = copy!(similar(x,T), x)
 
 convert{T,S,N}(::Type{AbstractArray{T,N}}, B::StridedArray{S,N}) = copy!(similar(B,T), B)
 
-function collect{C}(T::Type, itr::C)
-    if method_exists(length,(C,))
-        a = Array(T,length(itr))
+function collect(T::Type, itr)
+    if applicable(length, itr)
+        # when length() isn't defined this branch might pollute the
+        # type of the other.
+        a = Array(T,length(itr)::Integer)
         i = 0
         for x in itr
             a[i+=1] = x
@@ -272,9 +278,8 @@ function collect{C}(T::Type, itr::C)
     end
     return a
 end
-function collect{C}(itr::C)
-    method_exists(eltype,(C,)) ? collect(eltype(itr),itr) : [x for x in itr]
-end
+
+collect(itr) = collect(eltype(itr), itr)
 
 ## Indexing: getindex ##
 
@@ -755,7 +760,7 @@ promote_array_type{S<:Integer}(::Type{S}, ::Type{Bool}) = S
 for f in (:+, :-, :div, :mod, :&, :|, :$)
     @eval begin
         function ($f){S,T}(A::StridedArray{S}, B::StridedArray{T})
-            F = Array(promote_type(S,T), promote_shape(size(A),size(B)))
+            F = similar(A, promote_type(S,T), promote_shape(size(A),size(B)))
             for i=1:length(A)
                 @inbounds F[i] = ($f)(A[i], B[i])
             end
@@ -763,7 +768,7 @@ for f in (:+, :-, :div, :mod, :&, :|, :$)
         end
         # interaction with Ranges
         function ($f){S,T<:Real}(A::StridedArray{S}, B::Ranges{T})
-            F = Array(promote_type(S,T), promote_shape(size(A),size(B)))
+            F = similar(A, promote_type(S,T), promote_shape(size(A),size(B)))
             i = 1
             for b in B
                 @inbounds F[i] = ($f)(A[i], b)
@@ -772,7 +777,7 @@ for f in (:+, :-, :div, :mod, :&, :|, :$)
             return F
         end
         function ($f){S<:Real,T}(A::Ranges{S}, B::StridedArray{T})
-            F = Array(promote_type(S,T), promote_shape(size(A),size(B)))
+            F = similar(B, promote_type(S,T), promote_shape(size(A),size(B)))
             i = 1
             for a in A
                 @inbounds F[i] = ($f)(a, B[i])
@@ -782,7 +787,7 @@ for f in (:+, :-, :div, :mod, :&, :|, :$)
         end
     end
 end
-for f in (:.+, :.-, :.*, :./, :.%, :div, :mod, :rem, :&, :|, :$)
+for f in (:.+, :.-, :.*, :./, :.\, :.%, :div, :mod, :rem, :&, :|, :$)
     @eval begin
         function ($f){T}(A::Number, B::StridedArray{T})
             F = similar(B, promote_array_type(typeof(A),T))
@@ -805,14 +810,14 @@ end
 for f in (:.+, :.-)
     @eval begin
         function ($f)(A::Bool, B::StridedArray{Bool})
-            F = Array(Int, size(B))
+            F = similar(B, Int, size(B))
             for i=1:length(B)
                 @inbounds F[i] = ($f)(A, B[i])
             end
             return F
         end
         function ($f)(A::StridedArray{Bool}, B::Bool)
-            F = Array(Int, size(A))
+            F = similar(A, Int, size(A))
             for i=1:length(A)
                 @inbounds F[i] = ($f)(A[i], B)
             end
@@ -823,7 +828,7 @@ end
 for f in (:+, :-)
     @eval begin
         function ($f)(A::StridedArray{Bool}, B::StridedArray{Bool})
-            F = Array(Int, promote_shape(size(A), size(B)))
+            F = similar(A, Int, promote_shape(size(A), size(B)))
             for i=1:length(A)
                 @inbounds F[i] = ($f)(A[i], B[i])
             end
@@ -1084,14 +1089,14 @@ function find(testf::Function, A::StridedArray)
             push!(tmpI, i)
         end
     end
-    I = Array(Int, length(tmpI))
+    I = similar(A, Int, length(tmpI))
     copy!(I, tmpI)
     I
 end
 
 function find(A::StridedArray)
     nnzA = countnz(A)
-    I = Array(Int, nnzA)
+    I = similar(A, Int, nnzA)
     count = 1
     for i=1:length(A)
         if A[i] != 0
@@ -1109,8 +1114,8 @@ findn(A::AbstractVector) = find(A)
 
 function findn(A::StridedMatrix)
     nnzA = countnz(A)
-    I = Array(Int, nnzA)
-    J = Array(Int, nnzA)
+    I = similar(A, Int, nnzA)
+    J = similar(A, Int, nnzA)
     count = 1
     for j=1:size(A,2), i=1:size(A,1)
         if A[i,j] != 0
@@ -1144,7 +1149,7 @@ end
 
 function nonzeros{T}(A::StridedArray{T})
     nnzA = countnz(A)
-    V = Array(T, nnzA)
+    V = similar(A, T, nnzA)
     count = 1
     if nnzA > 0
         for i=1:length(A)
