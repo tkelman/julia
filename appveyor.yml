@@ -11,19 +11,19 @@ init:
 # Carriage returns are bad
   - git config --global core.autocrlf input
 
-install:
+#install:
 # Download most-recent Julia binary for dependencies
-  - ps: if ($env:ARCH -eq "x86_64") {(new-object net.webclient).DownloadFile($($env:JL_URL+"x64"+$env:JL_VER+"64.exe"), "C:\projects\julia-prev.exe")} else {(new-object net.webclient).DownloadFile($($env:JL_URL+"x86"+$env:JL_VER+"32.exe"), "C:\projects\julia-prev.exe")}
+#  - ps: if ($env:ARCH -eq "x86_64") {(new-object net.webclient).DownloadFile($($env:JL_URL+"x64"+$env:JL_VER+"64.exe"), "C:\projects\julia-prev.exe")} else {(new-object net.webclient).DownloadFile($($env:JL_URL+"x86"+$env:JL_VER+"32.exe"), "C:\projects\julia-prev.exe")}
 # Run installer silently, output to C:\projects\julia-prev
-  - C:\projects\julia-prev.exe /S /D=C:\projects\julia-prev
+#  - C:\projects\julia-prev.exe /S /D=C:\projects\julia-prev
 # Copy libs and libuv includes from julia-prev to julia/usr
-  - ps: foreach ($i in "bin","lib","include","Git\\bin") {mkdir C:\projects\julia\usr\$i}
-  - copy C:\projects\julia-prev\bin\*.dll C:\projects\julia\usr\bin
-  - copy C:\projects\julia-prev\lib\julia\*.a C:\projects\julia\usr\lib
-  - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
-  - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
+#  - ps: foreach ($i in "bin","lib","include","Git\\bin") {mkdir C:\projects\julia\usr\$i}
+#  - copy C:\projects\julia-prev\bin\*.dll C:\projects\julia\usr\bin
+#  - copy C:\projects\julia-prev\lib\julia\*.a C:\projects\julia\usr\lib
+#  - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
+#  - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
 # Copy msys dll, perl, and some of coreutils from msysgit for test/spawn.jl and test/file.jl
-  - ps: foreach ($i in "chmod.exe","false.exe","msys-1.0.dll","perl.exe","sh.exe","sort.exe","touch.exe","true.exe") {copy C:\projects\julia-prev\Git\bin\$i C:\projects\julia\usr\Git\bin}
+#  - ps: foreach ($i in "chmod.exe","false.exe","msys-1.0.dll","perl.exe","sh.exe","sort.exe","touch.exe","true.exe") {copy C:\projects\julia-prev\Git\bin\$i C:\projects\julia\usr\Git\bin}
 # Install Cygwin and build-time dependencies (copy curl from msysgit)
 #  - "cinst cyg-get > cyg-get.log"
 #  - set PATH=%PATH%;C:\cygwin
