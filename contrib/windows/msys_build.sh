@@ -126,9 +126,9 @@ fi
 #fi
 echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
 echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
-# This binary version doesn't include libgtest or libgtest_main for some reason
-#$AR cr usr/lib/libgtest.a
-#$AR cr usr/lib/libgtest_main.a
+# The binary version doesn't include libgtest or libgtest_main
+$AR cr usr/lib/libgtest.a
+$AR cr usr/lib/libgtest_main.a
 
 echo 'Downloading readline, termcap, pcre binaries'
 for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
