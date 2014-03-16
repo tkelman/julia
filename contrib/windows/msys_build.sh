@@ -25,7 +25,7 @@ if [ -n "`uname | grep CYGWIN`" ]; then
   if [ -z "$XC_HOST" ]; then
     export XC_HOST="$ARCH-w64-mingw32"
   fi
-  echo "override BUILD_MACHINE = $ARCH-pc-cygwin" > Make.user
+  echo "override BUILD_MACHINE = $ARCH-pc-cygwin" >> Make.user
   # If no Fortran compiler installed, override with name of C compiler
   # (this only fixes the unnecessary invocation of FC in openlibm)
   if [ -z "`which $XC_HOST-gfortran 2>/dev/null`" ]; then
@@ -118,7 +118,7 @@ done
 if [ -z "`which make 2>/dev/null`" ]; then
   mv bin/make.exe /usr/bin
 fi
-for i in cat chmod echo false printf sh sort touch true; do
+for i in cat chmod echo false printf sort touch true; do
   mv bin/$i.exe usr/Git/bin
 done
 
