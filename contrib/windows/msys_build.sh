@@ -111,6 +111,7 @@ echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
 # The binary version of LLVM doesn't include libgtest or libgtest_main
 $AR cr usr/lib/libgtest.a
 $AR cr usr/lib/libgtest_main.a
+chmod +x usr/bin/*
 
 if [ -z "`which make 2>/dev/null`" ]; then
   download="/make/make-3.81-2/make-3.81-2-msys-1.0.11-bin.tar"
