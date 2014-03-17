@@ -4,7 +4,7 @@ environment:
 #  USE_MSVC: "1"
   
   matrix:
-  - ARCH: "i686"
+#  - ARCH: "i686"
   - ARCH: "x86_64"
 
 init:
@@ -25,13 +25,13 @@ install:
 # Copy msys dll, perl, and some of coreutils from msysgit for test/spawn.jl and test/file.jl
 #  - ps: foreach ($i in "chmod.exe","false.exe","msys-1.0.dll","perl.exe","sh.exe","sort.exe","touch.exe","true.exe") {copy C:\projects\julia-prev\Git\bin\$i C:\projects\julia\usr\Git\bin}
 # Install Cygwin and build-time dependencies
-#  - "cinst cyg-get > cyg-get.log"
-#  - set PATH=%PATH%;C:\cygwin
+  - "cinst cyg-get > cyg-get.log"
+  - set PATH=%PATH%;C:\cygwin
+  - "cyg-get make >> cyg-get.log"
+  - "cyg-get wget >> cyg-get.log"
+  - "cyg-get bsdtar >> cyg-get.log"
+  - "cyg-get mingw64-%ARCH%-gcc-g++ >> cyg-get.log"
 #  - ps: foreach ($i in "curl*","libcrypto.dll","libssl.dll") {copy C:\projects\julia-prev\Git\bin\$i C:\cygwin\bin}
-#  - "cyg-get make >> cyg-get.log"
-#  - "cyg-get wget >> cyg-get.log"
-#  - "cyg-get bsdtar >> cyg-get.log"
-#  - "cyg-get mingw64-%ARCH%-gcc-g++ >> cyg-get.log"
 
 build_script:
 #  - '"%VS120COMNTOOLS%\..\..\VC\bin\vcvars32.bat"'

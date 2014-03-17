@@ -95,10 +95,10 @@ if [ -z "`which bsdtar 2>/dev/null`" ]; then
 else
   bsdtar -xf $f
 fi
-#if [ $ARCH = x86_64 ]; then
+if [ $ARCH = x86_64 ]; then
   # Skip a file that needs to be patched for Julia
-#  rm llvm/lib/libLLVMSelectionDAG.a
-#fi
+  rm llvm/lib/libLLVMSelectionDAG.a
+fi
 mv llvm/bin/* usr/bin
 mv llvm/lib/*.a usr/lib
 if ! [ -d usr/include/llvm ]; then
