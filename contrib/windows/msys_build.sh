@@ -83,6 +83,7 @@ for f in juliadeps-$ARCH-w64-mingw32.7z llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z;
     bsdtar -xf $f
   fi
 done
+cp usr/bin/zlib1.dll usr/bin/libz.dll
 
 #f=llvm-3.3-w$bits-bin-$ARCH-20130804.7z
 #if ! [ -e $f ]; then
