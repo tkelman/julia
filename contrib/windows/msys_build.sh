@@ -69,11 +69,9 @@ else
   echo "override AR = $AR" >> Make.user
 fi
 
-#f=llvm-3.3-w$bits-bin-$ARCH-20130804.7z
 for f in juliadeps-$ARCH-w64-mingw32.7z llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z; do
   if ! [ -e $f ]; then
     echo "Downloading $f"
-    #deps/jldownload $mingw-w64-dgn/files/others/$f >> get-deps.log 2>&1
     deps/jldownload http://sourceforge.net/projects/juliadeps-win/files/$f >> get-deps.log 2>&1
   fi
   echo "Extracting $f"
@@ -84,15 +82,9 @@ for f in juliadeps-$ARCH-w64-mingw32.7z llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z;
     bsdtar -xf $f
   fi
 done
-#mv llvm/bin/* usr/bin
-#mv llvm/lib/*.a usr/lib
-#if ! [ -d usr/include/llvm ]; then
-#  mv llvm/include/llvm usr/include
-#  mv llvm/include/llvm-c usr/include
-#fi
 echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
 echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
-# The binary version doesn't include libgtest or libgtest_main
+# The binary version of LLVM doesn't include libgtest or libgtest_main
 $AR cr usr/lib/libgtest.a
 $AR cr usr/lib/libgtest_main.a
 
@@ -147,7 +139,7 @@ fi
 sed -i "s|prefix=/usr/$ARCH-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
 
 for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR \
-    PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV; do
+    PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV OPENLIBM UTF8PROC; do
   echo "USE_SYSTEM_$lib = 1" >> Make.user
 done
 echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
@@ -161,17 +153,17 @@ echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 # openlibm (and readline?) since we need these as static libraries to
 # work properly (not included as part of Julia Windows binaries yet)
 # utf8proc since its headers are not in the binary download
-echo 'override STAGE2_DEPS = utf8proc' >> Make.user
+echo 'override STAGE2_DEPS = ' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
-echo 'Downloading openlibm, utf8proc sources'
-make -C deps get-openlibm utf8proc-v1.1.6/Makefile >> get-deps.log 2>&1
+echo 'Downloading openlibm source'
+make -C deps get-openlibm >> get-deps.log 2>&1
 
 if [ -n "$USE_MSVC" ]; then
   # Openlibm doesn't build well with MSVC right now
-  echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
+  #echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
   echo 'override STAGE1_DEPS = ' >> Make.user
   # Since we don't have a static library for openlibm
-  echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
+  #echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 
   # Fix MSVC compilation issues
   sed -i 's/-Wall -Wno-strict-aliasing//' src/Makefile
@@ -184,7 +176,7 @@ if [ -n "$USE_MSVC" ]; then
   sed -i 's/newptr = realloc/newptr = (int32_t *) realloc/' deps/utf8proc-v1.1.6/utf8proc.c
   #sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
 else
-  echo 'override STAGE1_DEPS = openlibm' >> Make.user
+  echo 'override STAGE1_DEPS = ' >> Make.user
 fi
 
 # Disable git and enable verbose make in AppVeyor
