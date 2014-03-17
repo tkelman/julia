@@ -29,6 +29,7 @@ install:
   - set PATH=%PATH%;C:\cygwin
 #  - ps: foreach ($i in "curl*","libcrypto.dll","libssl.dll") {copy C:\projects\julia-prev\Git\bin\$i C:\cygwin\bin}
   - "cyg-get make >> cyg-get.log"
+  - "cyg-get wget >> cyg-get.log"
 #  - "cyg-get bsdtar >> cyg-get.log"
   - "cyg-get mingw64-%ARCH%-gcc-g++ >> cyg-get.log"
 
