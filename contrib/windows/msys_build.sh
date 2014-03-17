@@ -95,10 +95,10 @@ if [ -z "`which bsdtar 2>/dev/null`" ]; then
 else
   bsdtar -xf $f
 fi
-if [ $ARCH = x86_64 ]; then
+#if [ $ARCH = x86_64 ]; then
   # Skip a file that needs to be patched for Julia
-  rm llvm/lib/libLLVMSelectionDAG.a
-fi
+#  rm llvm/lib/libLLVMSelectionDAG.a
+#fi
 mv llvm/bin/* usr/bin
 mv llvm/lib/*.a usr/lib
 if ! [ -d usr/include/llvm ]; then
@@ -162,7 +162,7 @@ fi
 sed -i "s|prefix=/usr/$ARCH-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
 
 for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR \
-    PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV; do
+    PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV OPENLIBM; do
   echo "USE_SYSTEM_$lib = 1" >> Make.user
 done
 echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
@@ -199,7 +199,11 @@ if [ -n "$USE_MSVC" ]; then
   sed -i 's/newptr = realloc/newptr = (int32_t *) realloc/' deps/utf8proc-v1.1.6/utf8proc.c
   #sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
 else
-  echo 'override STAGE1_DEPS = openlibm' >> Make.user
+  #echo 'override STAGE1_DEPS = openlibm' >> Make.user
+  echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
+  echo 'override STAGE1_DEPS = ' >> Make.user
+  # Since we don't have a static library for openlibm
+  echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 fi
 
 # Disable git and enable verbose make in AppVeyor
