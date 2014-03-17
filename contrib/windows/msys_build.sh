@@ -139,7 +139,7 @@ fi
 sed -i "s|prefix=/usr/$ARCH-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
 
 for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR \
-    PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV OPENLIBM UTF8PROC; do
+    PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV OPENLIBM; do
   echo "USE_SYSTEM_$lib = 1" >> Make.user
 done
 echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
@@ -155,7 +155,7 @@ echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 # utf8proc since its headers are not in the binary download
 echo 'override STAGE2_DEPS = ' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
-echo 'Downloading openlibm source'
+echo 'Downloading openlibm source for assembly headers'
 make -C deps get-openlibm >> get-deps.log 2>&1
 
 if [ -n "$USE_MSVC" ]; then
