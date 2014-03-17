@@ -45,6 +45,7 @@ mingw=http://sourceforge.net/projects/mingw
 if [ -z "$USE_MSVC" ]; then
   if [ -z "`which ${CROSS_COMPILE}gcc 2>/dev/null`" ]; then
     echo "Downloading $ARCH-w64-mingw32 compilers"
+    # TODO: find a smaller build with just gcc, g++?
     f=x$bits-4.8.1-release-win32-$exc-rev5.7z
     if ! [ -e $f ]; then
       # Screen output (including stderr 2>&1) from downloads is redirected
@@ -69,19 +70,41 @@ else
   echo "override AR = $AR" >> Make.user
 fi
 
-for f in juliadeps-$ARCH-w64-mingw32.7z llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z; do
-  if ! [ -e $f ]; then
-    echo "Downloading $f"
-    deps/jldownload http://sourceforge.net/projects/juliadeps-win/files/$f >> get-deps.log 2>&1
-  fi
-  echo "Extracting $f"
-  # Use bsdtar in Cygwin (maybe faster?)
-  if [ -z "`which bsdtar 2>/dev/null`" ]; then
-    7z x -y $f >> get-deps.log
-  else
-    bsdtar -xf $f
-  fi
-done
+f=juliadeps-$ARCH-w64-mingw32.7z
+if ! [ -e $f ]; then
+  echo "Downloading $f"
+  deps/jldownload http://sourceforge.net/projects/juliadeps-win/files/$f >> get-deps.log 2>&1
+fi
+echo "Extracting $f"
+# Use bsdtar in Cygwin (maybe faster?)
+if [ -z "`which bsdtar 2>/dev/null`" ]; then
+  7z x -y $f >> get-deps.log
+else
+  bsdtar -xf $f
+fi
+
+f=llvm-3.3-w$bits-bin-$ARCH-20130804.7z
+if ! [ -e $f ]; then
+  echo "Downloading $f"
+  deps/jldownload $mingw-w64-dgn/files/others/$f >> get-deps.log 2>&1
+fi
+echo "Extracting $f"
+# Use bsdtar in Cygwin (maybe faster?)
+if [ -z "`which bsdtar 2>/dev/null`" ]; then
+  7z x -y $f >> get-deps.log
+else
+  bsdtar -xf $f
+fi
+if [ $ARCH = x86_64 ]; then
+  # Skip a file that needs to be patched for Julia
+  rm llvm/lib/libLLVMSelectionDAG.a
+fi
+mv llvm/bin/* usr/bin
+mv llvm/lib/*.a usr/lib
+if ! [ -d usr/include/llvm ]; then
+  mv llvm/include/llvm usr/include
+  mv llvm/include/llvm-c usr/include
+fi
 echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
 echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
 # The binary version of LLVM doesn't include libgtest or libgtest_main
