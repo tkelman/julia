@@ -83,7 +83,6 @@ for f in juliadeps-$ARCH-w64-mingw32.7z llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z;
     bsdtar -xf $f
   fi
 done
-cp usr/bin/zlib1.dll usr/bin/libz.dll
 
 #f=llvm-3.3-w$bits-bin-$ARCH-20130804.7z
 #if ! [ -e $f ]; then
@@ -112,6 +111,7 @@ echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
 # The binary version of LLVM doesn't include libgtest or libgtest_main
 $AR cr usr/lib/libgtest.a
 $AR cr usr/lib/libgtest_main.a
+$AR cr usr/lib/libz.a
 chmod +x usr/bin/*
 
 if [ -z "`which make 2>/dev/null`" ]; then
