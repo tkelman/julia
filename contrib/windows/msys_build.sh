@@ -202,11 +202,7 @@ if [ -n "$USE_MSVC" ]; then
   sed -i 's/newptr = realloc/newptr = (int32_t *) realloc/' deps/utf8proc-v1.1.6/utf8proc.c
   #sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
 else
-  #echo 'override STAGE1_DEPS = openlibm' >> Make.user
-  echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
   echo 'override STAGE1_DEPS = ' >> Make.user
-  # Since we don't have a static library for openlibm
-  echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 fi
 
 # Disable git and enable verbose make in AppVeyor
