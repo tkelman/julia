@@ -1,7 +1,4 @@
 environment:
-#  JL_URL: "http://s3.amazonaws.com/julialang/bin/winnt/"
-#  JL_VER: "/0.3/julia-0.3.0-prerelease-win"
-#  USE_MSVC: "1"
   matrix:
   - ARCH: "i686"
   - ARCH: "x86_64"
@@ -11,30 +8,16 @@ init:
   - git config --global core.autocrlf input
 
 install:
-# Download most-recent Julia binary for dependencies
-#  - ps: if ($env:ARCH -eq "x86_64") {(new-object net.webclient).DownloadFile($($env:JL_URL+"x64"+$env:JL_VER+"64.exe"), "C:\projects\julia-prev.exe")} else {(new-object net.webclient).DownloadFile($($env:JL_URL+"x86"+$env:JL_VER+"32.exe"), "C:\projects\julia-prev.exe")}
-# Run installer silently, output to C:\projects\julia-prev
-#  - C:\projects\julia-prev.exe /S /D=C:\projects\julia-prev
-# Copy libs and libuv includes from julia-prev to julia/usr
-#  - ps: foreach ($i in "bin","lib","include","Git\\bin") {mkdir C:\projects\julia\usr\$i}
-#  - copy C:\projects\julia-prev\bin\*.dll C:\projects\julia\usr\bin
-#  - copy C:\projects\julia-prev\lib\julia\*.a C:\projects\julia\usr\lib
-#  - copy C:\projects\julia-prev\include\julia\uv*.h C:\projects\julia\usr\include
-#  - copy C:\projects\julia-prev\include\julia\tree.h C:\projects\julia\usr\include
-# Copy msys dll, perl, and some of coreutils from msysgit for test/spawn.jl and test/file.jl
-#  - ps: foreach ($i in "chmod.exe","false.exe","msys-1.0.dll","perl.exe","sh.exe","sort.exe","touch.exe","true.exe") {copy C:\projects\julia-prev\Git\bin\$i C:\projects\julia\usr\Git\bin}
 # Install Cygwin and build-time dependencies
+# Using MSYS would save some setup time, but doesn't work
+# for 64 bit with binary dependencies yet.
   - "cinst cyg-get > cyg-get.log"
   - set PATH=%PATH%;C:\cygwin
   - "cyg-get make >> cyg-get.log"
   - "cyg-get wget >> cyg-get.log"
-#  - "cyg-get bsdtar >> cyg-get.log"
   - "cyg-get mingw64-%ARCH%-gcc-g++ >> cyg-get.log"
-#  - ps: foreach ($i in "curl*","libcrypto.dll","libssl.dll") {copy C:\projects\julia-prev\Git\bin\$i C:\cygwin\bin}
 
 build_script:
-#  - '"%VS120COMNTOOLS%\..\..\VC\bin\vcvars32.bat"'
-#  - sh --login /c/projects/julia/contrib/windows/msys_build.sh
   - C:\cygwin\bin\sh --login /cygdrive/c/projects/julia/contrib/windows/msys_build.sh
 
 test_script:
