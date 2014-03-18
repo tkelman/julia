@@ -58,7 +58,7 @@ mingw=http://sourceforge.net/projects/mingw
 if [ -z "$USE_MSVC" ]; then
   if [ -z "`which ${CROSS_COMPILE}gcc 2>/dev/null`" ]; then
     echo "Downloading $ARCH-w64-mingw32 compilers"
-    # TODO: find a smaller build with just gcc, g++?
+    # TODO: find a smaller build with just gcc, g++? Or try clang?
     f=x$bits-4.8.1-release-win32-$exc-rev5.7z
     if ! [ -e $f ]; then
       deps/jldownload ${mingw}builds/files/host-windows/releases/4.8.1/$bits-bit/threads-win32/$exc/$f >> get-deps.log 2>&1
@@ -157,18 +157,19 @@ echo 'override LIBUV = $(JULIAHOME)/usr/lib/libuv.a' >> Make.user
 echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 
 # Remaining dependencies:
+# random until the Windows binaries get updated with latest feature
 # openlibm (and readline?) since we need these as static libraries to
 # work properly (not included as part of Julia Windows binaries yet)
 # utf8proc since its headers are not in the binary download
+echo 'override STAGE1_DEPS = random' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
-echo 'Downloading openlibm, utf8proc sources'
-make -C deps get-openlibm utf8proc-v1.1.6/Makefile >> get-deps.log 2>&1
+echo 'Downloading openlibm, utf8proc, random sources'
+make -C deps get-openlibm utf8proc-v1.1.6/Makefile get-random >> get-deps.log 2>&1
 
 if [ -n "$USE_MSVC" ]; then
   # Openlibm doesn't build well with MSVC right now
   echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
-  echo 'override STAGE1_DEPS = ' >> Make.user
   # Since we don't have a static library for openlibm
   echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 
@@ -183,7 +184,7 @@ if [ -n "$USE_MSVC" ]; then
   sed -i 's/newptr = realloc/newptr = (int32_t *) realloc/' deps/utf8proc-v1.1.6/utf8proc.c
   #sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
 else
-  echo 'override STAGE1_DEPS = openlibm' >> Make.user
+  echo 'override STAGE1_DEPS += openlibm' >> Make.user
 fi
 
 # Disable git and enable verbose make in AppVeyor
