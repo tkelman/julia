@@ -35,6 +35,8 @@
 #if defined(LLVM_VERSION_MAJOR) && LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 5
 #define LLVM35 1
 #include "llvm/IR/Verifier.h"
+#include "llvm/IR/DIBuilder.h"
+#include "llvm/AsmParser/Parser.h"
 #else
 #include "llvm/Analysis/Verifier.h"
 #endif
@@ -61,8 +63,10 @@
 #include "llvm/Attributes.h"
 #endif
 #if defined(LLVM_VERSION_MAJOR) && LLVM_VERSION_MAJOR == 3 && LLVM_VERSION_MINOR >= 2 
+#ifndef LLVM35
 #include "llvm/DebugInfo.h"
 #include "llvm/DIBuilder.h"
+#endif
 #ifndef LLVM33
 #include "llvm/IRBuilder.h"
 #endif
@@ -1976,12 +1980,7 @@ static Value *emit_call(jl_value_t **args, size_t arglen, jl_codectx_t *ctx,
         }
         assert(idx == nfargs);
         result = builder.CreateCall(prepare_call(cf), ArrayRef<Value*>(&argvals[0],nfargs));
-        if (result->getType() == T_void) {
-            result = literal_pointer_val((jl_value_t*)jl_nothing);
-        }
-        else {
-            result = mark_julia_type(result, jl_ast_rettype(f->linfo, f->linfo->ast));
-        }
+        result = mark_julia_type(result, jl_ast_rettype(f->linfo, f->linfo->ast));
     }
     else {
         result = emit_jlcall(theFptr, theF, &args[1], nargs, ctx);

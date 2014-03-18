@@ -231,6 +231,15 @@ All Objects
 
    Convert ``y`` to the type of ``x``.
 
+.. function:: widen(type | x)
+
+   If the argument is a type, return a "larger" type (for numeric types, this will be
+   a type with at least as much range and precision as the argument, and usually more).
+   Otherwise the argument ``x`` is converted to ``widen(typeof(x))``.
+
+   **Example**: ``widen(Int32) === Int64``
+   **Example**: ``widen(1.5f0) === 1.5``
+
 .. function:: identity(x)
 
    The identity function. Returns its argument.
@@ -1346,6 +1355,10 @@ I/O
 .. function:: read(stream, type, dims)
 
    Read a series of values of the given type from a stream, in canonical binary representation. ``dims`` is either a tuple or a series of integer arguments specifying the size of ``Array`` to return.
+
+.. function:: read!(stream, array::Array)
+
+   Read binary data from a stream, filling in the argument ``array``.
 
 .. function:: readbytes!(stream, b::Vector{Uint8}, nb=length(b))
 
@@ -2999,6 +3012,10 @@ Mathematical Functions
 
    Compute the number of digits in number ``n`` written in base ``b``.
 
+.. function:: widemul(x, y)
+
+   Multiply ``x`` and ``y``, giving the result as a larger type.
+
 Data Formats
 ------------
 
@@ -3439,11 +3456,11 @@ Random number generation in Julia uses the `Mersenne Twister library <http://www
 
    Fill an array with random boolean values. A may be an ``Array`` or a ``BitArray``.
 
-.. function:: randn(dims or [dims...])
+.. function:: randn([rng], dims or [dims...])
 
    Generate a normally-distributed random number with mean 0 and standard deviation 1. Optionally generate an array of normally-distributed random numbers.
 
-.. function:: randn!(A::Array{Float64,N})
+.. function:: randn!([rng], A::Array{Float64,N})
 
    Fill the array A with normally-distributed (mean 0, standard deviation 1) random numbers. Also see the rand function.
 

@@ -448,6 +448,7 @@ export
     uint64,
     uint8,
     unsigned,
+    widemul,
     zero,
 
 # specfun
@@ -982,6 +983,7 @@ export
     super,
     typeintersect,
     typejoin,
+    widen,
 
 # syntax
     esc,
@@ -1079,6 +1081,7 @@ export
     position,
     RawFD,
     read,
+    read!,
     readall,
     readavailable,
     readbytes!,
