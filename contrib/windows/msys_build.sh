@@ -1,15 +1,11 @@
 #!/bin/sh
-# Script to compile Julia in MSYS, assuming 7zip is installed and on the path,
-# and dependency dll's have been copied into usr/bin (see appveyor.yml)
+# Script to compile Julia in MSYS assuming 7zip is installed and on the path,
+# or Cygwin assuming make, curl, and mingw64-$ARCH-gcc-g++ are installed
 
 # Run in top-level Julia directory
 cd `dirname "$0"`/../..
 # Stop on error
 set -e
-
-for f in bin lib include Git/bin; do
-  mkdir -p usr/$f
-done
 
 # If ARCH environment variable not set, choose based on uname -m
 if [ -z "$ARCH" ]; then
@@ -17,10 +13,10 @@ if [ -z "$ARCH" ]; then
 fi
 if [ $ARCH = x86_64 ]; then
   bits=64
-  exc=seh
+  archsuffix=64
 else
   bits=32
-  exc=sjlj
+  archsuffix=86
 fi
 echo "override ARCH = $ARCH" > Make.user
 
@@ -29,112 +25,121 @@ if [ -n "`uname | grep CYGWIN`" ]; then
   if [ -z "$XC_HOST" ]; then
     export XC_HOST="$ARCH-w64-mingw32"
   fi
-  echo "override BUILD_MACHINE = $ARCH-pc-cygwin" > Make.user
-  # If no Fortran compiler installed, override with name of C compiler
-  # (this only fixes the unnecessary invocation of FC in openlibm)
-  if [ -z "`which $XC_HOST-gfortran 2>/dev/null`" ]; then
-    echo 'override FC = $(XC_HOST)-gcc' >> Make.user
-  fi
+  echo "override BUILD_MACHINE = $ARCH-pc-cygwin" >> Make.user
   CROSS_COMPILE="$XC_HOST-"
+  # Set HOSTCC if we don't have Cygwin gcc installed
+  if [ -z "`which gcc 2>/dev/null`" ]; then
+    echo 'override HOSTCC = $(CROSS_COMPILE)gcc' >> Make.user
+  fi
 else
   CROSS_COMPILE=""
 fi
 
+# Download most recent Julia binary for dependencies
 echo "" > get-deps.log
+if [ -z "`which julia-installer.exe 2>/dev/null`" ]; then
+  f=julia-0.3.0-prerelease-win$bits.exe
+  echo "Downloading $f"
+  deps/jldownload "http://s3.amazonaws.com/julialang/bin/winnt/x$archsuffix/0.3/$f -sS"
+  echo "Extracting $f"
+  7z x -y $f >> get-deps.log
+fi
+for i in bin/*.dll lib/julia/*.a include/julia/uv*.h include/julia/tree.h \
+    Git/bin/msys-1.0.dll Git/bin/msys-perl5_8.dll Git/bin/perl.exe Git/bin/sh.exe; do
+  7z e -y julia-installer.exe "\$_OUTDIR/$i" \
+    -ousr\\`dirname $i | sed -e 's|/julia||' -e 's|/|\\\\|g'` >> get-deps.log
+done
+# Remove libjulia.dll if it was copied from downloaded binary
+[ -e usr/bin/libjulia.dll ] && rm usr/bin/libjulia.dll
+[ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
+
 mingw=http://sourceforge.net/projects/mingw
-if [ -z "$USE_MSVC" ]; then
+if [ -z "$USEMSVC" ]; then
   if [ -z "`which ${CROSS_COMPILE}gcc 2>/dev/null`" ]; then
-    echo "Downloading $ARCH-w64-mingw32 compilers"
-    f=x$bits-4.8.1-release-win32-$exc-rev5.7z
+    f=mingw-w$bits-bin-$ARCH-20140102.7z
     if ! [ -e $f ]; then
-      # Screen output (including stderr 2>&1) from downloads is redirected
-      # to a file to avoid filling up the AppVeyor log with progress bars.
-      deps/jldownload ${mingw}builds/files/host-windows/releases/4.8.1/$bits-bit/threads-win32/$exc/$f >> get-deps.log 2>&1
+      echo "Downloading $f"
+      deps/jldownload "$mingw-w64-dgn/files/mingw-w64/$f -sS"
     fi
-    echo "Extracting $ARCH-w64-mingw32 compilers"
+    echo "Extracting $f"
     7z x -y $f >> get-deps.log
     export PATH=$PATH:$PWD/mingw$bits/bin
+    # If there is a version of make.exe here, it is mingw32-make which won't work
+    [ -e mingw$bits/bin/make.exe ] && rm mingw$bits/bin/make.exe
   fi
   export AR=${CROSS_COMPILE}ar
+
+  f=llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z
 else
   # compile and ar-lib scripts to use MSVC instead of MinGW compiler
-  deps/jldownload compile http://git.savannah.gnu.org/cgit/automake.git/plain/lib/compile?id=v1.14.1 >> get-deps.log 2>&1
-  deps/jldownload ar-lib http://git.savannah.gnu.org/cgit/automake.git/plain/lib/ar-lib?id=v1.14.1 >> get-deps.log 2>&1
+  deps/jldownload compile "http://git.savannah.gnu.org/cgit/automake.git/plain/lib/compile?id=v1.14.1 -sS"
+  deps/jldownload ar-lib "http://git.savannah.gnu.org/cgit/automake.git/plain/lib/ar-lib?id=v1.14.1 -sS"
+  # Create a modified version of compile for wrapping link
+  sed -e 's/-link//' -e 's/cl/link/g' -e 's/ -Fe/ -OUT:/' compile > linkld
   chmod +x compile
   chmod +x ar-lib
-  echo "override CC = $PWD/compile cl -TP" >> Make.user
+  chmod +x linkld
+  echo "override CC = $PWD/compile cl -nologo" >> Make.user
   echo 'override CXX = $(CC)' >> Make.user
-  echo 'override FC = $(CC)' >> Make.user
   export AR="$PWD/ar-lib lib"
+  export LD="$PWD/linkld link"
   echo "override AR = $AR" >> Make.user
+  echo "override LD = $LD" >> Make.user
+
+  f=llvm-3.3.1-$ARCH-msvc11-juliadeps.7z
+fi
+
+if ! [ -e $f ]; then
+  echo "Downloading $f"
+  deps/jldownload "http://sourceforge.net/projects/juliadeps-win/files/$f -sS"
+fi
+echo "Extracting $f"
+7z x -y $f >> get-deps.log
+echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
+# The MinGW binary version of LLVM doesn't include libgtest or libgtest_main
+$AR cr usr/lib/libgtest.a
+$AR cr usr/lib/libgtest_main.a
+
+# If no Fortran compiler installed, override with name of C compiler
+# (this only fixes the unnecessary invocation of FC in openlibm)
+if [ -z "`which ${CROSS_COMPILE}gfortran 2>/dev/null`" ]; then
+  echo 'override FC = $(CC)' >> Make.user
 fi
 
 if [ -z "`which make 2>/dev/null`" ]; then
-  download="/make/make-3.81-3/make-3.81-3-msys-1.0.13-bin.tar"
+  download="/make/make-3.81-2/make-3.81-2-msys-1.0.11-bin.tar"
+  if [ -n "`uname | grep CYGWIN`" ]; then
+    echo "Install the Cygwin package for 'make' and try again."
+    exit 1
+  fi
 else
   download=""
 fi
 for f in $download \
-    /gettext/gettext-0.18.1.1-1/libintl-0.18.1.1-1-msys-1.0.17-dll-8.tar \
-    /libiconv/libiconv-1.14-1/libiconv-1.14-1-msys-1.0.17-dll-2.tar \
-    /coreutils/coreutils-5.97-3/coreutils-5.97-3-msys-1.0.13-bin.tar; do
-  echo "Downloading `basename $f`"
+    /coreutils/coreutils-5.97-2/coreutils-5.97-2-msys-1.0.11-bin.tar; do
   if ! [ -e `basename $f.lzma` ]; then
-    deps/jldownload $mingw/files/MSYS/Base$f.lzma >> get-deps.log 2>&1
+    echo "Downloading `basename $f`"
+    deps/jldownload "$mingw/files/MSYS/Base$f.lzma -sS"
   fi
-  # Use bsdtar in Cygwin (maybe faster?)
-  if [ -z "`which bsdtar 2>/dev/null`" ]; then
-    7z x -y `basename $f.lzma` >> get-deps.log
-    tar -xf `basename $f`
-  else
-    bsdtar -xf `basename $f.lzma`
-  fi
+  7z x -y `basename $f.lzma` >> get-deps.log
+  tar -xf `basename $f`
 done
 if [ -z "`which make 2>/dev/null`" ]; then
   mv bin/make.exe /usr/bin
-  cp bin/*.dll /usr/bin
+  # msysgit has an ancient version of touch that fails with `touch -c nonexistent`
+  cp bin/touch.exe /usr/bin
 fi
-mv bin/*.dll usr/Git/bin
-mv bin/cat.exe usr/Git/bin
-mv bin/echo.exe usr/Git/bin
-mv bin/printf.exe usr/Git/bin
+for i in cat chmod echo false printf sort touch true; do
+  mv bin/$i.exe usr/Git/bin
+done
 
-echo 'Downloading LLVM binary'
-f=llvm-3.3-w$bits-bin-$ARCH-20130804.7z
-if ! [ -e $f ]; then
-  deps/jldownload $mingw-w64-dgn/files/others/$f >> get-deps.log 2>&1
-fi
-echo 'Extracting LLVM binary'
-# Use bsdtar in Cygwin (maybe faster?)
-if [ -z "`which bsdtar 2>/dev/null`" ]; then
-  7z x -y $f >> get-deps.log
-else
-  bsdtar -xf $f
-fi
-mv llvm/bin/* usr/bin
-mv llvm/lib/*.a usr/lib
-if ! [ -d usr/include/llvm ]; then
-  mv llvm/include/llvm usr/include
-  mv llvm/include/llvm-c usr/include
-fi
-echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
-echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
-# This binary version doesn't include libgtest or libgtest_main for some reason
-$AR cr usr/lib/libgtest.a
-$AR cr usr/lib/libgtest_main.a
-
-echo 'Downloading readline, termcap, pcre binaries'
 for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
   if ! [ -e mingw$bits-$f.noarch.rpm ]; then
-    deps/jldownload ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw$bits-$f.noarch.rpm >> get-deps.log 2>&1
+    echo "Downloading $f"
+    deps/jldownload "ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw$bits-$f.noarch.rpm -sS"
   fi
-  # Use bsdtar in Cygwin (maybe faster?)
-  if [ -z "`which bsdtar 2>/dev/null`" ]; then
-    7z x -y mingw$bits-$f.noarch.rpm >> get-deps.log
-    7z x -y mingw$bits-$f.noarch.cpio >> get-deps.log
-  else
-    bsdtar -xf mingw$bits-$f.noarch.rpm
-  fi
+  7z x -y mingw$bits-$f.noarch.rpm >> get-deps.log
+  7z x -y mingw$bits-$f.noarch.cpio >> get-deps.log
 done
 echo 'override READLINE = -lreadline -lhistory' >> Make.user
 echo 'override PCRE_CONFIG = $(JULIAHOME)/usr/bin/pcre-config' >> Make.user
@@ -146,12 +151,9 @@ if ! [ -d usr/include/readline ]; then
 fi
 # Modify prefix in pcre-config
 sed -i "s|prefix=/usr/$ARCH-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
+chmod +x usr/bin/*
 
-# Remove libjulia.dll if it was copied from downloaded binary
-[ -e usr/bin/libjulia.dll ] && rm usr/bin/libjulia.dll
-[ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
-
-for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR \
+for lib in LLVM SUITESPARSE ARPACK BLAS LAPACK FFTW GMP MPFR \
     PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV; do
   echo "USE_SYSTEM_$lib = 1" >> Make.user
 done
@@ -164,33 +166,12 @@ echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 
 # Remaining dependencies:
 # openlibm (and readline?) since we need these as static libraries to
-# work properly (not included as part of Julia Windows binaries yet)
+# work properly (not included as part of Julia Windows binaries)
 # utf8proc since its headers are not in the binary download
+echo 'override STAGE1_DEPS = ' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
-echo 'Downloading openlibm, utf8proc sources'
-make -C deps get-openlibm utf8proc-v1.1.6/Makefile >> get-deps.log 2>&1
-
-if [ -n "$USE_MSVC" ]; then
-  # Openlibm doesn't build well with MSVC right now
-  echo "USE_SYSTEM_OPENLIBM = 1" >> Make.user
-  echo 'override STAGE1_DEPS = ' >> Make.user
-  # Since we don't have a static library for openlibm
-  echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
-
-  # Fix MSVC compilation issues
-  sed -i 's/-Wall -Wno-strict-aliasing//' src/Makefile
-  sed -i 's/-Wall -Wno-strict-aliasing//' src/support/Makefile
-  sed -i 's!$(LLVM_CONFIG) --cxxflags!$(LLVM_CONFIG) --cxxflags | sed "s/-Woverloaded-virtual -Wcast-qual//"!g' src/Makefile
-  sed -i "s/_setjmp.win$bits.o _longjmp.win$bits.o//g" src/support/Makefile # this probably breaks exception handling
-  sed -i 's/char bool/char _bool/' deps/utf8proc-v1.1.6/utf8proc.h
-  sed -i 's/false, true/_false, _true/' deps/utf8proc-v1.1.6/utf8proc.h
-  sed -i 's/buffer = malloc/buffer = (int32_t *) malloc/' deps/utf8proc-v1.1.6/utf8proc.c
-  sed -i 's/newptr = realloc/newptr = (int32_t *) realloc/' deps/utf8proc-v1.1.6/utf8proc.c
-  #sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
-else
-  echo 'override STAGE1_DEPS = openlibm' >> Make.user
-fi
+make -C deps get-openlibm get-utf8proc
 
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
@@ -198,7 +179,20 @@ if [ -n "$APPVEYOR" ]; then
  echo 'VERBOSE = 1' >> Make.user
 fi
 
+if [ -n "$USEMSVC" ]; then
+  # Openlibm doesn't build well with MSVC right now
+  echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
+  # Since we don't have a static library for openlibm
+  echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
+
+  # Compile libuv and utf8proc without -TP first, then add -TP
+  make -C deps install-uv install-utf8proc
+  cp usr/lib/uv.lib usr/lib/libuv.a
+  echo 'override CC += -TP' >> Make.user
+else
+  echo 'override STAGE1_DEPS += openlibm' >> Make.user
+fi
+
 make -j 4
-#make -j 4 debug
 # remove precompiled system image
 rm usr/lib/julia/sys.dll
