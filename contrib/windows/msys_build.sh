@@ -150,13 +150,12 @@ done
 if [ $ARCH = x86_64 ]; then
   # Build PCRE from source on 64 bit
   download=""
-  STAGE1_DEPS="pcre"
+  make -C deps get-pcre >> get-deps.log 2>&1
+  make -C deps compile-pcre
   # Some of PCRE's tests fail with MinGW-w64
-  #mkdir -p deps/pcre-8.31
-  #echo 1 > deps/pcre-8.31/checked
+  echo 1 > deps/pcre-8.31/checked
 else
   download="pcre-8.34-1.fc21"
-  STAGE1_DEPS=""
   echo 'USE_SYSTEM_PCRE = 1' >> Make.user
   echo 'override PCRE_CONFIG = $(JULIAHOME)/usr/bin/pcre-config' >> Make.user
 fi
@@ -203,6 +202,7 @@ make -C deps get-openlibm utf8proc-v1.1.6/Makefile >> get-deps.log 2>&1
 if [ -n "$USE_MSVC" ]; then
   # Openlibm doesn't build well with MSVC right now
   echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
+  echo 'override STAGE1_DEPS = ' >> Make.user
   # Since we don't have a static library for openlibm
   echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 
@@ -217,9 +217,8 @@ if [ -n "$USE_MSVC" ]; then
   sed -i 's/newptr = realloc/newptr = (int32_t *) realloc/' deps/utf8proc-v1.1.6/utf8proc.c
   #sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
 else
-  STAGE1_DEPS="$STAGE1_DEPS openlibm"
+  echo 'override STAGE1_DEPS = openlibm' >> Make.user
 fi
-echo "override STAGE1_DEPS = $STAGE1_DEPS" >> Make.user
 
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
