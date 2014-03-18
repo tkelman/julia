@@ -35,26 +35,7 @@ else
   CROSS_COMPILE=""
 fi
 
-# Download most recent Julia binary for dependencies
 echo "" > get-deps.log
-if [ -z "`which julia-installer.exe 2>/dev/null`" ]; then
-  # Screen output (including stderr 2>&1) from downloads is redirected
-  # to a file to avoid filling up the AppVeyor log with progress bars.
-  f=julia-0.3.0-prerelease-win$bits.exe
-  echo "Downloading $f"
-  deps/jldownload http://s3.amazonaws.com/julialang/bin/winnt/x$bits/0.3/$f >> get-deps.log 2>&1
-  echo "Extracting $f"
-  7z x -y $f >> get-deps.log
-fi
-7z e -y julia-installer.exe '$_OUTDIR/bin/*.dll' -ousr\\bin >> get-deps.log
-7z e -y julia-installer.exe '$_OUTDIR/lib/julia/*.a' -ousr\\lib >> get-deps.log
-7z e -y julia-installer.exe '$_OUTDIR/include/julia/uv*.h' -ousr\\include >> get-deps.log
-7z e -y julia-installer.exe '$_OUTDIR/include/julia/tree.h' -ousr\\include >> get-deps.log
-7z e -y julia-installer.exe '$_OUTDIR/Git/bin/msys-1.0.dll' -ousr\\Git\\bin >> get-deps.log
-7z e -y julia-installer.exe '$_OUTDIR/Git/bin/msys-perl5_8.dll' -ousr\\Git\\bin >> get-deps.log
-7z e -y julia-installer.exe '$_OUTDIR/Git/bin/perl.exe' -ousr\\Git\\bin >> get-deps.log
-7z e -y julia-installer.exe '$_OUTDIR/Git/bin/sh.exe' -ousr\\Git\\bin >> get-deps.log
-
 mingw=http://sourceforge.net/projects/mingw
 if [ -z "$USE_MSVC" ]; then
   if [ -z "`which ${CROSS_COMPILE}gcc 2>/dev/null`" ]; then
@@ -84,43 +65,23 @@ fi
 
 # If no Fortran compiler installed, override with name of C compiler
 # (this only fixes the unnecessary invocation of FC in openlibm)
-if [ -z "`which $XC_HOST-gfortran 2>/dev/null`" ]; then
-  echo 'override FC = $(XC_HOST)-gcc' >> Make.user
+if [ -z "`which ${CROSS_COMPILE}gfortran 2>/dev/null`" ]; then
+  echo "override FC = ${CROSS_COMPILE}gcc" >> Make.user
 fi
 
-#juliadeps-$ARCH-w64-mingw32.7z
-#for f in llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z; do
-#  if ! [ -e $f ]; then
-#    echo "Downloading $f"
-#    deps/jldownload http://sourceforge.net/projects/juliadeps-win/files/$f >> get-deps.log 2>&1
-#  fi
-#  echo "Extracting $f"
-#  7z x -y $f >> get-deps.log
-#done
-
-f=llvm-3.3-w$bits-bin-$ARCH-20130804.7z
-if ! [ -e $f ]; then
-  echo "Downloading $f"
-  deps/jldownload $mingw-w64-dgn/files/others/$f >> get-deps.log 2>&1
-fi
-echo "Extracting $f"
-7z x -y $f >> get-deps.log
-#if [ $ARCH = x86_64 ]; then
-  # Skip a file that needs to be patched for Julia
-#  rm llvm/lib/libLLVMSelectionDAG.a
-#fi
-mv llvm/bin/* usr/bin
-mv llvm/lib/*.a usr/lib
-if ! [ -d usr/include/llvm ]; then
-  mv llvm/include/llvm usr/include
-  mv llvm/include/llvm-c usr/include
-fi
+for f in juliadeps-$ARCH-w64-mingw32.7z llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z; do
+  if ! [ -e $f ]; then
+    echo "Downloading $f"
+    deps/jldownload http://sourceforge.net/projects/juliadeps-win/files/$f >> get-deps.log 2>&1
+  fi
+  echo "Extracting $f"
+  7z x -y $f >> get-deps.log
+done
 echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
 echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
 # The binary version of LLVM doesn't include libgtest or libgtest_main
 $AR cr usr/lib/libgtest.a
 $AR cr usr/lib/libgtest_main.a
-chmod +x usr/bin/*
 
 if [ -z "`which make 2>/dev/null`" ]; then
   download="/make/make-3.81-2/make-3.81-2-msys-1.0.11-bin.tar"
@@ -147,19 +108,7 @@ for i in cat chmod echo false printf sort touch true; do
   mv bin/$i.exe usr/Git/bin
 done
 
-if [ $ARCH = x86_64 ]; then
-  # Build PCRE from source on 64 bit
-  download=""
-  make -C deps get-pcre >> get-deps.log 2>&1
-  make -C deps compile-pcre
-  # Some of PCRE's tests fail with MinGW-w64
-  echo 1 > deps/pcre-8.31/checked
-else
-  download="pcre-8.34-1.fc21"
-  echo 'USE_SYSTEM_PCRE = 1' >> Make.user
-  echo 'override PCRE_CONFIG = $(JULIAHOME)/usr/bin/pcre-config' >> Make.user
-fi
-for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 $download; do
+for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
   if ! [ -e mingw$bits-$f.noarch.rpm ]; then
     echo "Downloading $f"
     deps/jldownload ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw$bits-$f.noarch.rpm >> get-deps.log 2>&1
@@ -168,19 +117,19 @@ for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 $download; do
   7z x -y mingw$bits-$f.noarch.cpio >> get-deps.log
 done
 echo 'override READLINE = -lreadline -lhistory' >> Make.user
+echo 'override PCRE_CONFIG = $(JULIAHOME)/usr/bin/pcre-config' >> Make.user
 # Move downloaded bin, lib, and include files into build tree
 mv usr/$ARCH-w64-mingw32/sys-root/mingw/bin/* usr/bin
 mv usr/$ARCH-w64-mingw32/sys-root/mingw/lib/*.dll.a usr/lib
 if ! [ -d usr/include/readline ]; then
   mv usr/$ARCH-w64-mingw32/sys-root/mingw/include/* usr/include
 fi
-if ! [ $ARCH = x86_64 ]; then
-  # Modify prefix in pcre-config
-  sed -i "s|prefix=/usr/$ARCH-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
-fi
+# Modify prefix in pcre-config
+sed -i "s|prefix=/usr/$ARCH-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
+chmod +x usr/bin/*
 
-for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR \
-    LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV; do
+for lib in LLVM SUITESPARSE ARPACK BLAS LAPACK FFTW GMP MPFR \
+    PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV; do
   echo "USE_SYSTEM_$lib = 1" >> Make.user
 done
 echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
