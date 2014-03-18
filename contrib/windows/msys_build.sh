@@ -14,9 +14,11 @@ fi
 if [ $ARCH = x86_64 ]; then
   bits=64
   exc=seh
+  archsuffix=64
 else
   bits=32
   exc=sjlj
+  archsuffix=86
 fi
 echo "override ARCH = $ARCH" > Make.user
 
@@ -42,7 +44,7 @@ if [ -z "`which julia-installer.exe 2>/dev/null`" ]; then
   # to a file to avoid filling up the AppVeyor log with progress bars.
   f=julia-0.3.0-prerelease-win$bits.exe
   echo "Downloading $f"
-  deps/jldownload http://s3.amazonaws.com/julialang/bin/winnt/x$bits/0.3/$f >> get-deps.log 2>&1
+  deps/jldownload http://s3.amazonaws.com/julialang/bin/winnt/x$archsuffix/0.3/$f >> get-deps.log 2>&1
   echo "Extracting $f"
   7z x -y $f >> get-deps.log
 fi
