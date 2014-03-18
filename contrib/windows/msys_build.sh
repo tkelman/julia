@@ -1,6 +1,6 @@
 #!/bin/sh
 # Script to compile Julia in MSYS assuming 7zip is installed and on the path,
-# or Cygwin assuming make, wget, bsdtar, and mingw64-$ARCH-gcc-g++ are installed
+# or Cygwin assuming make, wget, and mingw64-$ARCH-gcc-g++ are installed
 
 # Run in top-level Julia directory
 cd `dirname "$0"`/../..
@@ -26,11 +26,6 @@ if [ -n "`uname | grep CYGWIN`" ]; then
     export XC_HOST="$ARCH-w64-mingw32"
   fi
   echo "override BUILD_MACHINE = $ARCH-pc-cygwin" >> Make.user
-  # If no Fortran compiler installed, override with name of C compiler
-  # (this only fixes the unnecessary invocation of FC in openlibm)
-  if [ -z "`which $XC_HOST-gfortran 2>/dev/null`" ]; then
-    echo 'override FC = $(XC_HOST)-gcc' >> Make.user
-  fi
   CROSS_COMPILE="$XC_HOST-"
   # Set HOSTCC if we don't have Cygwin gcc installed
   if [ -z "`which gcc 2>/dev/null`" ]; then
@@ -40,7 +35,26 @@ else
   CROSS_COMPILE=""
 fi
 
+# Download most recent Julia binary for dependencies
 echo "" > get-deps.log
+if [ -z "`which julia-installer.exe 2>/dev/null`" ]; then
+  # Screen output (including stderr 2>&1) from downloads is redirected
+  # to a file to avoid filling up the AppVeyor log with progress bars.
+  f=julia-0.3.0-prerelease-win$bits.exe
+  echo "Downloading $f"
+  deps/jldownload http://s3.amazonaws.com/julialang/bin/winnt/x$bits/0.3/$f >> get-deps.log 2>&1
+  echo "Extracting $f"
+  7z x -y $f >> get-deps.log
+fi
+7z e -y julia-installer.exe '$_OUTDIR/bin/*.dll' -ousr\\bin >> get-deps.log
+7z e -y julia-installer.exe '$_OUTDIR/lib/julia/*.a' -ousr\\lib >> get-deps.log
+7z e -y julia-installer.exe '$_OUTDIR/include/julia/uv*.h' -ousr\\include >> get-deps.log
+7z e -y julia-installer.exe '$_OUTDIR/include/julia/tree.h' -ousr\\include >> get-deps.log
+7z e -y julia-installer.exe '$_OUTDIR/Git/bin/msys-1.0.dll' -ousr\\Git\\bin >> get-deps.log
+7z e -y julia-installer.exe '$_OUTDIR/Git/bin/msys-perl5_8.dll' -ousr\\Git\\bin >> get-deps.log
+7z e -y julia-installer.exe '$_OUTDIR/Git/bin/perl.exe' -ousr\\Git\\bin >> get-deps.log
+7z e -y julia-installer.exe '$_OUTDIR/Git/bin/sh.exe' -ousr\\Git\\bin >> get-deps.log
+
 mingw=http://sourceforge.net/projects/mingw
 if [ -z "$USE_MSVC" ]; then
   if [ -z "`which ${CROSS_COMPILE}gcc 2>/dev/null`" ]; then
@@ -48,8 +62,6 @@ if [ -z "$USE_MSVC" ]; then
     # TODO: find a smaller build with just gcc, g++?
     f=x$bits-4.8.1-release-win32-$exc-rev5.7z
     if ! [ -e $f ]; then
-      # Screen output (including stderr 2>&1) from downloads is redirected
-      # to a file to avoid filling up the AppVeyor log with progress bars.
       deps/jldownload ${mingw}builds/files/host-windows/releases/4.8.1/$bits-bit/threads-win32/$exc/$f >> get-deps.log 2>&1
     fi
     echo "Extracting $ARCH-w64-mingw32 compilers"
@@ -70,20 +82,21 @@ else
   echo "override AR = $AR" >> Make.user
 fi
 
-#llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z
-for f in juliadeps-$ARCH-w64-mingw32.7z; do
-  if ! [ -e $f ]; then
-    echo "Downloading $f"
-    deps/jldownload http://sourceforge.net/projects/juliadeps-win/files/$f >> get-deps.log 2>&1
-  fi
-  echo "Extracting $f"
-  # Use bsdtar in Cygwin (maybe faster?)
-  if [ -z "`which bsdtar 2>/dev/null`" ]; then
-    7z x -y $f >> get-deps.log
-  else
-    bsdtar -xf $f
-  fi
-done
+# If no Fortran compiler installed, override with name of C compiler
+# (this only fixes the unnecessary invocation of FC in openlibm)
+if [ -z "`which $XC_HOST-gfortran 2>/dev/null`" ]; then
+  echo 'override FC = $(XC_HOST)-gcc' >> Make.user
+fi
+
+#juliadeps-$ARCH-w64-mingw32.7z
+#for f in llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z; do
+#  if ! [ -e $f ]; then
+#    echo "Downloading $f"
+#    deps/jldownload http://sourceforge.net/projects/juliadeps-win/files/$f >> get-deps.log 2>&1
+#  fi
+#  echo "Extracting $f"
+#  7z x -y $f >> get-deps.log
+#done
 
 f=llvm-3.3-w$bits-bin-$ARCH-20130804.7z
 if ! [ -e $f ]; then
@@ -91,16 +104,11 @@ if ! [ -e $f ]; then
   deps/jldownload $mingw-w64-dgn/files/others/$f >> get-deps.log 2>&1
 fi
 echo "Extracting $f"
-# Use bsdtar in Cygwin (maybe faster?)
-if [ -z "`which bsdtar 2>/dev/null`" ]; then
-  7z x -y $f >> get-deps.log
-else
-  bsdtar -xf $f
-fi
-if [ $ARCH = x86_64 ]; then
+7z x -y $f >> get-deps.log
+#if [ $ARCH = x86_64 ]; then
   # Skip a file that needs to be patched for Julia
-  rm llvm/lib/libLLVMSelectionDAG.a
-fi
+#  rm llvm/lib/libLLVMSelectionDAG.a
+#fi
 mv llvm/bin/* usr/bin
 mv llvm/lib/*.a usr/lib
 if ! [ -d usr/include/llvm ]; then
@@ -116,6 +124,10 @@ chmod +x usr/bin/*
 
 if [ -z "`which make 2>/dev/null`" ]; then
   download="/make/make-3.81-2/make-3.81-2-msys-1.0.11-bin.tar"
+  if [ -n "`uname | grep CYGWIN`" ]; then
+    echo "Install the Cygwin package for 'make' and try again."
+    exit 1
+  fi
 else
   download=""
 fi
@@ -125,13 +137,8 @@ for f in $download \
     echo "Downloading `basename $f`"
     deps/jldownload $mingw/files/MSYS/Base$f.lzma >> get-deps.log 2>&1
   fi
-  # Use bsdtar in Cygwin (maybe faster?)
-  if [ -z "`which bsdtar 2>/dev/null`" ]; then
-    7z x -y `basename $f.lzma` >> get-deps.log
-    tar -xf `basename $f`
-  else
-    bsdtar -xf `basename $f.lzma`
-  fi
+  7z x -y `basename $f.lzma` >> get-deps.log
+  tar -xf `basename $f`
 done
 if [ -z "`which make 2>/dev/null`" ]; then
   mv bin/make.exe /usr/bin
@@ -140,32 +147,41 @@ for i in cat chmod echo false printf sort touch true; do
   mv bin/$i.exe usr/Git/bin
 done
 
-for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 pcre-8.34-1.fc21; do
+if [ $ARCH = x86_64 ]; then
+  # Build PCRE from source on 64 bit
+  download=""
+  STAGE1_DEPS="pcre"
+  # Some of PCRE's tests fail with MinGW-w64
+  #mkdir -p deps/pcre-8.31
+  #echo 1 > deps/pcre-8.31/checked
+else
+  download="pcre-8.34-1.fc21"
+  STAGE1_DEPS=""
+  echo 'USE_SYSTEM_PCRE = 1' >> Make.user
+  echo 'override PCRE_CONFIG = $(JULIAHOME)/usr/bin/pcre-config' >> Make.user
+fi
+for f in readline-6.2-3.fc20 termcap-1.3.1-16.fc20 $download; do
   if ! [ -e mingw$bits-$f.noarch.rpm ]; then
     echo "Downloading $f"
     deps/jldownload ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/mingw$bits-$f.noarch.rpm >> get-deps.log 2>&1
   fi
-  # Use bsdtar in Cygwin (maybe faster?)
-  if [ -z "`which bsdtar 2>/dev/null`" ]; then
-    7z x -y mingw$bits-$f.noarch.rpm >> get-deps.log
-    7z x -y mingw$bits-$f.noarch.cpio >> get-deps.log
-  else
-    bsdtar -xf mingw$bits-$f.noarch.rpm
-  fi
+  7z x -y mingw$bits-$f.noarch.rpm >> get-deps.log
+  7z x -y mingw$bits-$f.noarch.cpio >> get-deps.log
 done
 echo 'override READLINE = -lreadline -lhistory' >> Make.user
-echo 'override PCRE_CONFIG = $(JULIAHOME)/usr/bin/pcre-config' >> Make.user
 # Move downloaded bin, lib, and include files into build tree
 mv usr/$ARCH-w64-mingw32/sys-root/mingw/bin/* usr/bin
 mv usr/$ARCH-w64-mingw32/sys-root/mingw/lib/*.dll.a usr/lib
 if ! [ -d usr/include/readline ]; then
   mv usr/$ARCH-w64-mingw32/sys-root/mingw/include/* usr/include
 fi
-# Modify prefix in pcre-config
-sed -i "s|prefix=/usr/$ARCH-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
+if ! [ $ARCH = x86_64 ]; then
+  # Modify prefix in pcre-config
+  sed -i "s|prefix=/usr/$ARCH-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin/pcre-config
+fi
 
 for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR \
-    PCRE LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV; do
+    LIBUNWIND READLINE GRISU RMATH OPENSPECFUN LIBUV; do
   echo "USE_SYSTEM_$lib = 1" >> Make.user
 done
 echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
@@ -187,7 +203,6 @@ make -C deps get-openlibm utf8proc-v1.1.6/Makefile >> get-deps.log 2>&1
 if [ -n "$USE_MSVC" ]; then
   # Openlibm doesn't build well with MSVC right now
   echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
-  echo 'override STAGE1_DEPS = ' >> Make.user
   # Since we don't have a static library for openlibm
   echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 
@@ -202,8 +217,9 @@ if [ -n "$USE_MSVC" ]; then
   sed -i 's/newptr = realloc/newptr = (int32_t *) realloc/' deps/utf8proc-v1.1.6/utf8proc.c
   #sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
 else
-  echo 'override STAGE1_DEPS = openlibm' >> Make.user
+  STAGE1_DEPS="$STAGE1_DEPS openlibm"
 fi
+echo "override STAGE1_DEPS = $STAGE1_DEPS" >> Make.user
 
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
