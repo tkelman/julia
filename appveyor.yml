@@ -14,7 +14,7 @@ install:
   - "cinst cyg-get > cyg-get.log"
   - set PATH=%PATH%;C:\cygwin
   - "cyg-get make >> cyg-get.log"
-  - "cyg-get wget >> cyg-get.log"
+  - "cyg-get curl >> cyg-get.log"
   - "cyg-get mingw64-%ARCH%-gcc-g++ >> cyg-get.log"
 
 build_script:
