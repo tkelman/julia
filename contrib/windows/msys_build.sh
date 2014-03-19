@@ -64,6 +64,8 @@ if [ -z "$USEMSVC" ]; then
     echo "Extracting $f"
     7z x -y $f >> get-deps.log
     export PATH=$PATH:$PWD/mingw$bits/bin
+    # If there is a version of make.exe here, it is mingw32-make which won't work
+    [ -e mingw$bits/bin/make.exe ] && rm mingw$bits/bin/make.exe
   fi
   export AR=${CROSS_COMPILE}ar
 else
