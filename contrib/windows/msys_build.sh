@@ -53,6 +53,9 @@ for i in bin/*.dll lib/julia/*.a include/julia/uv*.h include/julia/tree.h \
   7z e -y julia-installer.exe "\$_OUTDIR/$i" \
     -ousr\\`dirname $i | sed -e 's|/julia||' -e 's|/|\\\\|g'` >> get-deps.log
 done
+# Remove libjulia.dll if it was copied from downloaded binary
+[ -e usr/bin/libjulia.dll ] && rm usr/bin/libjulia.dll
+[ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
 
 mingw=http://sourceforge.net/projects/mingw
 if [ -z "$USE_MSVC" ]; then
