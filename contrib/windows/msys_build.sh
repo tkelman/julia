@@ -13,11 +13,9 @@ if [ -z "$ARCH" ]; then
 fi
 if [ $ARCH = x86_64 ]; then
   bits=64
-  exc=seh
   archsuffix=64
 else
   bits=32
-  exc=sjlj
   archsuffix=86
 fi
 echo "override ARCH = $ARCH" > Make.user
@@ -58,13 +56,12 @@ done
 [ -e usr/bin/libjulia-debug.dll ] && rm usr/bin/libjulia-debug.dll
 
 mingw=http://sourceforge.net/projects/mingw
-if [ -z "$USE_MSVC" ]; then
+if [ -z "$USEMSVC" ]; then
   if [ -z "`which ${CROSS_COMPILE}gcc 2>/dev/null`" ]; then
-    echo "Downloading $ARCH-w64-mingw32 compilers"
-    # TODO: find a smaller build with just gcc, g++? Or try clang?
-    f=x$bits-4.8.1-release-win32-$exc-rev5.7z
+    f=mingw-w$bits-bin-$ARCH-20140102.7z
     if ! [ -e $f ]; then
-      deps/jldownload ${mingw}builds/files/host-windows/releases/4.8.1/$bits-bit/threads-win32/$exc/$f >> get-deps.log 2>&1
+      echo "Downloading $ARCH-w64-mingw32 compilers"
+      deps/jldownload $mingw-w64-dgn/files/mingw-w64/$f >> get-deps.log 2>&1
     fi
     echo "Extracting $ARCH-w64-mingw32 compilers"
     7z x -y $f >> get-deps.log
@@ -170,7 +167,7 @@ echo 'override STAGE3_DEPS = ' >> Make.user
 echo 'Downloading openlibm, utf8proc, random sources'
 make -C deps get-openlibm utf8proc-v1.1.6/Makefile get-random >> get-deps.log 2>&1
 
-if [ -n "$USE_MSVC" ]; then
+if [ -n "$USEMSVC" ]; then
   # Openlibm doesn't build well with MSVC right now
   echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
   # Since we don't have a static library for openlibm
