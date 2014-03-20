@@ -14,7 +14,9 @@ export
 
 # Types
     AbstractMatrix,
+    AbstractSparseArray,
     AbstractSparseMatrix,
+    AbstractSparseVector,
     AbstractVector,
     AbstractVecOrMat,
     Array,
@@ -518,7 +520,6 @@ export
     indexin,
     indmax,
     indmin,
-    infs,
     invperm,
     ipermute!,
     ipermutedims,
@@ -535,7 +536,6 @@ export
     minimum!,
     minimum,
     minmax,
-    nans,
     ndims,
     nfilled,
     nonzeros,
