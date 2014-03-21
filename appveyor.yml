@@ -26,7 +26,7 @@ build_script:
   - ps: (Get-Content deps\libuv\Windows.inc) | ForEach-Object { $_ -replace "icl /nologo /Qstd=c99", "cl /nologo" } | Set-Content deps\libuv\Windows.inc
   - ps: (Get-Content deps\libuv\Windows.inc) | ForEach-Object { $_ -replace "xili", "li" } | Set-Content deps\libuv\Windows.inc
   - cd deps\libuv && nmake /f Windows.mk
-  - cd src && nmake /f Windows.mk
+  - cd ..\..\src && nmake /f Windows.mk
 #  - C:\cygwin\bin\sh --login /cygdrive/c/projects/julia/contrib/windows/msys_build.sh
 # Since the AppVeyor VMs have Git installed, they have MSYS1
 #  - sh --login /c/projects/julia/contrib/windows/msys_build.sh
