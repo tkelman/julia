@@ -10,7 +10,7 @@
 install:
 # libuv's Windows build system uses gyp which needs Python
   - cinst python -Version 2.7.6
-  - set PYTHON="C:\Python27\python --no-parallel"
+  - set PYTHON=C:\Python27\python --no-parallel
 # Install Cygwin and build-time dependencies
 # Using MSYS would save some setup time, but doesn't work
 # for 64 bit with binary dependencies yet.
