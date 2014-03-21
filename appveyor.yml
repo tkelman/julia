@@ -7,10 +7,10 @@
 # Carriage returns are bad
 #  - git config --global core.autocrlf input
 
-install:
+#install:
 # libuv's Windows build system uses gyp which needs Python
-  - cinst python -Version 2.7.6
-  - set PYTHON=C:\Python27\python
+#  - cinst python -Version 2.7.6
+#  - set PYTHON=C:\Python27\python
 # Install Cygwin and build-time dependencies
 # Using MSYS would save some setup time, but doesn't work
 # for 64 bit with binary dependencies yet.
@@ -22,8 +22,14 @@ install:
 
 build_script:
   - git submodule update --init
-  - cd deps\libuv && vcbuild.bat
   - '"%VS120COMNTOOLS%\..\..\VC\bin\vcvars32.bat"'
+  - set CC=cl
+  - set LINK=link
+  - set AR=lib
+  - cd deps\libuv && nmake /f Windows.mk
+  - set CC=
+  - set LINK=
+  - set AR=
   - cd src && nmake /f Windows.mk
 #  - C:\cygwin\bin\sh --login /cygdrive/c/projects/julia/contrib/windows/msys_build.sh
 # Since the AppVeyor VMs have Git installed, they have MSYS1
