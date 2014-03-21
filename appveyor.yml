@@ -1,11 +1,11 @@
-environment:
-  matrix:
+#environment:
+#  matrix:
 #  - ARCH: "i686"
-  - ARCH: "x86_64"
+#  - ARCH: "x86_64"
 
-init:
+#init:
 # Carriage returns are bad
-  - git config --global core.autocrlf input
+#  - git config --global core.autocrlf input
 
 #install:
 # Install Cygwin and build-time dependencies
@@ -18,9 +18,11 @@ init:
 #  - "cyg-get mingw64-%ARCH%-gcc-g++ >> cyg-get.log"
 
 build_script:
+  - '"%VS120COMNTOOLS%\..\..\VC\bin\vcvars32.bat"'
+  - cd src && nmake /f Windows.mk
 #  - C:\cygwin\bin\sh --login /cygdrive/c/projects/julia/contrib/windows/msys_build.sh
 # Since the AppVeyor VMs have Git installed, they have MSYS1
-  - sh --login /c/projects/julia/contrib/windows/msys_build.sh
+#  - sh --login /c/projects/julia/contrib/windows/msys_build.sh
 
-test_script:
-  - cd test && ..\usr\bin\julia-basic runtests.jl all
+#test_script:
+#  - cd test && ..\usr\bin\julia-basic runtests.jl all
