@@ -30,6 +30,7 @@ build_script:
   - 7z x utf8proc-v1.1.6.tar.gz
   - 7z x utf8proc-v1.1.6.tar
   - cd utf8proc-v1.1.6 && cl -nologo /c utf8proc.c
+  - git init && git apply -v ..\utf8proc_msvc.patch
   - cd ..\..\src && nmake /f Windows.mk
 #  - C:\cygwin\bin\sh --login /cygdrive/c/projects/julia/contrib/windows/msys_build.sh
 # Since the AppVeyor VMs have Git installed, they have MSYS1
