@@ -26,8 +26,9 @@ build_script:
   - ps: (Get-Content deps\libuv\Windows.inc) | ForEach-Object { $_ -replace "icl /nologo /Qstd=c99", "cl /nologo" } | Set-Content deps\libuv\Windows.inc
   - ps: (Get-Content deps\libuv\Windows.inc) | ForEach-Object { $_ -replace "xili", "li" } | Set-Content deps\libuv\Windows.inc
   - cd deps\libuv && nmake /f Windows.mk && cd ..
-  - ps: (new-object net.webclient).DownloadFile("http://www.public-software-group.org/pub/projects/utf8proc/v1.1.6/utf8proc-v1.1.6.tar.gz", "C:\projects\julia\deps\utf8proc.tar.gz")
-  - 7z x utf8proc.tar.gz
+  - ps: (new-object net.webclient).DownloadFile("http://www.public-software-group.org/pub/projects/utf8proc/v1.1.6/utf8proc-v1.1.6.tar.gz", "C:\projects\julia\deps\utf8proc-v1.1.6.tar.gz")
+  - 7z x utf8proc-v1.1.6.tar.gz
+  - 7z x utf8proc-v1.1.6.tar
   - cd ..\src && nmake /f Windows.mk
 #  - C:\cygwin\bin\sh --login /cygdrive/c/projects/julia/contrib/windows/msys_build.sh
 # Since the AppVeyor VMs have Git installed, they have MSYS1
