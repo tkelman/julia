@@ -43,7 +43,8 @@ AR = lib /nologo
 ###############################################################################
 
 CFLAGS = /c /DCRTAPI1=_cdecl /DCRTAPI2=_cdecl /GS /D_WINNT /D_WIN32_WINNT=$(WINVER) /DNTDDI_VERSION=$(WINVER)0000 /DWINVER=$(WINVER) /DWIN32 /D_WIN32
-LFLAGS = /INCREMENTAL:NO /NODEFAULTLIB:MSVCRT
+LFLAGS = /INCREMENTAL:NO
+#/NODEFAULTLIB:MSVCRT
 
 !if "$(CPU)" == "i386"
 CFLAGS = $(CFLAGS) /D_X86_=1
