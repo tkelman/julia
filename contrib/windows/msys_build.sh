@@ -164,7 +164,7 @@ echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 echo 'override STAGE1_DEPS = random' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
-make -C deps get-openlibm utf8proc-v1.1.6/Makefile get-random
+make -C deps get-openlibm get-utf8proc get-random
 
 if [ -n "$USEMSVC" ]; then
   # Openlibm doesn't build well with MSVC right now
@@ -173,14 +173,7 @@ if [ -n "$USEMSVC" ]; then
   echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 
   # Fix MSVC compilation issues
-  sed -i 's/-Wall -Wno-strict-aliasing//' src/Makefile
-  sed -i 's/-Wall -Wno-strict-aliasing//' src/support/Makefile
-  sed -i 's!$(LLVM_CONFIG) --cxxflags!$(LLVM_CONFIG) --cxxflags | sed "s/-Woverloaded-virtual -Wcast-qual//"!g' src/Makefile
-  sed -i "s/_setjmp.win$bits.o _longjmp.win$bits.o//g" src/support/Makefile # this probably breaks exception handling
-  sed -i 's/char bool/char _bool/' deps/utf8proc-v1.1.6/utf8proc.h
-  sed -i 's/false, true/_false, _true/' deps/utf8proc-v1.1.6/utf8proc.h
-  sed -i 's/buffer = malloc/buffer = (int32_t *) malloc/' deps/utf8proc-v1.1.6/utf8proc.c
-  sed -i 's/newptr = realloc/newptr = (int32_t *) realloc/' deps/utf8proc-v1.1.6/utf8proc.c
+  sed -i 's!$(LLVM_CONFIG) --cxxflags)!$(LLVM_CONFIG) --cxxflags | sed "s/-Woverloaded-virtual -Wcast-qual//")!g' src/Makefile
   #sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
 else
   echo 'override STAGE1_DEPS += openlibm' >> Make.user
