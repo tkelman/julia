@@ -29,7 +29,7 @@ build_script:
   - ps: (new-object net.webclient).DownloadFile("http://www.public-software-group.org/pub/projects/utf8proc/v1.1.6/utf8proc-v1.1.6.tar.gz", "C:\projects\julia\deps\utf8proc-v1.1.6.tar.gz")
   - 7z x utf8proc-v1.1.6.tar.gz
   - 7z x utf8proc-v1.1.6.tar
-  - cd utf8proc-v1.1.6 && cl -nologo utf8proc.c
+  - cd utf8proc-v1.1.6 && cl -nologo /c utf8proc.c
   - cd ..\..\src && nmake /f Windows.mk
 #  - C:\cygwin\bin\sh --login /cygdrive/c/projects/julia/contrib/windows/msys_build.sh
 # Since the AppVeyor VMs have Git installed, they have MSYS1
