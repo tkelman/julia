@@ -50,6 +50,9 @@ $(LIBSUPPORT):
 $(LIBUV):
 	PUSHD $(MAKEDIR)\..\..\deps\libuv && $(MAKE) /NOLOGO /F Windows.mk  && POPD
 
+$(LIBUTF8PROC):
+	PUSHD $(MAKEDIR)\..\..\deps\utf8proc-v1.1.6 && cl -nologo /c utf8proc.c && $(AR) /OUT:libutf8proc.lib utf8proc.obj && POPD
+
 lib$(NAME).lib: $(OBJECTS)
 	$(AR) /OUT:lib$(NAME).lib $**
 
