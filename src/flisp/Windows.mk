@@ -31,7 +31,7 @@ OBJECTS = \
 	basename.obj
 
 LIBUV = $(MAKEDIR)\..\..\deps\libuv\libuv.lib
-LIBUTF8PROC = $(MAKEDIR)\..\..\deps\libutf8proc-v1.1.6\libutf8proc.lib
+LIBUTF8PROC = $(MAKEDIR)\..\..\deps\utf8proc-v1.1.6\libutf8proc.lib
 LIBSUPPORT = $(MAKEDIR)\..\support\libsupport.lib
 
 INCLUDE = $(INCLUDE);$(MAKEDIR)\..\..\deps\libuv\include;$(MAKEDIR)\..\..\deps\utf8proc-v1.1.6;$(MAKEDIR)\..\support
