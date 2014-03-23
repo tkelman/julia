@@ -74,11 +74,12 @@ else
   deps/jldownload ar-lib "http://git.savannah.gnu.org/cgit/automake.git/plain/lib/ar-lib?id=v1.14.1 -sS"
   chmod +x compile
   chmod +x ar-lib
-  echo "override CC = $PWD/compile cl -TP" >> Make.user
+  echo "override CC = $PWD/compile cl -nologo" >> Make.user
   echo 'override CXX = $(CC)' >> Make.user
   echo 'override FC = $(CC)' >> Make.user
   export AR="$PWD/ar-lib lib"
   echo "override AR = $AR" >> Make.user
+  export LD=link
 fi
 
 # If no Fortran compiler installed, override with name of C compiler
@@ -120,6 +121,8 @@ for f in $download \
 done
 if [ -z "`which make 2>/dev/null`" ]; then
   mv bin/make.exe /usr/bin
+  # msysgit has an ancient version of touch that fails with touch -c nonexistent
+  cp bin/touch.exe /usr/bin
 fi
 for i in cat chmod echo false printf sort touch true; do
   mv bin/$i.exe usr/Git/bin
@@ -164,7 +167,13 @@ echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 echo 'override STAGE1_DEPS = random' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
-make -C deps get-openlibm utf8proc-v1.1.6/Makefile get-random
+make -C deps get-openlibm get-utf8proc get-random
+
+# Disable git and enable verbose make in AppVeyor
+if [ -n "$APPVEYOR" ]; then
+ echo 'override NO_GIT = 1' >> Make.user
+ echo 'VERBOSE = 1' >> Make.user
+fi
 
 if [ -n "$USEMSVC" ]; then
   # Openlibm doesn't build well with MSVC right now
@@ -173,23 +182,14 @@ if [ -n "$USEMSVC" ]; then
   echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 
   # Fix MSVC compilation issues
-  sed -i 's/-Wall -Wno-strict-aliasing//' src/Makefile
-  sed -i 's/-Wall -Wno-strict-aliasing//' src/support/Makefile
-  sed -i 's!$(LLVM_CONFIG) --cxxflags!$(LLVM_CONFIG) --cxxflags | sed "s/-Woverloaded-virtual -Wcast-qual//"!g' src/Makefile
-  sed -i "s/_setjmp.win$bits.o _longjmp.win$bits.o//g" src/support/Makefile # this probably breaks exception handling
-  sed -i 's/char bool/char _bool/' deps/utf8proc-v1.1.6/utf8proc.h
-  sed -i 's/false, true/_false, _true/' deps/utf8proc-v1.1.6/utf8proc.h
-  sed -i 's/buffer = malloc/buffer = (int32_t *) malloc/' deps/utf8proc-v1.1.6/utf8proc.c
-  sed -i 's/newptr = realloc/newptr = (int32_t *) realloc/' deps/utf8proc-v1.1.6/utf8proc.c
+  sed -i 's!$(LLVM_CONFIG) --cxxflags)!$(LLVM_CONFIG) --cxxflags | sed "s/-Woverloaded-virtual -Wcast-qual//")!g' src/Makefile
   #sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
+  
+  # Compile libuv and utf8proc without -TP first, then add -TP
+  make -C deps install-uv install-utf8proc
+  echo 'override CC += -TP' >> Make.user
 else
   echo 'override STAGE1_DEPS += openlibm' >> Make.user
-fi
-
-# Disable git and enable verbose make in AppVeyor
-if [ -n "$APPVEYOR" ]; then
- echo 'override NO_GIT = 1' >> Make.user
- echo 'VERBOSE = 1' >> Make.user
 fi
 
 make -j 4
