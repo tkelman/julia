@@ -68,38 +68,55 @@ if [ -z "$USEMSVC" ]; then
     [ -e mingw$bits/bin/make.exe ] && rm mingw$bits/bin/make.exe
   fi
   export AR=${CROSS_COMPILE}ar
+
+  f=llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z
+  if ! [ -e $f ]; then
+    echo "Downloading $f"
+    deps/jldownload "http://sourceforge.net/projects/juliadeps-win/files/$f -sS"
+  fi
+  echo "Extracting $f"
+  7z x -y $f >> get-deps.log
+  echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
+  # The binary version of LLVM doesn't include libgtest or libgtest_main
+  $AR cr usr/lib/libgtest.a
+  $AR cr usr/lib/libgtest_main.a
 else
   # compile and ar-lib scripts to use MSVC instead of MinGW compiler
   deps/jldownload compile "http://git.savannah.gnu.org/cgit/automake.git/plain/lib/compile?id=v1.14.1 -sS"
   deps/jldownload ar-lib "http://git.savannah.gnu.org/cgit/automake.git/plain/lib/ar-lib?id=v1.14.1 -sS"
+  # Create a modified version of compile for wrapping link
+  sed -e 's/-link//' -e 's/cl/link/g' -e 's/ -Fe/ -OUT:/' compile > linkld
   chmod +x compile
   chmod +x ar-lib
+  chmod +x linkld
   echo "override CC = $PWD/compile cl -nologo" >> Make.user
   echo 'override CXX = $(CC)' >> Make.user
-  echo 'override FC = $(CC)' >> Make.user
   export AR="$PWD/ar-lib lib"
+  export LD="$PWD/linkld link"
   echo "override AR = $AR" >> Make.user
-  export LD=link
+  echo "override LD = $LD" >> Make.user
+
+  f=LLVM-3.3-final-win$bits.rar
+  if ! [ -e $f ]; then
+    echo "Downloading $f"
+    deps/jldownload "http://sourceforge.net/projects/clangonwin/files/MSVC_Build/3.3/Release/final/$f -sS"
+  fi
+  echo "Extracting $f"
+  for i in include/llvm include/llvm-c lib/gtest*.lib lib/LLVM*.lib; do
+    7z x -y $f "*/$i" >> get-deps.log
+  done
+  mv LLVM*/include usr
+  mv LLVM*/lib usr
+  deps/jldownload usr/bin/llvm-config "https://gist.githubusercontent.com/tkelman/9734909/raw/514ab0e381d1766366b5571215dba1bd4fc927d2/llvm-config -sS"
+  chmod +x usr/bin/llvm-config
+  echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
 fi
 
 # If no Fortran compiler installed, override with name of C compiler
 # (this only fixes the unnecessary invocation of FC in openlibm)
 if [ -z "`which ${CROSS_COMPILE}gfortran 2>/dev/null`" ]; then
-  echo "override FC = ${CROSS_COMPILE}gcc" >> Make.user
+  echo 'override FC = $(CC)' >> Make.user
 fi
-
-f=llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z
-if ! [ -e $f ]; then
-  echo "Downloading $f"
-  deps/jldownload "http://sourceforge.net/projects/juliadeps-win/files/$f -sS"
-fi
-echo "Extracting $f"
-7z x -y $f >> get-deps.log
-echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
-echo 'LLVM_LLC = $(JULIAHOME)/usr/bin/llc' >> Make.user
-# The binary version of LLVM doesn't include libgtest or libgtest_main
-$AR cr usr/lib/libgtest.a
-$AR cr usr/lib/libgtest_main.a
 
 if [ -z "`which make 2>/dev/null`" ]; then
   download="/make/make-3.81-2/make-3.81-2-msys-1.0.11-bin.tar"
@@ -121,7 +138,7 @@ for f in $download \
 done
 if [ -z "`which make 2>/dev/null`" ]; then
   mv bin/make.exe /usr/bin
-  # msysgit has an ancient version of touch that fails with touch -c nonexistent
+  # msysgit has an ancient version of touch that fails with `touch -c nonexistent`
   cp bin/touch.exe /usr/bin
 fi
 for i in cat chmod echo false printf sort touch true; do
@@ -181,12 +198,9 @@ if [ -n "$USEMSVC" ]; then
   # Since we don't have a static library for openlibm
   echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 
-  # Fix MSVC compilation issues
-  sed -i 's!$(LLVM_CONFIG) --cxxflags)!$(LLVM_CONFIG) --cxxflags | sed "s/-Woverloaded-virtual -Wcast-qual//")!g' src/Makefile
-  #sed -i 's/-Wno-implicit-function-declaration//' deps/openlibm/Make.inc
-  
   # Compile libuv and utf8proc without -TP first, then add -TP
   make -C deps install-uv install-utf8proc
+  cp usr/lib/uv.lib usr/lib/libuv.a
   echo 'override CC += -TP' >> Make.user
 else
   echo 'override STAGE1_DEPS += openlibm' >> Make.user
