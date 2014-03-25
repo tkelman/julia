@@ -70,16 +70,6 @@ if [ -z "$USEMSVC" ]; then
   export AR=${CROSS_COMPILE}ar
 
   f=llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z
-  if ! [ -e $f ]; then
-    echo "Downloading $f"
-    deps/jldownload "http://sourceforge.net/projects/juliadeps-win/files/$f -sS"
-  fi
-  echo "Extracting $f"
-  7z x -y $f >> get-deps.log
-  echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
-  # The binary version of LLVM doesn't include libgtest or libgtest_main
-  $AR cr usr/lib/libgtest.a
-  $AR cr usr/lib/libgtest_main.a
 else
   # compile and ar-lib scripts to use MSVC instead of MinGW compiler
   deps/jldownload compile "http://git.savannah.gnu.org/cgit/automake.git/plain/lib/compile?id=v1.14.1 -sS"
@@ -96,21 +86,19 @@ else
   echo "override AR = $AR" >> Make.user
   echo "override LD = $LD" >> Make.user
 
-  f=LLVM-3.3-final-win$bits.rar
-  if ! [ -e $f ]; then
-    echo "Downloading $f"
-    deps/jldownload "http://sourceforge.net/projects/clangonwin/files/MSVC_Build/3.3/Release/final/$f -sS"
-  fi
-  echo "Extracting $f"
-  for i in include/llvm include/llvm-c lib/gtest*.lib lib/LLVM*.lib; do
-    7z x -y $f "*/$i" >> get-deps.log
-  done
-  mv LLVM*/include usr
-  mv LLVM*/lib usr
-  deps/jldownload usr/bin/llvm-config "https://gist.githubusercontent.com/tkelman/9734909/raw/514ab0e381d1766366b5571215dba1bd4fc927d2/llvm-config -sS"
-  chmod +x usr/bin/llvm-config
-  echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
+  f=llvm-3.3.1-$ARCH-msvc11-juliadeps.7z
 fi
+
+if ! [ -e $f ]; then
+  echo "Downloading $f"
+  deps/jldownload "http://sourceforge.net/projects/juliadeps-win/files/$f -sS"
+fi
+echo "Extracting $f"
+7z x -y $f >> get-deps.log
+echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
+# The MinGW binary version of LLVM doesn't include libgtest or libgtest_main
+$AR cr usr/lib/libgtest.a
+$AR cr usr/lib/libgtest_main.a
 
 # If no Fortran compiler installed, override with name of C compiler
 # (this only fixes the unnecessary invocation of FC in openlibm)
@@ -177,11 +165,10 @@ echo 'override LIBUV = $(JULIAHOME)/usr/lib/libuv.a' >> Make.user
 echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 
 # Remaining dependencies:
-# random until the Windows binaries get updated with latest feature
 # openlibm (and readline?) since we need these as static libraries to
-# work properly (not included as part of Julia Windows binaries yet)
+# work properly (not included as part of Julia Windows binaries)
 # utf8proc since its headers are not in the binary download
-echo 'override STAGE1_DEPS = random' >> Make.user
+echo 'override STAGE1_DEPS = ' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 make -C deps get-openlibm get-utf8proc get-random
