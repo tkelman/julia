@@ -7,16 +7,16 @@ init:
 # Carriage returns are bad
   - git config --global core.autocrlf input
 
-install:
+#install:
 # Install Cygwin and build-time dependencies
-  - "cinst cyg-get > cyg-get.log"
-  - set PATH=%PATH%;C:\cygwin
-  - "cyg-get make >> cyg-get.log"
-  - "cyg-get curl >> cyg-get.log"
-  - "cyg-get mingw64-%ARCH%-gcc-g++ >> cyg-get.log"
+#  - "cinst cyg-get > cyg-get.log"
+#  - set PATH=%PATH%;C:\cygwin
+#  - "cyg-get make >> cyg-get.log"
+#  - "cyg-get curl >> cyg-get.log"
+#  - "cyg-get mingw64-%ARCH%-gcc-g++ >> cyg-get.log"
 
 build_script:
-  - C:\cygwin\bin\sh --login /cygdrive/c/projects/julia/contrib/windows/msys_build.sh
+  - sh --login /c/projects/julia/contrib/windows/msys_build.sh
 
 test_script:
   - cd test && ..\usr\bin\julia-basic runtests.jl all
