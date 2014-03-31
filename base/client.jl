@@ -70,22 +70,6 @@ function repl_hook(input::String)
          macroexpand(Expr(:macrocall,symbol("@cmd"),input)))
 end
 
-function repl_methods(input::String)
-    tokens = split(input, ".")
-    fn = Main
-    for token in tokens
-        sym = symbol(token)
-        isdefined(fn, sym) || return
-        fn = fn.(sym)
-    end
-    isgeneric(fn) || return
-
-    buf = IOBuffer()
-    show_method_table(buf, methods(fn), -1, false)
-    println(buf)
-    takebuf_string(buf)
-end
-
 display_error(er) = display_error(er, {})
 function display_error(er, bt)
     with_output_color(:red, STDERR) do io
@@ -328,11 +312,11 @@ function _start()
 
         local term
         if repl
-            term = Terminals.UnixTerminal(get(ENV,"TERM",""),STDIN,STDOUT,STDERR)
             if !isa(STDIN,TTY)
                 global is_interactive = !isa(STDIN,Union(File,IOStream))
                 color_set || (global have_color = false)
             else
+                term = Terminals.UnixTerminal(get(ENV,"TERM",""),STDIN,STDOUT,STDERR)
                 global is_interactive = true
                 color_set || (global have_color = Terminals.hascolor(term))
             end
