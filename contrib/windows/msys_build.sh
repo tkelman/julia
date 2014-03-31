@@ -190,6 +190,6 @@ else
   echo 'override STAGE1_DEPS += openlibm' >> Make.user
 fi
 
-make -j 4 || make debug -j 4
+make -j 4
 # remove precompiled system image
 rm -f usr/lib/julia/sys.dll
