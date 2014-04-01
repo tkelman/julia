@@ -52,6 +52,7 @@ ifneq ($(USEMSVC), 1)
 CXXLD = $(CXX)
 else
 CXXLD = $(LD)
+JLDFLAGS += -lgetopt
 endif
 
 $(build_bindir)/julia$(EXE): repl.o repl-basic.o
