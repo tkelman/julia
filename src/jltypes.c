@@ -14,6 +14,10 @@
 #include "julia_internal.h"
 #include "builtin_proto.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 jl_datatype_t *jl_any_type;
 jl_datatype_t *jl_type_type;
 jl_datatype_t *jl_typename_type;
@@ -3134,4 +3138,9 @@ void jl_init_types(void)
     boundscheck_sym = jl_symbol("boundscheck");
     newvar_sym = jl_symbol("newvar");
     copyast_sym = jl_symbol("copyast");
+    simdloop_sym = jl_symbol("simdloop");
 }
+
+#ifdef __cplusplus
+}
+#endif

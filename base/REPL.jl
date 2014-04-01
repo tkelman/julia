@@ -16,7 +16,7 @@ import Base.Terminals: raw!
 import Base.LineEdit: CompletionProvider,
                       HistoryProvider,
                       add_history,
-                      completeLine,
+                      complete_line,
                       history_prev,
                       history_next,
                       history_search
@@ -162,13 +162,13 @@ type ShellCompletionProvider <: CompletionProvider
     r::LineEditREPL
 end
 
-function completeLine(c::REPLCompletionProvider,s)
+function complete_line(c::REPLCompletionProvider,s)
     partial = bytestring(s.input_buffer.data[1:position(s.input_buffer)])
     ret, range, should_complete = completions(partial,endof(partial))
     return (ret, partial[range], should_complete)
 end
 
-function completeLine(c::ShellCompletionProvider,s)
+function complete_line(c::ShellCompletionProvider,s)
     # First parse everything up to the current position
     partial = bytestring(s.input_buffer.data[1:position(s.input_buffer)])
     ret, range, should_complete = shell_completions(partial,endof(partial))
@@ -256,7 +256,8 @@ function history_prev(s::LineEdit.MIState,hist::REPLHistoryProvider)
         hist.cur_idx-=1
         LineEdit.transition(s,hist.mode_mapping[hist.modes[hist.cur_idx]])
         LineEdit.replace_line(s,hist.history[hist.cur_idx])
-        LineEdit.refresh_line(s)
+        LineEdit.move_input_start(s)
+        LineEdit.move_line_end(s)
     else
         Terminals.beep(LineEdit.terminal(s))
     end
@@ -268,23 +269,23 @@ function history_next(s::LineEdit.MIState,hist::REPLHistoryProvider)
         hist.cur_idx+=1
         LineEdit.transition(s,hist.mode_mapping[hist.modes[hist.cur_idx]])
         LineEdit.replace_line(s,hist.history[hist.cur_idx])
-        LineEdit.refresh_line(s)
+        LineEdit.move_input_end(s)
     elseif hist.cur_idx == length(hist.history)
         hist.cur_idx+=1
         buf = hist.last_buffer
         hist.last_buffer = IOBuffer()
         LineEdit.transition(s,hist.last_mode)
         LineEdit.replace_line(s,buf)
-        LineEdit.refresh_line(s)
+        LineEdit.move_input_end(s)
     elseif 0 < hist.last_idx < length(hist.history)
-        # issue #6321
+        # issue #6312
         hist.cur_idx = hist.last_idx + 1
         hist.last_idx = -1
         hist.last_mode = LineEdit.mode(s)
         hist.last_buffer = copy(LineEdit.buffer(s))
         LineEdit.transition(s,hist.mode_mapping[hist.modes[hist.cur_idx]])
         LineEdit.replace_line(s,hist.history[hist.cur_idx])
-        LineEdit.refresh_line(s)
+        LineEdit.move_input_end(s)
     else
         Terminals.beep(LineEdit.terminal(s))
     end
@@ -568,7 +569,16 @@ function setup_interface(d::REPLDisplay,req,rep;extra_repl_keymap=Dict{Any,Any}[
     main_prompt.keymap_func = repl_keymap_func
 
     const mode_keymap = {
-        '\b' => s->(isempty(s) ? transition(s,main_prompt) : LineEdit.edit_backspace(s) )
+        '\b' => function (s)
+            if (isempty(s) || position(LineEdit.buffer(s)) == 0) && LineEdit.mode(s) != main_prompt
+                buf = copy(LineEdit.buffer(s))
+                transition(s,main_prompt)
+                LineEdit.state(s,main_prompt).input_buffer = buf
+                LineEdit.refresh_line(s)
+            else
+                LineEdit.edit_backspace(s)
+            end
+        end
     }
 
     b = Dict{Any,Any}[hkeymap, mode_keymap, LineEdit.history_keymap(hp), LineEdit.default_keymap,LineEdit.escape_defaults]

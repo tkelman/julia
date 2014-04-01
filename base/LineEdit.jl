@@ -20,6 +20,7 @@ type MIState
     current_mode
     aborted::Bool
     mode_state
+    kill_buffer::ByteString
 end
 
 type Mode <: TextInterface
@@ -65,13 +66,13 @@ end
 
 reset_state(::EmptyHistoryProvider) = nothing
 
-completeLine(c::EmptyCompletionProvider,s) = []
+complete_line(c::EmptyCompletionProvider,s) = []
 
 terminal(s::IO) = s
 terminal(s::PromptState) = s.terminal
 
 for f in [:terminal,:edit_insert,:on_enter,:add_history,:buffer,:edit_backspace,:(Base.isempty),
-        :replace_line,:refreshMultiLine,:input_string,:completeLine,:edit_move_left,:edit_move_right,
+        :replace_line,:refreshMultiLine,:input_string,:complete_line,:edit_move_left,:edit_move_right,
         :edit_move_word_left,:edit_move_word_right,:update_display_buffer]
     @eval ($f)(s::MIState,args...) = $(f)(s.mode_state[s.current_mode],args...)
 end
@@ -114,8 +115,8 @@ function show_completions(s::PromptState, completions)
     end
 end
 
-function completeLine(s::PromptState)
-    (completions,partial,should_complete) = completeLine(s.p.complete,s)
+function complete_line(s::PromptState)
+    (completions,partial,should_complete) = complete_line(s.p.complete,s)
     if length(completions) == 0
         beep(LineEdit.terminal(s))
     elseif !should_complete
@@ -525,6 +526,18 @@ function edit_delete_next_word(s)
     edit_delete_next_word(buffer(s)) && refresh_line(s)
 end
 
+function edit_yank(s::MIState)
+    edit_insert(buffer(s),s.kill_buffer)
+    refresh_line(s)
+end
+
+function edit_kill(s::MIState)
+    pos = position(buffer(s))
+    s.kill_buffer = readall(buffer(s))
+    truncate(buffer(s),pos);
+    refresh_line(s)
+end
+
 function replace_line(s::PromptState,l::IOBuffer)
     s.input_buffer = l
 end
@@ -545,7 +558,7 @@ function history_prev(s,hist)
     (l,ok) = history_prev(mode(s).hist)
     if ok
         replace_line(s,l)
-        refresh_line(s)
+        move_input_start(s)
     else
         beep(LineEdit.terminal(s))
     end
@@ -554,7 +567,7 @@ function history_next(s,hist)
     (l,ok) = history_next(mode(s).hist)
     if ok
         replace_line(s,l)
-        refresh_line(s)
+        move_input_end(s)
     else
         beep(LineEdit.terminal(s))
     end
@@ -913,6 +926,10 @@ function setup_search_keymap(hp)
         127     => '\b',
         "^C"    => s->transition(s,state(s,p).parent),
         "^D"    => s->transition(s,state(s,p).parent),
+        # ^K
+        11      => s->transition(s,state(s,p).parent),
+        # ^Y
+        25      => :(LineEdit.edit_yank(s); LineEdit.update_display_buffer(s,data)),
         # ^A
         1       => s->(accept_result(s,p); move_line_start(s)),
         # ^E
@@ -1003,7 +1020,7 @@ const default_keymap =
                 return
             end
         end
-        LineEdit.completeLine(s)
+        LineEdit.complete_line(s)
         LineEdit.refresh_line(s)
     end,
     # Enter
@@ -1019,6 +1036,9 @@ const default_keymap =
     # Backspace/^H
     '\b' => edit_backspace,
     127 => '\b',
+    # Meta Backspace
+    "\e\b" => edit_delete_prev_word,
+    "\e\x7f" => "\e\b",
     # ^D
     4 => quote
         if LineEdit.buffer(s).size > 0
@@ -1043,7 +1063,9 @@ const default_keymap =
     # ^U
     21 => :( truncate(LineEdit.buffer(s),0); LineEdit.refresh_line(s) ),
     # ^K
-    11 => :( truncate(LineEdit.buffer(s),position(LineEdit.buffer(s))); LineEdit.refresh_line(s) ),
+    11 => edit_kill,
+    # ^Y
+    25 => edit_yank,
     # ^A
     1 => move_line_start,
     # ^E
@@ -1165,7 +1187,7 @@ end
 init_state(terminal,prompt::Prompt) = PromptState(terminal,prompt,IOBuffer(),InputAreaState(1,1),length(prompt.prompt))
 
 function init_state(terminal,m::ModalInterface)
-    s = MIState(m,m.modes[1],false,Dict{Any,Any}())
+    s = MIState(m,m.modes[1],false,Dict{Any,Any}(),"")
     for mode in m.modes
         s.mode_state[mode] = init_state(terminal,mode)
     end
