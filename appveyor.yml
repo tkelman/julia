@@ -19,4 +19,5 @@ build_script:
   - C:\cygwin\bin\sh --login /cygdrive/c/projects/julia/contrib/windows/msys_build.sh
 
 test_script:
+  - set JULIA_CPU_CORES=4
   - cd test && ..\usr\bin\julia runtests.jl all
