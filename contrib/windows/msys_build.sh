@@ -66,9 +66,6 @@ if [ -z "$USEMSVC" ]; then
     export PATH=$PATH:$PWD/mingw$bits/bin
     # If there is a version of make.exe here, it is mingw32-make which won't work
     rm -f mingw$bits/bin/make.exe
-  else
-    which ${CROSS_COMPILE}gcc
-    ${CROSS_COMPILE}gcc -v
   fi
   export AR=${CROSS_COMPILE}ar
 

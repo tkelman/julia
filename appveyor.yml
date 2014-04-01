@@ -16,6 +16,9 @@ init:
 #  - "cyg-get mingw64-%ARCH%-gcc-g++ >> cyg-get.log"
 
 build_script:
+# Remove C:\MinGW\bin from the path, the version of MinGW installed on
+# AppVeyor is not compatible with the cross-compiled Julia Windows binaries
+  - set PATH=%PATH:C:\MinGW\bin;=%
   - sh --login /c/projects/julia/contrib/windows/msys_build.sh
 
 test_script:
