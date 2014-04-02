@@ -266,6 +266,7 @@ end
 
 
 # Edit functionality
+is_non_word_char(c) = in(c," \t\n\"\\'`@\$><=:;|&{}()[].,+-*/?%^~")
 
 char_move_left(s::PromptState) = char_move_left(s.input_buffer)
 function char_move_left(buf::IOBuffer)
@@ -274,6 +275,10 @@ function char_move_left(buf::IOBuffer)
         c = peek(buf)
         (((c & 0x80) == 0) || ((c & 0xc0) == 0xc0)) && break
     end
+    pos = position(buf)
+    c = read(buf,Char)
+    seek(buf,pos)
+    c
 end
 
 function edit_move_left(s::PromptState)
@@ -293,37 +298,28 @@ end
 
 char_move_right(s) = char_move_right(buffer(s))
 function char_move_right(buf::IOBuffer)
-    while position(buf) != buf.size
-        seek(buf, position(buf)+1)
-        position(buf) == buf.size && break
-        c = peek(buf)
-        (((c & 0x80) == 0) || ((c & 0xc0) == 0xc0)) && break
-    end
+    !eof(buf) && read(buf, Char)
 end
 
-function char_move_word_right(buf::IOBuffer)
-    while !eof(buf) && isspace(read(buf, Char))
+function char_move_word_right(buf::IOBuffer, is_delimiter=is_non_word_char)
+    while !eof(buf) && is_delimiter(char_move_right(buf))
     end
     while !eof(buf)
-        c = peek(buf)
-        if isspace(char(c))
+        pos = position(buf)
+        if is_delimiter(char_move_right(buf))
+            seek(buf,pos)
             break
         end
-        read(buf, Char)
     end
 end
 
-function char_move_word_left(buf::IOBuffer)
-    while position(buf) > 0
-        char_move_left(buf)
-        c = peek(buf)
-        !isspace(char(c)) && break
+function char_move_word_left(buf::IOBuffer,is_delimiter=is_non_word_char)
+    while position(buf) > 0 && is_delimiter(char_move_left(buf))
     end
     while position(buf) > 0
-        char_move_left(buf)
-        c = peek(buf)
-        if isspace(char(c))
-            read(buf, Uint8)
+        pos = position(buf)
+        if is_delimiter(char_move_left(buf))
+            seek(buf,pos)
             break
         end
     end
@@ -474,6 +470,19 @@ function edit_delete(s)
     else
         beep(LineEdit.terminal(s))
     end
+end
+
+function edit_werase(buf::IOBuffer)
+    pos1 = position(buf)
+    char_move_word_left(buf,isspace)
+    pos0 = position(buf)
+    pos0 < pos1 || return false
+    memmove(buf, pos0+1, buf, pos1+1, buf.size-pos1)
+    buf.size -= pos1 - pos0
+    true
+end
+function edit_werase(s)
+    edit_werase(buffer(s)) && refresh_line(s)
 end
 
 function edit_delete_prev_word(buf::IOBuffer)
@@ -796,11 +805,11 @@ const escape_defaults = {
 
 function write_response_buffer(s::PromptState, data)
     offset = s.input_buffer.ptr
-    ptr = data.respose_buffer.ptr
-    seek(data.respose_buffer, 0)
-    write(s.input_buffer, readall(data.respose_buffer))
+    ptr = data.response_buffer.ptr
+    seek(data.response_buffer, 0)
+    write(s.input_buffer, readall(data.response_buffer))
     s.input_buffer.ptr = offset + ptr - 2
-    data.respose_buffer.ptr = ptr
+    data.response_buffer.ptr = ptr
     refresh_line(s)
 end
 
@@ -810,7 +819,7 @@ type SearchState
     #rsearch (true) or ssearch (false)
     backward::Bool
     query_buffer::IOBuffer
-    respose_buffer::IOBuffer
+    response_buffer::IOBuffer
     ias::InputAreaState
     #The prompt whose input will be replaced by the matched history
     parent
@@ -820,13 +829,13 @@ end
 terminal(s::SearchState) = s.terminal
 
 function update_display_buffer(s::SearchState, data)
-    history_search(data.histprompt.hp, data.query_buffer, data.respose_buffer, data.backward, false) || beep(LineEdit.terminal(s))
+    history_search(data.histprompt.hp, data.query_buffer, data.response_buffer, data.backward, false) || beep(LineEdit.terminal(s))
     refresh_line(s)
 end
 
 function history_next_result(s::MIState, data::SearchState)
-    #truncate(data.query_buffer, s.input_buffer.size - data.respose_buffer.size)
-    history_search(data.histprompt.hp, data.query_buffer, data.respose_buffer, data.backward, true) || beep(LineEdit.terminal(s))
+    #truncate(data.query_buffer, s.input_buffer.size - data.response_buffer.size)
+    history_search(data.histprompt.hp, data.query_buffer, data.response_buffer, data.backward, true) || beep(LineEdit.terminal(s))
     refresh_line(data)
 end
 
@@ -839,11 +848,11 @@ function refreshMultiLine(s::SearchState)
     write(buf, pointer(s.query_buffer.data), s.query_buffer.ptr-1)
     write(buf, "': ")
     offset = buf.ptr
-    ptr = s.respose_buffer.ptr
-    seek(s.respose_buffer,0)
-    write(buf, readall(s.respose_buffer))
+    ptr = s.response_buffer.ptr
+    seek(s.response_buffer,0)
+    write(buf, readall(s.response_buffer))
     buf.ptr = offset+ptr-1
-    s.respose_buffer.ptr = ptr
+    s.response_buffer.ptr = ptr
     s.ias = refreshMultiLine(s.terminal, buf, s.ias, s.backward ? "(reverse-i-search)`" : "(i-search)`")
 end
 
@@ -852,9 +861,9 @@ function reset_state(s::SearchState)
         s.query_buffer.size = 0
         s.query_buffer.ptr = 1
     end
-    if s.respose_buffer.size != 0
-        s.respose_buffer.size = 0
-        s.query_buffer.ptr = 1
+    if s.response_buffer.size != 0
+        s.response_buffer.size = 0
+        s.response_buffer.ptr = 1
     end
     reset_state(s.histprompt.hp)
 end
@@ -875,8 +884,19 @@ mode(s::SearchState) = @assert false
 
 function accept_result(s, p)
     parent = state(s, p).parent
-    replace_line(state(s, parent), state(s, p).respose_buffer)
+    replace_line(state(s, parent), state(s, p).response_buffer)
     transition(s, parent)
+end
+
+function enter_search(s::MIState, p::HistoryPrompt, backward::Bool)
+    # a bit of hack to help fix #6325
+    p.hp.last_mode = mode(s)
+    p.hp.last_buffer = copy(buffer(s))
+
+    ss = state(s, p)
+    ss.parent = mode(s)
+    ss.backward = backward
+    transition(s, p)
 end
 
 function setup_search_keymap(hp)
@@ -909,8 +929,8 @@ function setup_search_keymap(hp)
     @eval @LineEdit.keymap keymap_func $([pkeymap, escape_defaults])
     p.keymap_func = keymap_func
     keymap = {
-        "^R"    => s->(state(s, p).parent = mode(s); state(s, p).backward = true; transition(s, p)),
-        "^S"    => s->(state(s, p).parent = mode(s); state(s, p).backward = false; transition(s, p)),
+        "^R"    => s->(enter_search(s, p, true)),
+        "^S"    => s->(enter_search(s, p, false)),
     }
     (p, keymap)
 end
@@ -1039,7 +1059,7 @@ const default_keymap =
     # ^L
     12 => :(Terminals.clear(LineEdit.terminal(s)); LineEdit.refresh_line(s)),
     # ^W
-    23 => edit_delete_prev_word,
+    23 => edit_werase,
     # Meta D
     "\ed" => edit_delete_next_word,
     # ^C

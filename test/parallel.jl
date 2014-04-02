@@ -70,6 +70,14 @@ end
 @test ones(10, 10, 10) == Base.shmem_fill(1.0, (10,10,10))
 @test zeros(Int32, 10, 10, 10) == Base.shmem_fill(0, (10,10,10))
 
+d = Base.shmem_rand(dims)
+s = Base.shmem_rand(dims)
+copy!(s, d)
+@test s == d
+s = Base.shmem_rand(dims)
+copy!(s, sdata(d))
+@test s == d
+
 d = SharedArray(Int, dims; init = D->fill!(D.loc_subarr_1d, myid()))
 for p in procs(d)
     idxes_in_p = remotecall_fetch(p, D -> parentindexes(D.loc_subarr_1d)[1], d)
@@ -78,6 +86,16 @@ for p in procs(d)
     @test d[idxf] == p 
     @test d[idxl] == p 
 end
+
+# issue #6362
+d = Base.shmem_rand(dims)
+s = copy(sdata(d))
+ds = deepcopy(d)
+@test ds == d
+remotecall_fetch(findfirst(id->(id != myid()), procs(ds)), setindex!, ds, 1.0, 1:10)
+@test ds != d
+@test s == d
+
 
 # SharedArray as an array
 # Since the data in d will depend on the nprocs, just test that these operations work
