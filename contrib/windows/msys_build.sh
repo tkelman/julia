@@ -70,19 +70,13 @@ if [ -z "$USEMSVC" ]; then
   export AR=${CROSS_COMPILE}ar
 
   f=llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z
+  # The MinGW binary version of LLVM doesn't include libgtest or libgtest_main
+  $AR cr usr/lib/libgtest.a
+  $AR cr usr/lib/libgtest_main.a
 else
-  # compile and ar-lib scripts to use MSVC instead of MinGW compiler
-  curl -kLOsS3 https://raw.githubusercontent.com/Distrotech/automake/v1.14.1/lib/compile
-  curl -kLOsS3 https://raw.githubusercontent.com/Distrotech/automake/v1.14.1/lib/ar-lib
-  # Create a modified version of compile for wrapping link
-  sed -e 's/-link//' -e 's/cl/link/g' -e 's/ -Fe/ -OUT:/' \
-    -e 's|$dir/$lib|$dir/lib$lib|g' compile > linkld
-  chmod +x compile
-  chmod +x ar-lib
-  chmod +x linkld
-  export CC="$PWD/compile cl -nologo"
-  export AR="$PWD/ar-lib lib"
-  export LD="$PWD/linkld link"
+  export CC="$PWD/deps/libuv/compile cl -nologo"
+  export AR="$PWD/deps/libuv/ar-lib lib"
+  export LD="$PWD/deps/libuv/linkld link"
   echo "override CC = $CC" >> Make.user
   echo 'override CXX = $(CC)' >> Make.user
   echo "override AR = $AR" >> Make.user
@@ -98,9 +92,6 @@ fi
 echo "Extracting $f"
 7z x -y $f >> get-deps.log
 echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
-# The MinGW binary version of LLVM doesn't include libgtest or libgtest_main
-$AR cr usr/lib/libgtest.a
-$AR cr usr/lib/libgtest_main.a
 
 # If no Fortran compiler installed, override with name of C compiler
 # (this only fixes the unnecessary invocation of FC in openlibm)
@@ -177,6 +168,11 @@ if [ -n "$APPVEYOR" ]; then
 fi
 
 if [ -n "$USEMSVC" ]; then
+  # Create a modified version of compile for wrapping link
+  sed -e 's/-link//' -e 's/cl/link/g' -e 's/ -Fe/ -OUT:/' \
+    -e 's|$dir/$lib|$dir/lib$lib|g' deps/libuv/compile > deps/libuv/linkld
+  chmod +x deps/libuv/linkld
+
   # Openlibm doesn't build well with MSVC right now
   echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
   # Since we don't have a static library for openlibm
