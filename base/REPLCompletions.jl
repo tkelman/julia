@@ -8,10 +8,17 @@ function completes_global(x, name)
     return beginswith(x, name) && !('#' in x)
 end
 
+function filtered_mod_names(ffunc::Function, mod::Module, name::String, all::Bool=false, imported::Bool=false)
+    ssyms = names(mod, all, imported)
+    filter!(ffunc, ssyms)
+    syms = UTF8String[string(s) for s in ssyms]
+    filter!(x->completes_global(x, name), syms)
+end
+
 # REPL Symbol Completions
 function complete_symbol(sym, ffunc)
     # Find module
-    strs = split(sym, ".")
+    strs = split(sym, '.')
     # Maybe be smarter in the future
     context_module = Main
 
@@ -32,11 +39,11 @@ function complete_symbol(sym, ffunc)
                     # A.B.C where B is neither a type nor a
                     # module. Will have to be revisited if
                     # overloading is allowed
-                    return ASCIIString[]
+                    return UTF8String[]
                 end
             else
                 # A.B.C where B doesn't exist in A. Give up
-                return ASCIIString[]
+                return UTF8String[]
             end
         else
             # We're now looking for a type
@@ -46,7 +53,7 @@ function complete_symbol(sym, ffunc)
                 if s == fields[i]
                     t = t.types[i]
                     if !Base.isstructtype(t)
-                        return ASCIIString[]
+                        return UTF8String[]
                     end
                     found = true
                     break
@@ -54,14 +61,14 @@ function complete_symbol(sym, ffunc)
             end
             if !found
                 #Same issue as above, but with types instead of modules
-                return ASCIIString[]
+                return UTF8String[]
             end
         end
     end
 
     name = strs[end]
 
-    suggestions = String[]
+    suggestions = UTF8String[]
     if lookup_module
         # We will exlcude the results that the user does not want, as well
         # as excluding Main.Main.Main, etc., because that's most likely not what
@@ -72,20 +79,12 @@ function complete_symbol(sym, ffunc)
             # Also look in modules we got through `using`
             mods = ccall(:jl_module_usings, Any, (Any,), Main)
             for m in mods
-                ssyms = names(m)
-                filter!(p, ssyms)
-                syms = map!(string, Array(UTF8String, length(ssyms)), ssyms)
-                append!(suggestions, syms[map((x)->completes_global(x, name), syms)])
+                append!(suggestions, filtered_mod_names(p, m, name))
             end
-            ssyms = names(mod, true, true)
-            filter!(p, ssyms)
-            syms = map!(string, Array(UTF8String, length(ssyms)), ssyms)
+            append!(suggestions, filtered_mod_names(p, mod, name, true, true))
         else
-            ssyms = names(mod, true, false)
-            filter!(p, ssyms)
-            syms = map!(string, Array(UTF8String, length(ssyms)), ssyms)
+            append!(suggestions, filtered_mod_names(p, mod, name, true, false))
         end
-        append!(suggestions, syms[map((x)->completes_global(x, name), syms)])
     else
         # Looking for a member of a type
         fields = t.names
@@ -149,7 +148,20 @@ end
 
 const non_word_chars = " \t\n\"\\'`@\$><=:;|&{}()[].,+-*/?%^~"
 
-function completions(string,pos)
+# Aux function to detect whether we're right after a
+# using or import keyword
+function afterusing(string::ByteString, startpos::Int)
+    (isempty(string) || startpos == 0) && return false
+    str = string[1:prevind(string,startpos)]
+    isempty(str) && return false
+    rstr = reverse(str)
+    r = search(rstr, r"\s(gnisu|tropmi)\b")
+    isempty(r) && return false
+    fr = chr2ind(str, length(str)-ind2chr(rstr, last(r))+1)
+    return ismatch(r"^\b(using|import)\s*(\w+\s*,\s*)*\w*$", str[fr:end])
+end
+
+function completions(string, pos)
     startpos = min(pos, 1)
     dotpos = 0
     instring = false
@@ -199,32 +211,35 @@ function completions(string,pos)
         return sort(paths), r, true
     end
 
-    ffunc = (mod,x)->true
-    suggestions = UTF8String[]
-    r = rsearch(string, "using", startpos)
     if infunc
         # We're right after the start of a function call
-        return (complete_methods(string[startpos:pos-1]), startpos:pos,false)
-    elseif !isempty(r) && all(isspace, string[nextind(string, last(r)):prevind(string, startpos)])
-        # We're right after using. Let's look only for packages
+        return (complete_methods(string[startpos:pos-1]), startpos:pos, false)
+    end
+
+    ffunc = (mod,x)->true
+    suggestions = UTF8String[]
+    comp_keywords = true
+    if afterusing(string, startpos)
+        # We're right after using or import. Let's look only for packages
         # and modules we can reach from here
 
         # If there's no dot, we're in toplevel, so we should
         # also search for packages
         s = string[startpos:pos]
         if dotpos <= startpos
-            append!(suggestions, filter(pname->begin
+            append!(suggestions, filter(readdir(Pkg.dir())) do pname
                 pname[1] != '.' &&
                 pname != "METADATA" &&
                 beginswith(pname, s)
-            end,readdir(Pkg.dir())))
+            end)
         end
         ffunc = (mod,x)->(isdefined(mod, x) && isa(mod.(x), Module))
+        comp_keywords = false
     end
     startpos == 0 && (pos = -1)
     dotpos <= startpos && (dotpos = startpos - 1)
     s = string[startpos:pos]
-    append!(suggestions, complete_keyword(s))
+    comp_keywords && append!(suggestions, complete_keyword(s))
     append!(suggestions, complete_symbol(s, ffunc))
     return sort(unique(suggestions)), (dotpos+1):pos, true
 end

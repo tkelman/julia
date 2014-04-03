@@ -13,13 +13,17 @@ import Base: AsyncStream,
              writemime
 
 import Base.Terminals: raw!
-import Base.LineEdit: CompletionProvider,
-                      HistoryProvider,
-                      add_history,
-                      complete_line,
-                      history_prev,
-                      history_next,
-                      history_search
+
+import Base.LineEdit:
+    CompletionProvider,
+    HistoryProvider,
+    add_history,
+    complete_line,
+    history_next,
+    history_next_prefix,
+    history_prev,
+    history_prev_prefix,
+    history_search
 
 abstract AbstractREPL
 
@@ -141,7 +145,7 @@ type LineEditREPL <: AbstractREPL
     answer_color::String
     shell_color::String
     help_color::String
-    use_history_file::Bool
+    no_history_file::Bool
     in_shell::Bool
     in_help::Bool
     consecutive_returns::Int
@@ -153,7 +157,7 @@ LineEditREPL(t::TextTerminal) =  LineEditREPL(t, julia_green,
                                               Base.answer_color(),
                                               Base.text_colors[:red],
                                               Base.text_colors[:yellow],
-                                              true, false, false, 0)
+                                              false, false, false, 0)
 
 type REPLCompletionProvider <: CompletionProvider
     r::LineEditREPL
@@ -293,6 +297,29 @@ function history_next(s::LineEdit.MIState, hist::REPLHistoryProvider)
     end
 end
 
+function history_move_prefix(s::LineEdit.MIState,
+                             hist::REPLHistoryProvider,
+                             backwards::Bool)
+    buf = LineEdit.buffer(s)
+    n = buf.ptr - 1
+    prefix = bytestring(buf.data[1:min(n,buf.size)])
+    idxs = backwards ? ((hist.cur_idx-1):-1:1) : ((hist.cur_idx+1):length(hist.history))
+    for idx in idxs
+        if beginswith(hist.history[idx], prefix)
+            history_move(s, hist, idx)
+            seek(LineEdit.buffer(s), n)
+            LineEdit.refresh_line(s)
+            return
+        end
+    end
+    Terminals.beep(LineEdit.terminal(s))
+end
+history_next_prefix(s::LineEdit.MIState, hist::REPLHistoryProvider) =
+    hist.cur_idx == length(hist.history) ?
+        history_next(s, hist) : history_move_prefix(s, hist, false)
+history_prev_prefix(s::LineEdit.MIState, hist::REPLHistoryProvider) =
+    history_move_prefix(s, hist, true)
+
 function history_search(hist::REPLHistoryProvider, query_buffer::IOBuffer, response_buffer::IOBuffer,
                         backwards::Bool=false, skip_current::Bool=false)
     if !(query_buffer.ptr > 1)
@@ -357,7 +384,7 @@ LineEdit.reset_state(hist::REPLHistoryProvider) = history_reset_state(hist)
 
 const julia_green = "\033[1m\033[32m"
 
-function return_callback(repl,s)
+function return_callback(repl, s)
     if position(s.input_buffer) != 0 && eof(s.input_buffer) &&
         (seek(s.input_buffer, position(s.input_buffer)-1); read(s.input_buffer, Uint8) == '\n')
         repl.consecutive_returns += 1
@@ -373,13 +400,13 @@ function return_callback(repl,s)
 end
 
 function find_hist_file()
-    if isfile(".julia_history2")
-        return ".julia_history2"
+    filename = ".julia_history2"
+    if isfile(filename)
+        return filename
     elseif haskey(ENV,"JULIA_HISTORY")
         return ENV["JULIA_HISTORY"]
     else
-        @windows_only return ENV["AppData"] * "/julia/history2"
-        @unix_only return ENV["HOME"] * "/.julia_history2"
+        return joinpath(homedir(), filename)
     end
 end
 
@@ -491,7 +518,7 @@ function setup_interface(d::REPLDisplay, req, rep; extra_repl_keymap = Dict{Any,
                                           uint8(';') => shell_mode,
                                           uint8('?') => help_mode,
                                           uint8('>') => main_prompt])
-    if repl.use_history_file
+    if !repl.no_history_file
         f = open(find_hist_file(), true, true, true, false, false)
         finalizer(replc, replc->close(f))
         hist_from_file(hp, f)
@@ -568,7 +595,7 @@ function setup_interface(d::REPLDisplay, req, rep; extra_repl_keymap = Dict{Any,
         end,
     }
 
-    a = Dict{Any,Any}[hkeymap, repl_keymap, LineEdit.history_keymap(hp), LineEdit.default_keymap,LineEdit.escape_defaults]
+    a = Dict{Any,Any}[hkeymap, repl_keymap, LineEdit.history_keymap(hp), LineEdit.default_keymap, LineEdit.escape_defaults]
     prepend!(a, extra_repl_keymap)
     @eval @LineEdit.keymap repl_keymap_func $(a)
 
@@ -584,6 +611,14 @@ function setup_interface(d::REPLDisplay, req, rep; extra_repl_keymap = Dict{Any,
             else
                 LineEdit.edit_backspace(s)
             end
+        end,
+        "^C" => function (s)
+            LineEdit.move_input_end(s)
+            LineEdit.refresh_line(s)
+            print(LineEdit.terminal(s), "^C\n\n")
+            transition(s, main_prompt)
+            transition(s, :reset)
+            LineEdit.refresh_line(s)
         end
     }
 

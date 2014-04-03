@@ -39,9 +39,9 @@ immutable StepRange{T,S} <: OrdinalRange{T,S}
                 if T<:Signed && (diff > zero(diff)) != (stop > start)
                     # handle overflowed subtraction with unsigned rem
                     if diff > zero(diff)
-                        remain = -oftype(T, unsigned(-diff) % abs(step))
+                        remain = -oftype(T, unsigned(-diff) % step)
                     else
-                        remain = oftype(T, unsigned(diff) % abs(step))
+                        remain = oftype(T, unsigned(diff) % step)
                     end
                 else
                     remain = diff % step
@@ -54,8 +54,7 @@ immutable StepRange{T,S} <: OrdinalRange{T,S}
     end
 end
 
-StepRange{T,S}(start::T, step::S, stop::T) =
-    StepRange{T, S}(start, step, stop)
+StepRange{T,S}(start::T, step::S, stop::T) = StepRange{T,S}(start, step, stop)
 
 immutable UnitRange{T<:Real} <: OrdinalRange{T,Int}
     start::T
@@ -65,23 +64,26 @@ immutable UnitRange{T<:Real} <: OrdinalRange{T,Int}
 end
 UnitRange{T<:Real}(start::T, stop::T) = UnitRange{T}(start, stop)
 
-colon(a, b) = colon(promote(a,b)...)
+colon(a::Real, b::Real) = colon(promote(a,b)...)
 
-colon{T<:Real}(start::T, stop::T) = UnitRange(start, stop)
+colon{T<:Real}(start::T, stop::T) = UnitRange{T}(start, stop)
+
 range(a::Real, len::Integer) = UnitRange{typeof(a)}(a, a+len-1)
 
 colon{T}(start::T, stop::T) = StepRange(start, one(stop-start), stop)
+
 range{T}(a::T, len::Integer) =
     StepRange{T, typeof(a-a)}(a, one(a-a), a+oftype(a-a,(len-1)))
 
 # first promote start and stop, leaving step alone
 # this is for non-numeric ranges where step can be quite different
-colon{A,C}(a::A, b, c::C) = colon(convert(promote_type(A,C),a), b, convert(promote_type(A,C),c))
+colon{A<:Real,C<:Real}(a::A, b, c::C) = colon(convert(promote_type(A,C),a), b, convert(promote_type(A,C),c))
+
+colon{T<:Real}(start::T, step, stop::T) = StepRange(start, step, stop)
 
 colon{T}(start::T, step, stop::T) = StepRange(start, step, stop)
 
-range{T,S}(a::T, step::S, len::Integer) =
-    StepRange{T, S}(a, step, a+step*(len-1))
+range{T,S}(a::T, step::S, len::Integer) = StepRange{T,S}(a, step, a+step*(len-1))
 
 ## floating point ranges
 
@@ -112,30 +114,34 @@ function rat(x)
     return a, b
 end
 
-# float range "lifting" helper
-function frange{T<:FloatingPoint}(start::T, step::T, stop::T)
+function colon{T<:FloatingPoint}(start::T, step::T, stop::T)
+    step == 0                    && error("range step cannot be zero")
+    start == stop                && return FloatRange{T}(start,step,1,1)
+    (0 < step) != (start < stop) && return FloatRange{T}(start,step,0,1)
+
+    # float range "lifting"
     r = (stop-start)/step
     n = round(r)
     lo = prevfloat((prevfloat(stop)-nextfloat(start))/n)
     hi = nextfloat((nextfloat(stop)-prevfloat(start))/n)
     if lo <= step <= hi
-        a, b = rat(start)
-        a = convert(T,a)
+        a0, b = rat(start)
+        a = convert(T,a0)
         if a/convert(T,b) == start
-            c, d = rat(step)
-            c = convert(T,c)
+            c0, d = rat(step)
+            c = convert(T,c0)
             if c/convert(T,d) == step
                 e = lcm(b,d)
                 a *= div(e,b)
                 c *= div(e,d)
-                e = convert(T,e)
-                if (a+n*c)/e == stop
-                    return a, c, n+1, e
+                eT = convert(T,e)
+                if (a+n*c)/eT == stop
+                    return FloatRange{T}(a, c, n+1, eT)
                 end
             end
         end
     end
-    start, step, floor(r)+1, one(step)
+    FloatRange{T}(start, step, floor(r)+1, one(step))
 end
 
 colon{T<:FloatingPoint}(a::T, b::T) = colon(a, one(a), b)
@@ -143,12 +149,6 @@ colon{T<:FloatingPoint}(a::T, b::T) = colon(a, one(a), b)
 colon{T<:Real}(a::T, b::FloatingPoint, c::T) = colon(promote(a,b,c)...)
 colon{T<:FloatingPoint}(a::T, b::FloatingPoint, c::T) = colon(promote(a,b,c)...)
 colon{T<:FloatingPoint}(a::T, b::Real, c::T) = colon(promote(a,b,c)...)
-
-colon{T<:FloatingPoint}(start::T, step::T, stop::T) =
-          step == 0              ? error("range step cannot be zero") :
-         start == stop           ? FloatRange{T}(start,step,1,1) :
-    (0 < step) != (start < stop) ? FloatRange{T}(start,step,0,1) :
-                                   FloatRange{T}(frange(start,step,stop)...)
 
 range(a::FloatingPoint, len::Integer) = colon(a, oftype(a,a+len-1))
 range(a::FloatingPoint, st::FloatingPoint, len::Integer) = colon(a, st, a+oftype(st,(len-1)*st))
@@ -218,9 +218,9 @@ done(r::FloatRange, i) = (length(r) <= i)
 
 # NOTE: For ordinal ranges, we assume start+step might be from a
 # lifted domain (e.g. Int8+Int8 => Int); use that for iterating.
-start(r::StepRange) = oftype(r.start+r.step, r.start)
+start(r::StepRange) = convert(typeof(r.start+r.step), r.start)
 next{T}(r::StepRange{T}, i) = (oftype(T,i), i+r.step)
-done(r::StepRange, i) = (i==oftype(i,r.stop)+r.step) | isempty(r)
+done{T,S}(r::StepRange{T,S}, i) = (i!=r.stop) & ((r.step>zero(S))==(i>r.stop))
 
 start(r::UnitRange) = oftype(r.start+1, r.start)
 next{T}(r::UnitRange{T}, i) = (oftype(T,i), i+1)
@@ -430,7 +430,7 @@ end
 -(r::OrdinalRange) = range(-r.start, -step(r), length(r))
 -(r::FloatRange)   = FloatRange(-r.start, -r.step, r.len, r.divisor)
 
-+(x::Integer, r::UnitRange)  = range(x + r.start, length(r))
++(x::Real, r::UnitRange)  = range(x + r.start, length(r))
 +(x::Real, r::Range) = (x+first(r)):step(r):(x+last(r))
 #+(x::Real, r::StepRange)  = range(x + r.start, r.step, length(r))
 +(x::Real, r::FloatRange) = FloatRange(r.divisor*x + r.start, r.step, r.len, r.divisor)
@@ -439,7 +439,7 @@ end
 
 -(x::Real, r::Range)      = (x-first(r)):-step(r):(x-last(r))
 -(x::Real, r::FloatRange) = FloatRange(r.divisor*x - r.start, -r.step, r.len, r.divisor)
--(r::UnitRange, x::Integer)  = range(r.start-x, length(r))
+-(r::UnitRange, x::Real)  = range(r.start-x, length(r))
 -(r::StepRange , x::Real) = range(r.start-x, r.step, length(r))
 -(r::FloatRange, x::Real) = FloatRange(r.start - r.divisor*x, r.step, r.len, r.divisor)
 
