@@ -99,8 +99,8 @@ function display_error(io::IO, er, bt)
     end
 end
 
-immutable REPLDisplay <: Display
-    repl::AbstractREPL
+immutable REPLDisplay{R<:AbstractREPL} <: Display
+    repl::R
 end
 function display(d::REPLDisplay, ::MIME"text/plain", x)
     io = outstream(d.repl)
@@ -323,58 +323,45 @@ history_prev_prefix(s::LineEdit.MIState, hist::REPLHistoryProvider) =
 
 function history_search(hist::REPLHistoryProvider, query_buffer::IOBuffer, response_buffer::IOBuffer,
                         backwards::Bool=false, skip_current::Bool=false)
-    if !(query_buffer.ptr > 1)
-        #truncate(response_buffer,0)
+
+    qpos = position(query_buffer)
+    qpos > 0 || return true
+    searchdata = bytestring(query_buffer.data[1:qpos])
+
+    # Alright, first try to see if the current match still works
+    a = position(response_buffer) + 1
+    b = a + sizeof(searchdata) - 1
+    if !skip_current && (0 < a <= b <= response_buffer.size) &&
+       searchdata == bytestring(response_buffer.data[a:b])
         return true
     end
 
-    # Alright, first try to see if the current match still works
-    searchdata = bytestring(query_buffer.data[1:(query_buffer.ptr-1)])
-    pos = position(response_buffer)
-    if !skip_current && !((response_buffer.size == 0) || (pos+query_buffer.ptr-2 == 0)) &&
-        (response_buffer.size >= (pos+query_buffer.ptr-2)) && (pos != 0) &&
-        (searchdata == bytestring(response_buffer.data[pos:(pos+query_buffer.ptr-2)]))
-        return true
-    end
+    searchfunc,delta = backwards ? (rsearch,-1) : (search,1)
 
     # Start searching
     # First the current response buffer
-    match = backwards ?
-            rsearch(bytestring(response_buffer.data[1:response_buffer.size]), searchdata, response_buffer.ptr-1) :
-            response_buffer.ptr + 1 < response_buffer.size ?
-            search(bytestring(response_buffer.data[1:response_buffer.size]), searchdata, response_buffer.ptr+1) :
-            0:-1
-
+    response_str = bytestring(response_buffer)
+    match = searchfunc(response_str, searchdata, a+delta)
     if match != 0:-1
         seek(response_buffer, first(match)-1)
         return true
     end
 
     # Now search all the other buffers
-    idx = hist.cur_idx
-    found = false
-    while true
-        idx += backwards ? -1 : 1
-        if !(0 < idx <= length(hist.history))
-            break
-        end
-        match = backwards ? rsearch(hist.history[idx], searchdata):
-                            search(hist.history[idx], searchdata);
-        if match != 0:-1
-            found = true
+    idxs = backwards ? ((hist.cur_idx-1):-1:1) : ((hist.cur_idx+1):length(hist.history))
+    for idx in idxs
+        h = hist.history[idx]
+        match = searchfunc(h, searchdata)
+        if match != 0:-1 && h != response_str
             truncate(response_buffer, 0)
-            write(response_buffer, hist.history[idx])
+            write(response_buffer, h)
             seek(response_buffer, first(match)-1)
-            break
+            hist.cur_idx = idx
+            return true
         end
     end
-    if found
-        #if hist.cur_idx == length(hist.history)+1
-        #    hist.last_buffer = copy(s.input_buffer)
-        #end
-        hist.cur_idx = idx
-    end
-    return found
+
+    return false
 end
 
 function history_reset_state(hist::REPLHistoryProvider)
@@ -392,7 +379,7 @@ function return_callback(repl, s)
     else
         repl.consecutive_returns = 0
     end
-    ast = parse_input_line(bytestring(copy(s.input_buffer.data)))
+    ast = parse_input_line(bytestring(copy(s.input_buffer)))
     if repl.consecutive_returns > 1 || !isa(ast, Expr) || (ast.head != :continue && ast.head != :incomplete)
         return true
     else
@@ -437,7 +424,7 @@ function respond(f, d, main, req, rep)
     end
 end
 
-function reset(d::REPLDisplay)
+function reset(d::REPLDisplay{LineEditREPL})
     raw!(d.repl.t, false)
     print(Base.text_colors[:normal])
 end
@@ -571,15 +558,16 @@ function setup_interface(d::REPLDisplay, req, rep; extra_repl_keymap = Dict{Any,
             edit_insert(buf,input)
             string = takebuf_string(buf)
             pos = 0
-            while pos <= length(string)
+            sz = length(string.data)
+            while pos <= sz
                 oldpos = pos
                 ast, pos = Base.parse(string, pos, raise=false)
                 # Get the line and strip leading and trailing whitespace
-                line = strip(string[max(oldpos, 1):min(pos-1, length(string))])
+                line = strip(bytestring(string.data[max(oldpos, 1):min(pos-1, sz)]))
                 isempty(line) && continue
                 LineEdit.replace_line(s, line)
                 LineEdit.refresh_line(s)
-                (pos > length(string) && last(string) != '\n') && break
+                (pos > sz && last(string) != '\n') && break
                 if !isa(ast, Expr) || (ast.head != :continue && ast.head != :incomplete)
                     LineEdit.commit_line(s)
                     # This is slightly ugly but ok for now
@@ -598,9 +586,8 @@ function setup_interface(d::REPLDisplay, req, rep; extra_repl_keymap = Dict{Any,
 
     a = Dict{Any,Any}[hkeymap, repl_keymap, LineEdit.history_keymap(hp), LineEdit.default_keymap, LineEdit.escape_defaults]
     prepend!(a, extra_repl_keymap)
-    @eval @LineEdit.keymap repl_keymap_func $(a)
 
-    main_prompt.keymap_func = repl_keymap_func
+    main_prompt.keymap_func = @eval @LineEdit.keymap $(a)
 
     const mode_keymap = {
         '\b' => function (s)
@@ -625,9 +612,7 @@ function setup_interface(d::REPLDisplay, req, rep; extra_repl_keymap = Dict{Any,
 
     b = Dict{Any,Any}[hkeymap, mode_keymap, LineEdit.history_keymap(hp), LineEdit.default_keymap, LineEdit.escape_defaults]
 
-    @eval @LineEdit.keymap mode_keymap_func $(b)
-
-    shell_mode.keymap_func = help_mode.keymap_func = mode_keymap_func
+    shell_mode.keymap_func = help_mode.keymap_func = @eval @LineEdit.keymap $(b)
 
     ModalInterface([main_prompt, shell_mode, help_mode,hkp])
 end
@@ -670,9 +655,8 @@ answer_color(r::LineEditREPL) = r.answer_color
 answer_color(r::StreamREPL) = r.answer_color
 answer_color(::BasicREPL) = Base.text_colors[:white]
 
-print_response(d::REPLDisplay, r::StreamREPL,args...) = print_response(d, r.stream,r, args...)
-print_response(d::REPLDisplay, r::LineEditREPL,args...) = print_response(d, r.t, r, args...)
-print_response(d::REPLDisplay, args...) = print_response(d, d.repl, args...)
+print_response(d::REPLDisplay{StreamREPL}, args...)   = print_response(d, d.repl.stream, d.repl, args...)
+print_response(d::REPLDisplay{LineEditREPL}, args...) = print_response(d, d.repl.t, d.repl, args...)
 
 function run_repl(stream::AsyncStream)
     repl =

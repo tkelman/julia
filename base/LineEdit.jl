@@ -5,7 +5,7 @@ using Base.Terminals
 import Base.Terminals: raw!, width, height, cmove, getX,
                        getY, clear_line, beep
 
-import Base: ensureroom, peek
+import Base: ensureroom, peek, show
 
 abstract TextInterface
 
@@ -38,6 +38,8 @@ type Prompt <: TextInterface
     on_done
     hist
 end
+
+show(io::IO, x::Prompt) = show(io, string("Prompt(\"", x.prompt, "\",...)"))
 
 immutable InputAreaState
     num_rows::Int64
@@ -136,7 +138,7 @@ function complete_line(s::PromptState)
         # Replace word by completion
         prev_pos = position(s.input_buffer)
         seek(s.input_buffer, prev_pos-sizeof(partial))
-        edit_replace(s, position(s.input_buffer), prev_pos,completions[1])
+        edit_replace(s, position(s.input_buffer), prev_pos, completions[1])
     else
         p = common_prefix(completions)
         if length(p) > 0 && p != partial
@@ -531,10 +533,17 @@ function edit_yank(s::MIState)
     refresh_line(s)
 end
 
-function edit_kill(s::MIState)
+function edit_kill_line(s::MIState)
     pos = position(buffer(s))
-    s.kill_buffer = readall(buffer(s))
+    s.kill_buffer = readline(buffer(s))
+    rest = readall(buffer(s))
     truncate(buffer(s), pos)
+    if !isempty(s.kill_buffer) && s.kill_buffer[end] == '\n'
+        s.kill_buffer = s.kill_buffer[1:end-1]
+        isempty(s.kill_buffer) || print(buffer(s), '\n')
+    end
+    print(buffer(s), rest)
+    seek(buffer(s), pos)
     refresh_line(s)
 end
 
@@ -786,11 +795,11 @@ function keymap_unify(keymaps)
     return ret
 end
 
-macro keymap(func, keymaps)
+macro keymap(keymaps)
     dict = keymap_unify(keymap_prepare(keymaps))
     body = keymap_gen_body(dict, dict)
     esc(quote
-        function $(func)(s, data)
+        (s, data) -> begin
             $body
             return :ok
         end
@@ -849,7 +858,6 @@ function update_display_buffer(s::SearchState, data)
 end
 
 function history_next_result(s::MIState, data::SearchState)
-    #truncate(data.query_buffer, s.input_buffer.size - data.response_buffer.size)
     history_search(data.histprompt.hp, data.query_buffer, data.response_buffer, data.backward, true) || beep(LineEdit.terminal(s))
     refresh_line(data)
 end
@@ -903,14 +911,25 @@ function accept_result(s, p)
     transition(s, parent)
 end
 
+function copybuf!(dst::IOBuffer, src::IOBuffer)
+    n = src.size
+    ensureroom(dst, n)
+    copy!(dst.data, 1, src.data, 1, n)
+    dst.size = src.size
+    dst.ptr = src.ptr
+end
+
 function enter_search(s::MIState, p::HistoryPrompt, backward::Bool)
     # a bit of hack to help fix #6325
+    buf = buffer(s)
     p.hp.last_mode = mode(s)
-    p.hp.last_buffer = copy(buffer(s))
+    p.hp.last_buffer = copy(buf)
 
     ss = state(s, p)
     ss.parent = mode(s)
     ss.backward = backward
+    truncate(ss.query_buffer, 0)
+    copybuf!(ss.response_buffer, buf)
     transition(s, p)
 end
 
@@ -976,8 +995,7 @@ function setup_search_keymap(hp)
         "\e[F"    => s->(accept_result(s, p); move_input_end(s)),
         "*"       => :(LineEdit.edit_insert(data.query_buffer, c1); LineEdit.update_display_buffer(s, data))
     }
-    @eval @LineEdit.keymap keymap_func $([pkeymap, escape_defaults])
-    p.keymap_func = keymap_func
+    p.keymap_func = @eval @LineEdit.keymap $([pkeymap, escape_defaults])
     keymap = {
         "^R"    => s->(enter_search(s, p, true)),
         "^S"    => s->(enter_search(s, p, false)),
@@ -1101,7 +1119,7 @@ const default_keymap =
     # ^U
     21 => edit_clear,
     # ^K
-    11 => edit_kill,
+    11 => edit_kill_line,
     # ^Y
     25 => edit_yank,
     # ^A
@@ -1210,7 +1228,7 @@ function reset_state(s::MIState)
     end
 end
 
-@LineEdit.keymap default_keymap_func [LineEdit.default_keymap, LineEdit.escape_defaults]
+const default_keymap_func = @LineEdit.keymap [LineEdit.default_keymap, LineEdit.escape_defaults]
 
 function Prompt(prompt;
     first_prompt = prompt,
