@@ -37,7 +37,7 @@ fi
 
 # Download most recent Julia binary for dependencies
 echo "" > get-deps.log
-if [ -z "`which julia-installer.exe 2>/dev/null`" ]; then
+if ! [ -e julia-installer.exe ]; then
   f=julia-0.3.0-prerelease-win$bits.exe
   echo "Downloading $f"
   curl -kLOsS http://s3.amazonaws.com/julialang/bin/winnt/x$archsuffix/0.3/$f
@@ -76,7 +76,7 @@ if [ -z "$USEMSVC" ]; then
 else
   export CC="$PWD/deps/libuv/compile cl -nologo"
   export AR="$PWD/deps/libuv/ar-lib lib"
-  export LD="$PWD/deps/libuv/linkld link"
+  export LD="$PWD/linkld link"
   echo "override CC = $CC" >> Make.user
   echo 'override CXX = $(CC)' >> Make.user
   echo "override AR = $AR" >> Make.user
@@ -170,8 +170,8 @@ fi
 if [ -n "$USEMSVC" ]; then
   # Create a modified version of compile for wrapping link
   sed -e 's/-link//' -e 's/cl/link/g' -e 's/ -Fe/ -OUT:/' \
-    -e 's|$dir/$lib|$dir/lib$lib|g' deps/libuv/compile > deps/libuv/linkld
-  chmod +x deps/libuv/linkld
+    -e 's|$dir/$lib|$dir/lib$lib|g' deps/libuv/compile > linkld
+  chmod +x linkld
 
   # Openlibm doesn't build well with MSVC right now
   echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
@@ -187,5 +187,3 @@ else
 fi
 
 make -j 4
-# remove precompiled system image
-rm -f usr/lib/julia/sys.dll
