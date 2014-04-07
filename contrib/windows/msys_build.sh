@@ -156,7 +156,7 @@ echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 # Remaining dependencies:
 # openlibm since we need it as a static library to work properly
 # utf8proc since its headers are not in the binary download
-echo 'override STAGE1_DEPS = ' >> Make.user
+echo 'override STAGE1_DEPS = random' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 make -C deps get-openlibm get-utf8proc
