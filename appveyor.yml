@@ -9,17 +9,17 @@ init:
 
 #install:
 # Install Cygwin and build-time dependencies
-#  - "cinst cyg-get > cyg-get.log"
-#  - set PATH=%PATH%;C:\cygwin
-#  - "cyg-get make >> cyg-get.log"
-#  - "cyg-get curl >> cyg-get.log"
-#  - "cyg-get mingw64-%ARCH%-gcc-g++ >> cyg-get.log"
+  - "cinst cyg-get > cyg-get.log"
+  - set PATH=%PATH%;C:\cygwin
+  - "cyg-get make >> cyg-get.log"
+  - "cyg-get curl >> cyg-get.log"
+  - "cyg-get mingw64-%ARCH%-gcc-g++ >> cyg-get.log"
 
 build_script:
 # Remove C:\MinGW\bin from the path, the version of MinGW installed on
 # AppVeyor is not compatible with the cross-compiled Julia Windows binaries
   - set PATH=%PATH:C:\MinGW\bin;=%
-  - sh --login /c/projects/julia/contrib/windows/msys_build.sh
+  - C:\cygwin\bin\sh --login /cygdrive/c/projects/julia/contrib/windows/msys_build.sh
 
 test_script:
   - set JULIA_CPU_CORES=4
