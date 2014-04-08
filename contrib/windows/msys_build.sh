@@ -164,7 +164,7 @@ make -C deps get-openlibm get-utf8proc
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
   echo 'override NO_GIT = 1' >> Make.user
-  echo 'VERBOSE = 1' >> Make.user
+  #echo 'VERBOSE = 1' >> Make.user
 fi
 
 if [ -n "$USEMSVC" ]; then
