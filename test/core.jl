@@ -1467,7 +1467,7 @@ test5536(a::Union(Real, AbstractArray)) = "Non-splatting"
 @test test5536(5) == "Non-splatting"
 
 # multiline comments (#6139 and others raised in #6128)
-@test 3 == include_string("1 + #=# 2") == include_string("1 + #==# 2") == include_string("1 + #===# 2") == include_string("1 + #= #= blah =# =# 2") == include_string("1 + #= #= #= nested =# =# =# 2")
+@test 3 == include_string("1 + 2") == include_string("1 + #==# 2") == include_string("1 + #===# 2") == include_string("1 + #= #= blah =# =# 2") == include_string("1 + #= #= #= nested =# =# =# 2")
 @test_throws include_string("#=")
 @test_throws include_string("#= #= #= =# =# =")
 
@@ -1514,3 +1514,16 @@ function func1_6404(v1::Integer)
 end
 
 @test isa(func1_6404(3), type_1)
+
+# issue #5577
+f5577(::Any) = false
+f5577(::Type) = true
+@test !f5577((Int,String,2))
+@test f5577(((Int,String),String))
+@test f5577(Int)
+@test !f5577(2)
+
+# issue #6426
+f6426(x,args...) = f6426(x,map(a->(isa(a,Type) ? Type{a} : typeof(a)), args))
+f6426(x,t::(Type...)) = string(t)
+@test f6426(1, (1.,2.)) == "((Float64,Float64),)"
