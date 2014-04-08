@@ -59,7 +59,7 @@ if [ -z "$USEMSVC" ]; then
     f=mingw-w$bits-bin-$ARCH-20140102.7z
     if ! [ -e $f ]; then
       echo "Downloading $f"
-      curl -kLOsS $mingw-w64-dgn/files/mingw-w64/$f
+      curl -kLOsS http://www.mpclab.net/$f
     fi
     echo "Extracting $f"
     7z x -y $f >> get-deps.log
@@ -87,7 +87,7 @@ fi
 
 if ! [ -e $f ]; then
   echo "Downloading $f"
-  curl -kLOsS http://sourceforge.net/projects/juliadeps-win/files/$f
+  curl -kLOsS http://www.mpclab.net/$f
 fi
 echo "Extracting $f"
 7z x -y $f >> get-deps.log
