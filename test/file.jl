@@ -266,5 +266,5 @@ rm(file)
 rmdir(subdir)
 rmdir(dir)
 
-@test !ispath(file)
-@test !ispath(dir)
+@unix_only @test !ispath(file)
+@unix_only @test !ispath(dir)
