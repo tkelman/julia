@@ -7,6 +7,7 @@ cd `dirname "$0"`/../..
 # Stop on error
 set -e
 
+time {
 # If ARCH environment variable not set, choose based on uname -m
 if [ -z "$ARCH" ]; then
   export ARCH=`uname -m`
@@ -189,5 +190,7 @@ if [ -n "$USEMSVC" ]; then
 else
   echo 'override STAGE1_DEPS += openlibm' >> Make.user
 fi
+}
 
-#make
+time { make julia-release; }
+time { make; }
