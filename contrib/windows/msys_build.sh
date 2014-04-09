@@ -93,6 +93,12 @@ echo "Extracting $f"
 7z x -y $f >> get-deps.log
 echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
 
+# If no Fortran compiler installed, override with name of C compiler
+# (this only fixes the unnecessary invocation of FC in openlibm)
+if [ -z "`which ${CROSS_COMPILE}gfortran 2>/dev/null`" ]; then
+  echo 'override FC = $(CC)' >> Make.user
+fi
+
 if [ -z "`which make 2>/dev/null`" ]; then
   download="/make/make-3.81-2/make-3.81-2-msys-1.0.11-bin.tar"
   if [ -n "`uname | grep CYGWIN`" ]; then
