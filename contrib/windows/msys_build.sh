@@ -35,6 +35,10 @@ else
   CROSS_COMPILE=""
 fi
 
+for i in bin lib include Git/bin; do
+  mkdir -p usr/$i
+done
+
 # Download most recent Julia binary for dependencies
 echo "" > get-deps.log
 if ! [ -e julia-installer.exe ]; then
@@ -186,4 +190,4 @@ else
   echo 'override STAGE1_DEPS += openlibm' >> Make.user
 fi
 
-make
+#make
