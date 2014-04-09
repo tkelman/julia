@@ -20,4 +20,4 @@ build_script:
 
 test_script:
 #  - set JULIA_CPU_CORES=4
-  - cd test && ..\usr\bin\julia runtests.jl all
+  - cd test && ..\usr\bin\julia runtests.jl core keywordargs numbers strings collections hashing remote iobuffer arrayops simdloop blas fft dsp sparse bitarray random math functional bigint sorting statistics spawn priorityqueue arpack file suitesparse version resolve pollfd mpfr broadcast complex socket floatapprox readdlm regex float16 combinatorics sysinfo rounding ranges mod2pi euler show lineedit replcompletions parallel
