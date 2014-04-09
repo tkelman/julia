@@ -44,7 +44,7 @@ if ! [ -e julia-installer.exe ]; then
   echo "Extracting $f"
   7z x -y $f >> get-deps.log
 fi
-for i in bin/*.dll lib/julia/*.a include/julia/uv*.h include/julia/tree.h \
+for i in bin/*.dll \ #lib/julia/*.a include/julia/uv*.h include/julia/tree.h \
     Git/bin/msys-1.0.dll Git/bin/msys-perl5_8.dll Git/bin/perl.exe Git/bin/sh.exe; do
   7z e -y julia-installer.exe "\$_OUTDIR/$i" \
     -ousr\\`dirname $i | sed -e 's|/julia||' -e 's|/|\\\\|g'` >> get-deps.log
@@ -143,20 +143,20 @@ sed -i "s|prefix=/usr/$ARCH-w64-mingw32/sys-root/mingw|prefix=$PWD/usr|" usr/bin
 chmod +x usr/bin/*
 
 for lib in LLVM SUITESPARSE ARPACK BLAS LAPACK FFTW GMP MPFR \
-    PCRE LIBUNWIND GRISU RMATH OPENSPECFUN LIBUV; do
+    PCRE LIBUNWIND GRISU RMATH OPENSPECFUN; do
   echo "USE_SYSTEM_$lib = 1" >> Make.user
 done
 echo 'LIBBLAS = -L$(JULIAHOME)/usr/bin -lopenblas' >> Make.user
 echo 'LIBBLASNAME = libopenblas' >> Make.user
 echo 'override LIBLAPACK = $(LIBBLAS)' >> Make.user
 echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
-echo 'override LIBUV = $(JULIAHOME)/usr/lib/libuv.a' >> Make.user
-echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
+#echo 'override LIBUV = $(JULIAHOME)/usr/lib/libuv.a' >> Make.user
+#echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 
 # Remaining dependencies:
 # openlibm since we need it as a static library to work properly
 # utf8proc since its headers are not in the binary download
-echo 'override STAGE1_DEPS = random' >> Make.user
+echo 'override STAGE1_DEPS = uv random' >> Make.user
 echo 'override STAGE2_DEPS = utf8proc' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
 make -C deps get-openlibm get-utf8proc
