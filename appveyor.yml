@@ -3,9 +3,9 @@ environment:
   - ARCH: "i686"
   - ARCH: "x86_64"
 
-matrix:
-  allow_failures:
-    - ARCH: "i686"
+#matrix:
+#  allow_failures:
+#    - ARCH: "i686"
 
 init:
 # Carriage returns are bad
