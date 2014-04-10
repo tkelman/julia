@@ -7,6 +7,7 @@ cd `dirname "$0"`/../..
 # Stop on error
 set -e
 
+time {
 # If ARCH environment variable not set, choose based on uname -m
 if [ -z "$ARCH" ]; then
   export ARCH=`uname -m`
@@ -35,9 +36,13 @@ else
   CROSS_COMPILE=""
 fi
 
+for i in bin lib include Git/bin; do
+  mkdir -p usr/$i
+done
+
 # Download most recent Julia binary for dependencies
 echo "" > get-deps.log
-if ! [ -e julia-installer.exe ]; then
+( if ! [ -e julia-installer.exe ]; then
   f=julia-0.3.0-prerelease-win$bits.exe
   echo "Downloading $f"
   curl -kLOsS http://s3.amazonaws.com/julialang/bin/winnt/x$archsuffix/0.3/$f
@@ -51,28 +56,28 @@ for i in bin/*.dll lib/julia/*.a include/julia/uv*.h include/julia/tree.h \
 done
 # Remove libjulia.dll if it was copied from downloaded binary
 rm -f usr/bin/libjulia.dll
-rm -f usr/bin/libjulia-debug.dll
+rm -f usr/bin/libjulia-debug.dll )&
 
 mingw=http://sourceforge.net/projects/mingw
 if [ -z "$USEMSVC" ]; then
-  if [ -z "`which ${CROSS_COMPILE}gcc 2>/dev/null`" ]; then
+  export PATH=$PATH:$PWD/mingw$bits/bin
+  export AR=${CROSS_COMPILE}ar
+  ( if [ -z "`which ${CROSS_COMPILE}gcc 2>/dev/null`" ]; then
     f=mingw-w$bits-bin-$ARCH-20140102.7z
     if ! [ -e $f ]; then
       echo "Downloading $f"
-      curl -kLOsS http://www.mpclab.net/$f
+      curl -kLOsS $mingw-w64-dgn/files/mingw-w64/$f
     fi
     echo "Extracting $f"
     7z x -y $f >> get-deps.log
-    export PATH=$PATH:$PWD/mingw$bits/bin
     # If there is a version of make.exe here, it is mingw32-make which won't work
     rm -f mingw$bits/bin/make.exe
   fi
-  export AR=${CROSS_COMPILE}ar
 
-  f=llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z
   # The MinGW binary version of LLVM doesn't include libgtest or libgtest_main
   $AR cr usr/lib/libgtest.a
-  $AR cr usr/lib/libgtest_main.a
+  $AR cr usr/lib/libgtest_main.a )&
+  f=llvm-3.3-$ARCH-w64-mingw32-juliadeps.7z
 else
   export CC="$PWD/deps/libuv/compile cl -nologo"
   export AR="$PWD/deps/libuv/ar-lib lib"
@@ -85,12 +90,12 @@ else
   f=llvm-3.3.1-$ARCH-msvc11-juliadeps.7z
 fi
 
-if ! [ -e $f ]; then
+( if ! [ -e $f ]; then
   echo "Downloading $f"
-  curl -kLOsS http://www.mpclab.net/$f
+  curl -kLOsS http://sourceforge.net/projects/juliadeps-win/files/$f
 fi
 echo "Extracting $f"
-7z x -y $f >> get-deps.log
+7z x -y $f >> get-deps.log )&
 echo 'LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
 
 if [ -z "`which make 2>/dev/null`" ]; then
@@ -158,7 +163,7 @@ make -C deps get-openlibm get-utf8proc
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
   echo 'override NO_GIT = 1' >> Make.user
-  echo 'VERBOSE = 1' >> Make.user
+  #echo 'VERBOSE = 1' >> Make.user
 fi
 
 if [ -n "$USEMSVC" ]; then
@@ -180,4 +185,7 @@ else
   echo 'override STAGE1_DEPS += openlibm' >> Make.user
 fi
 
-make
+wait; }
+
+time { make julia-release; }
+time { make; }
