@@ -134,7 +134,7 @@ done
 f=mingw$bits-pcre-8.34-1.fc21.noarch
 if ! [ -e $f.rpm ]; then
   echo "Downloading $f"
-  curl -kLOsS ftp://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/$f.rpm
+  curl -kLOsS http://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/$f.rpm
 fi
 7z x -y $f.rpm >> get-deps.log
 7z x -y $f.cpio >> get-deps.log
