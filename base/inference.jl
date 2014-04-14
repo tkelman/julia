@@ -154,61 +154,20 @@ t_func[arraysize] = (1, 2, arraysize_tfunc)
 t_func[pointerref] = (2,2,(a,i)->(isa(a,DataType) && a<:Ptr ? a.parameters[1] : Any))
 t_func[pointerset] = (3, 3, (a,v,i)->a)
 
-function static_convert(to::ANY, from::ANY)
-    if !isa(to,Tuple) || !isa(from,Tuple)
-        if isa(to,TypeVar)
-            return to
-        end
-        if from <: to
-            return from
-        end
-        return typeintersect(from,to)
+const convert_default_tfunc = function (to, from, f)
+    !isType(to) && return Any
+    to = to.parameters[1]
+
+    if isa(to,TypeVar)
+        return to
     end
-    if is(to,Tuple)
+    if from <: to
         return from
     end
-    pl = length(to)::Int; cl = length(from)::Int
-    pseq = false
-    result = Array(Any, cl)
-    local pe  # used across iterations
-    for i=1:cl
-        ce = from[i]
-        if pseq
-        elseif i <= pl
-            pe = to[i]
-            if isvarargtype(pe)
-                pe = pe.parameters[1]
-                pseq = true
-            elseif isa(pe,TypeVar) && isvarargtype(pe.ub)
-                pe = pe.ub.parameters[1]
-                pseq = true
-            end
-        else
-            return None
-        end
-        # tuple conversion calls convert recursively
-        if isvarargtype(ce)
-            R = abstract_call_gf(convert, (), (Type{pe}, ce.parameters[1]), ())
-            #R = static_convert(pe, ce.parameters[1])
-            isType(R) && (R = R.parameters[1])
-            result[i] = Vararg{R}
-        else
-            R = abstract_call_gf(convert, (), (Type{pe}, ce), ())
-            #R = static_convert(pe, ce)
-            isType(R) && (R = R.parameters[1])
-            result[i] = R
-        end
-    end
-    a2t(result)
+    return typeintersect(from,to)
 end
-t_func[convert_default] =
-    (3, 3, (t,x,f)->(isType(t) ? static_convert(t.parameters[1],x) : Any))
-t_func[convert_tuple] =
-    (3, 3, (t,x,f)->(if isa(t,Tuple) && all(isType,t)
-                         t = Type{map(t->t.parameters[1],t)}
-                     end;
-                     isType(t) ? static_convert(t.parameters[1],x) :
-                     Any))
+t_func[convert_default] = (3, 3, convert_default_tfunc)
+
 const typeof_tfunc = function (t)
     if isType(t)
         t = t.parameters[1]
@@ -291,7 +250,7 @@ const tupleref_tfunc = function (A, t, i)
         end
         T = reduce(tmerge, None, types)
         if wrapType
-            return isleaftype(T) ? Type{T} : Type{TypeVar(:_,T)}
+            return isleaftype(T) || isa(T,TypeVar) ? Type{T} : Type{TypeVar(:_,T)}
         else
             return T
         end
@@ -507,9 +466,21 @@ t_func[apply_type] = (1, Inf, apply_type_tfunc)
 
 # other: apply
 
+function tuple_tfunc(argtypes::ANY, limit)
+    t = argtypes
+    if limit
+        t = limit_tuple_depth(t)
+    end
+    # tuple(Type{T...}) should give Type{(T...)}
+    if t!==() && all(isType, t) && isvarargtype(t[length(t)].parameters[1])
+        return Type{map(t->t.parameters[1], t)}
+    end
+    return t
+end
+
 function builtin_tfunction(f::ANY, args::ANY, argtypes::ANY)
     if is(f,tuple)
-        return limit_tuple_depth(argtypes)
+        return tuple_tfunc(argtypes, true)
     elseif is(f,arrayset)
         if length(argtypes) < 3
             return None
@@ -764,6 +735,16 @@ function invoke_tfunc(f, types, argtypes)
     return Any
 end
 
+function to_tuple_of_Types(t::ANY)
+    if isType(t)
+        p1 = t.parameters[1]
+        if isa(p1,Tuple) && !isvatuple(p1)
+            return map(t->Type{t}, p1)
+        end
+    end
+    return t
+end
+
 function abstract_call(f, fargs, argtypes, vtypes, sv::StaticVarInfo, e)
     if is(f,apply) && length(fargs)>0
         if isType(argtypes[1]) && isleaftype(argtypes[1].parameters[1])
@@ -773,7 +754,7 @@ function abstract_call(f, fargs, argtypes, vtypes, sv::StaticVarInfo, e)
             af = isconstantfunc(fargs[1], sv)
         end
         if !is(af,false)
-            aargtypes = argtypes[2:end]
+            aargtypes = map(to_tuple_of_Types, argtypes[2:end])
             if all(x->isa(x,Tuple), aargtypes) &&
                 !any(isvatuple, aargtypes[1:(length(aargtypes)-1)])
                 e.head = :call1
@@ -1501,6 +1482,7 @@ function typeinf(linfo::LambdaStaticData,atypes::Tuple,sparams::Tuple, def, cop)
         # inlining can add variables
         sv.vars = append_any(f_argnames(fulltree), fulltree.args[2][1])
         tuple_elim_pass(fulltree)
+        tupleref_elim_pass(fulltree.args[3], sv)
         linfo.inferred = true
         fulltree = ccall(:jl_compress_ast, Any, (Any,Any), def, fulltree)
     end
@@ -1869,7 +1851,7 @@ end
 # cannot be affected by previous calls, except assignment nodes
 function effect_free(e::ANY, sv, allow_volatile::Bool)
     if isa(e,Symbol) || isa(e,SymbolNode) || isa(e,Number) || isa(e,String) ||
-        isa(e,TopNode) || isa(e,QuoteNode) || isa(e,Type)
+        isa(e,TopNode) || isa(e,QuoteNode) || isa(e,Type) || isa(e,Tuple)
         return true
     end
     if isa(e,Expr)
@@ -1937,17 +1919,6 @@ function inlineable(f, e::Expr, atypes, sv, enclosing_ast)
             atypes[2] <: atypes[1].parameters[1]
             # todo: if T expression has side effects??!
             return (e.args[3],())
-        end
-    end
-    if is(f, convert_tuple) && length(atypes)==3
-        # convert((T...),x::(S...)) => x, when S<:T
-        istuple = isa(atypes[1],Tuple) # if true, is (Type{T}, Type{S}) not Type{(T, S)}
-        if (istuple && all(isType,atypes[1])) || (atypes[1] <: Tuple && isType(atypes[1])) && isleaftype(atypes[1])
-           tparams = (istuple ? map(t->t.parameters[1], atypes[1]) : atypes[1].parameters[1])
-            if atypes[2] <: tparams
-                # todo: if T expression has side effects??!
-                return (e.args[3],())
-            end
         end
     end
     if length(atypes)==2 && is(f,unbox) && isa(atypes[2],DataType) && !atypes[2].mutable && atypes[2].pointerfree
@@ -2289,15 +2260,15 @@ const top_setfield = TopNode(:setfield)
 const top_tupleref = TopNode(:tupleref)
 const top_tuple = TopNode(:tuple)
 
-function mk_tupleref(texpr, i)
+function mk_tupleref(texpr, i, T)
     e = :(($top_tupleref)($texpr, $i))
-    e.typ = exprtype(texpr)[i]
+    e.typ = T
     e
 end
 
 function mk_tuplecall(args)
     e = Expr(:call1, top_tuple, args...)
-    e.typ = tuple(map(exprtype, args)...)
+    e.typ = tuple_tfunc(tuple(map(exprtype, args)...), false)
     e
 end
 
@@ -2445,7 +2416,7 @@ function inlining_pass(e::Expr, sv, ast)
                 newargs = cell(na-2)
                 for i = 3:na
                     aarg = e.args[i]
-                    t = exprtype(aarg)
+                    t = to_tuple_of_Types(exprtype(aarg))
                     if isa(aarg,Expr) && is_known_call(aarg, tuple, sv)
                         # apply(f,tuple(x,y,...)) => f(x,y,...)
                         newargs[i-2] = aarg.args[2:end]
@@ -2453,7 +2424,7 @@ function inlining_pass(e::Expr, sv, ast)
                         newargs[i-2] = { QuoteNode(x) for x in aarg }
                     elseif isa(t,Tuple) && !isvatuple(t) && effect_free(aarg,sv,true)
                         # apply(f,t::(x,y)) => f(t[1],t[2])
-                        newargs[i-2] = { mk_tupleref(aarg,j) for j=1:length(t) }
+                        newargs[i-2] = { mk_tupleref(aarg,j,t[j]) for j=1:length(t) }
                     else
                         # not all args expandable
                         return (e,stmts)
@@ -2662,6 +2633,37 @@ function occurs_outside_tupleref(e::ANY, sym::ANY, sv::StaticVarInfo, tuplen::In
         end
     end
     return false
+end
+
+# replace tupleref(tuple(exprs...), i) with exprs[i]
+function tupleref_elim_pass(e::Expr, sv)
+    for i = 1:length(e.args)
+        ei = e.args[i]
+        if isa(ei,Expr)
+            tupleref_elim_pass(ei, sv)
+            if is_known_call(ei, tupleref, sv) && length(ei.args)==3 &&
+                isa(ei.args[3],Int)
+                e1 = ei.args[2]
+                j = ei.args[3]
+                if isa(e1,Expr)
+                    if is_known_call(e1, tuple, sv) && (1 <= j < length(e1.args))
+                        ok = true
+                        for k = 2:length(e1.args)
+                            k == j+1 && continue
+                            if !effect_free(e1.args[k], sv, true)
+                                ok = false; break
+                            end
+                        end
+                        if ok
+                            e.args[i] = e1.args[j+1]
+                        end
+                    end
+                elseif isa(e1,Tuple) && (1 <= j <= length(e1))
+                    e.args[i] = e1[j]
+                end
+            end
+        end
+    end
 end
 
 # eliminate allocation of unnecessary tuples

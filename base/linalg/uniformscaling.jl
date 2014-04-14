@@ -1,4 +1,4 @@
-import Base: copy, ctranspose, getindex, showarray, transpose
+import Base: copy, ctranspose, getindex, showarray, transpose, one, zero
 import Base.LinAlg: SingularException
 
 immutable UniformScaling{T<:Number}
@@ -11,11 +11,16 @@ eltype{T}(J::UniformScaling{T}) = T
 ndims(J::UniformScaling) = 2
 getindex(J::UniformScaling, i::Integer,j::Integer) = ifelse(i==j,J.λ,zero(J.λ))
 
-showarray(io::IO, J::UniformScaling; kw...) = print(io, "$(typeof(J))\n$(J.λ)*I")
+show(io::IO, J::UniformScaling) = print(io, "$(typeof(J))\n$(J.λ)*I")
 copy(J::UniformScaling) = UniformScaling(J.λ)
 
 transpose(J::UniformScaling) = J
 ctranspose(J::UniformScaling) = UniformScaling(conj(J.λ))
+
+one{T}(::Type{UniformScaling{T}}) = UniformScaling(one(T))
+one{T}(J::UniformScaling{T}) = one(UniformScaling{T})
+zero{T}(::Type{UniformScaling{T}}) = UniformScaling(zero(T))
+zero{T}(J::UniformScaling{T}) = zero(UniformScaling{T})
 
 +(J1::UniformScaling, J2::UniformScaling) = UniformScaling(J1.λ+J2.λ)
 +{T}(B::BitArray{2},J::UniformScaling{T}) = bitunpack(B) + J
