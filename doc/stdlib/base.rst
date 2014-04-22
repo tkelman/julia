@@ -1012,11 +1012,11 @@ Strings
 
 .. function:: bytestring(::Ptr{Uint8}, [length])
 
-   Create a string from the address of a C (0-terminated) string. A copy is made; the ptr can be safely freed. If ``length`` is specified, the string does not have to be 0-terminated.
+   Create a string from the address of a C (0-terminated) string encoded in ASCII or UTF-8. A copy is made; the ptr can be safely freed. If ``length`` is specified, the string does not have to be 0-terminated.
 
 .. function:: bytestring(s)
 
-   Convert a string to a contiguous byte array representation appropriate for passing it to C functions.
+   Convert a string to a contiguous byte array representation appropriate for passing it to C functions. The string will be encoded as either ASCII or UTF-8.
 
 .. function:: ascii(::Array{Uint8,1})
 
@@ -1300,6 +1300,16 @@ Strings
 
    General unescaping of traditional C and Unicode escape sequences. Reverse of :func:`escape_string`. See also :func:`print_unescaped`.
 
+.. function:: utf16(s)
+
+   Create a UTF-16 string from a byte array, array of ``Uint16``, or
+   any other string type.  (Data must be valid UTF-16.  Conversions of
+   byte arrays check for a byte-order marker in the first two bytes,
+   and do not include it in the resulting string.)
+
+.. function:: is_valid_utf16(s)
+
+   Returns true if the string or ``Uint16`` array is valid UTF-16.
 
 I/O
 ---
@@ -3962,16 +3972,16 @@ Combinatorics
 
    In-place version of :func:`reverse`.
 
-.. function:: combinations(itr, n)
+.. function:: combinations(arr, n)
 
-   Generate all combinations of ``n`` elements from a given iterable
+   Generate all combinations of ``n`` elements from an indexable
    object.  Because the number of combinations can be very large, this
    function returns an iterator object. Use
    ``collect(combinations(a,n))`` to get an array of all combinations.
 
-.. function:: permutations(itr)
+.. function:: permutations(arr)
 
-   Generate all permutations of a given iterable object.  Because the
+   Generate all permutations of an indexable object.  Because the
    number of permutations can be very large, this function returns an
    iterator object. Use ``collect(permutations(a,n))`` to get an array
    of all permutations.
@@ -4536,8 +4546,9 @@ Parallel Computing
    Add processes on remote machines via SSH. 
    Requires julia to be installed in the same location on each node, or to be available via a shared file system.
    
-   ``machines`` is a vector of host definitions of the form ``[user@]host[:port]``. A worker is started
-   for each such definition.
+   ``machines`` is a vector of host definitions of the form ``[user@]host[:port] [bind_addr]``. ``user`` defaults 
+   to current user, ``port`` to the standard ssh port. Optionally, in case of multi-homed hosts, ``bind_addr`` 
+   may be used to explicitly specify an interface.
    
    Keyword arguments:
 
