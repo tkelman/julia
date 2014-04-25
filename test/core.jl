@@ -1130,6 +1130,15 @@ let
     @test ys == xs
 end
 
+# issue #6591
+function f6591(d)
+    Intrinsics.box(Int64, d)
+    (f->f(d))(identity)
+end
+let d = Intrinsics.box(Date4581{Int}, int64(1))
+    @test isa(f6591(d), Date4581)
+end
+
 # issue #4645
 i4645(x) = (println(zz); zz = x; zz)
 @test_throws UndefVarError i4645(4)
@@ -1553,3 +1562,29 @@ f6502() = convert(Base.tupletail((Bool,Int...)), (10,))
 @test f6502() === (10,)
 @test convert((Bool,Int...,), (true,10)) === (true,10)
 @test convert((Int,Bool...), (true,1,0)) === (1,true,false)
+
+# issue on the flight from DFW
+# (type inference deducing Type{:x} rather than Symbol)
+type FooBarDFW{s}; end
+fooDFW(p::Type{FooBarDFW}) = string(p.parameters[1])
+fooDFW(p) = string(p.parameters[1])
+@test fooDFW(FooBarDFW{:x}) == "x" # not ":x"
+
+# issue #6611
+function crc6611(spec)
+    direcn = spec ? 1 : 2
+    local remainder::blech
+    ()->(remainder=1)
+end
+@test_throws UndefVarError crc6611(true)()
+
+# issue #6634
+function crc6634(spec)
+    A = Uint
+    remainder::A = 1
+    function handler(append)
+        remainder = append ? 1 : 2
+    end
+end
+@test crc6634(0x1)(true) == 1
+@test crc6634(0x1)(false) == 2

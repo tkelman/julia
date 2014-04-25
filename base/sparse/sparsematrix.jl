@@ -418,14 +418,83 @@ end
 
 ## Unary arithmetic and boolean operators
 
-for op in (:-, )
+# Operations that may map nonzeros to zero, and zero to zero
+# Result is sparse
+for (op, restype) in ((:iceil, Int), (:ceil, Nothing), 
+                      (:ifloor, Int), (:floor, Nothing),
+                      (:itrunc, Int), (:trunc, Nothing),
+                      (:iround, Int), (:round, Nothing),
+                      (:sin, Nothing), (:tan, Nothing), 
+                      (:sinh, Nothing), (:tanh, Nothing), 
+                      (:asin, Nothing), (:atan, Nothing), 
+                      (:asinh, Nothing), (:atanh, Nothing), 
+                      (:sinpi, Nothing), (:cosc, Nothing), 
+                      (:sind, Nothing), (:tand, Nothing), 
+                      (:asind, Nothing), (:atand, Nothing) )
+    @eval begin
+
+        function ($op){Tv,Ti}(A::SparseMatrixCSC{Tv,Ti})
+            nfilledA = nfilled(A)
+            colptrB = Array(Ti, A.n+1)
+            rowvalB = Array(Ti, nfilledA)
+            nzvalB = Array($(restype==Nothing ? (:Tv) : restype), nfilledA)
+
+            k = 0 # number of additional zeros introduced by op(A)
+            for i = 1 : A.n
+                colptrB[i] = A.colptr[i] - k
+                for j = A.colptr[i] : A.colptr[i+1]-1
+                    opAj = $(op)(A.nzval[j])
+                    if opAj == 0
+                        k += 1
+                    else
+                        rowvalB[j - k] = A.rowval[j]
+                        nzvalB[j - k] = opAj
+                    end
+                end
+            end
+            colptrB[end] = A.colptr[end] - k
+            deleteat!(rowvalB, colptrB[end]:nfilledA)
+            deleteat!(nzvalB, colptrB[end]:nfilledA)
+            return SparseMatrixCSC(A.m, A.n, colptrB, rowvalB, nzvalB)
+        end
+
+    end # quote
+end # macro
+
+# Operations that map nonzeros to nonzeros, and zeros to zeros
+# Result is sparse
+for op in (:-, :abs, :abs2, :log1p, :expm1)
     @eval begin
 
         function ($op)(A::SparseMatrixCSC)
-            B = copy(A)
+            B = similar(A)
             nzvalB = B.nzval
+            nzvalA = A.nzval
             for i=1:length(nzvalB)
-                nzvalB[i] = ($op)(nzvalB[i])
+                nzvalB[i] = ($op)(nzvalA[i])
+            end
+            return B
+        end
+
+    end
+end
+
+# Operations that map nonzeros to nonzeros, and zeros to nonzeros
+# Result is dense
+for op in (:cos, :cosh, :acos, :sec, :csc, :cot, :acot, :sech, 
+           :csch, :coth, :asech, :acsch, :cospi, :sinc, :cosd, 
+           :cotd, :cscd, :secd, :acosd, :acotd, :log, :log2, :log10,
+           :exp, :exp2, :exp10)
+    @eval begin
+
+        function ($op){Tv}(A::SparseMatrixCSC{Tv})
+            B = fill($(op)(zero(Tv)), size(A))
+            for col = 1 : A.n                
+                for j = A.colptr[col] : A.colptr[col+1]-1
+                    row = A.rowval[j]
+                    nz = A.nzval[j]
+                    B[row,col] = $(op)(nz)
+                end
             end
             return B
         end
@@ -1079,7 +1148,7 @@ setindex!{T<:Integer}(A::SparseMatrixCSC, v::AbstractMatrix, i::Integer, J::Abst
 setindex!{T<:Integer}(A::SparseMatrixCSC, v::AbstractMatrix, I::AbstractVector{T}, j::Integer) = setindex!(A, v, I, [j])
 
 setindex!{Tv,T<:Integer}(A::SparseMatrixCSC{Tv}, x::Number, I::AbstractVector{T}, J::AbstractVector{T}) =
-      setindex!(A, fill(x::Tv, length(I), length(J)), I, J)
+      setindex!(A, fill(convert(Tv,x), length(I), length(J)), I, J)
 
 setindex!{Tv,Ti,T<:Integer}(A::SparseMatrixCSC{Tv,Ti}, S::Matrix, I::AbstractVector{T}, J::AbstractVector{T}) =
       setindex!(A, convert(SparseMatrixCSC{Tv,Ti}, S), I, J)

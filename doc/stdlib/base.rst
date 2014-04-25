@@ -538,8 +538,8 @@ Iterable Collections
 .. function:: reduce(op, v0, itr)
 
    Reduce the given collection ``ìtr`` with the given binary operator. Reductions
-   for certain commonly-used operators are available in a more convenient
-   1-argument form: ``maximum(itr)``, ``minimum(itr)``, ``sum(itr)``,
+   for certain commonly-used operators have special implementations which should be
+   used instead: ``maximum(itr)``, ``minimum(itr)``, ``sum(itr)``,
    ``prod(itr)``, ``any(itr)``, ``all(itr)``.
 
    The associativity of the reduction is implementation-dependent. This means
@@ -2770,6 +2770,7 @@ Mathematical Functions
 .. function:: minmax(x, y)
 
    Return ``(min(x,y), max(x,y))``.
+   See also: :func:`extrema` that returns ``(minimum(x), maximum(x))`` 
 
 .. function:: clamp(x, lo, hi)
 
@@ -4142,17 +4143,18 @@ Statistics
    This function accepts three keyword arguments:
 
    - ``vardim``: the dimension of variables. When ``vardim = 1``, variables 
-   are considered in columns while observations in rows; when ``vardim = 2``, 
-   variables are in rows while observations in columns. By default, it is
-   set to ``1``.
+     are considered in columns while observations in rows; when ``vardim = 2``, 
+     variables are in rows while observations in columns. By default, it is
+     set to ``1``.
 
    - ``corrected``: whether to apply Bessel's correction (divide by ``n-1`` 
-   instead of ``n``). By default, it is set to ``true``.
+     instead of ``n``). By default, it is set to ``true``.
 
-   - ``mean``: allow users to supply mean values that are known. By default, it 
-   is set to ``nothing``, which indicates that the mean(s) are unknown, and the 
-   function will compute the mean. Users can use ``mean=0`` to indicate that 
-   the input data are centered, and hence there's no need to subtract the mean.
+   - ``mean``: allow users to supply mean values that are known. By default,
+     it is set to ``nothing``, which indicates that the mean(s) are unknown,
+     and the function will compute the mean. Users can use ``mean=0`` to
+     indicate that the input data are centered, and hence there's no need to
+     subtract the mean.
 
    The size of the result depends on the size of ``v1`` and ``v2``. When both 
    ``v1`` and ``v2`` are vectors, it returns the covariance between them as a 
