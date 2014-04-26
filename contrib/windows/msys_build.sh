@@ -188,4 +188,5 @@ fi
 wait; }
 
 time { make julia-release; }
+mkdir -p usr/lib/julia
 #time { make; }
