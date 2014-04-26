@@ -187,6 +187,6 @@ fi
 
 wait; }
 
-time { make julia-release; }
+time { make julia-release $PWD/usr/etc/julia/juliarc.jl; }
 mkdir -p usr/lib/julia
 #time { make; }
