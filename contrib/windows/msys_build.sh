@@ -55,8 +55,9 @@ for i in bin/*.dll lib/julia/*.a include/julia/uv*.h include/julia/tree.h \
     -ousr\\`dirname $i | sed -e 's|/julia||' -e 's|/|\\\\|g'` >> get-deps.log
 done
 # Remove libjulia.dll if it was copied from downloaded binary
-rm -f usr/bin/libjulia.dll
-rm -f usr/bin/libjulia-debug.dll )&
+#rm -f usr/bin/libjulia.dll
+#rm -f usr/bin/libjulia-debug.dll 
+)&
 
 mingw=http://sourceforge.net/projects/mingw
 if [ -z "$USEMSVC" ]; then
