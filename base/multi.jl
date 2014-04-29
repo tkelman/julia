@@ -1592,3 +1592,21 @@ function check_same_host(pids)
     end
 end
 
+function terminate_all_workers()
+    if myid() != 1
+        return
+    end
+    
+    if nprocs() > 1
+        ret = rmprocs(workers(); waitfor=0.5)
+        if ret != :ok
+            warn("Forcibly interrupting busy workers")
+            # Might be computation bound, interrupt them and try again
+            interrupt(workers())
+            ret = rmprocs(workers(); waitfor=0.5)
+            if ret != :ok
+                warn("Unable to terminate all workers")
+            end
+        end
+     end   
+end
