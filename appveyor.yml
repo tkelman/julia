@@ -14,10 +14,10 @@ build_script:
 # AppVeyor is not compatible with the cross-compiled Julia Windows binaries
   - set PATH=%PATH:C:\MinGW\bin;=%
   - sh --login /c/projects/julia/contrib/windows/msys_build.sh
-  - cd base
-  - ..\usr\bin\julia --build C:\projects\julia\usr\lib\julia\sys0 sysimg.jl
-  - ..\usr\bin\julia --build C:\projects\julia\usr\lib\julia\sys -JC:\projects\julia\usr\lib\julia\sys0.ji -f sysimg.jl
-  - cd ..
+#  - cd base
+#  - ..\usr\bin\julia --build C:\projects\julia\usr\lib\julia\sys0 sysimg.jl
+#  - ..\usr\bin\julia --build C:\projects\julia\usr\lib\julia\sys -JC:\projects\julia\usr\lib\julia\sys0.ji -f sysimg.jl
+#  - cd ..
 
 test_script:
 #  - set JULIA_CPU_CORES=4
