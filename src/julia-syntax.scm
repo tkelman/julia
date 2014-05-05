@@ -1199,8 +1199,14 @@
 (define vars-introduced-by-patterns
   (pattern-set
    ;; function with static parameters
-   (pattern-lambda (function (call (curly name . sparams) . argl) body)
-		   (cons 'varlist (llist-vars (fix-arglist argl))))
+   (pattern-lambda
+    (function (call (curly name . sparams) . argl) body)
+    (cons 'varlist (append (llist-vars (fix-arglist argl))
+			   (apply nconc
+				  (map (lambda (v) (trycatch
+						    (list (sparam-name v))
+						    (lambda (e) '())))
+				       sparams)))))
 
    ;; function definition
    (pattern-lambda (function (call name . argl) body)
