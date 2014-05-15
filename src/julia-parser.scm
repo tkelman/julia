@@ -117,14 +117,6 @@
   (let ((chrs (string->list "()[]{},;\"`@")))
     (lambda (c) (memv c chrs))))
 (define (newline? c) (eqv? c #\newline))
-(define (identifier-char? c) (or (and (char>=? c #\A)
-				      (char<=? c #\Z))
-				 (and (char>=? c #\a)
-				      (char<=? c #\z))
-				 (and (char>=? c #\0)
-				      (char<=? c #\9))
-				 (char>=? c #\uA1)
-				 (eqv? c #\_)))
 ;; characters that can be in an operator
 (define (opchar? c) (and (char? c) (string.find op-chars c)))
 ;; characters that can follow . in an operator
@@ -390,6 +382,14 @@
 	     (skip-ws-and-comments port)))
   #t)
 
+(define (zero-width-space? c)
+  (memv c '(#\u200b #\u2060 #\ufeff)))
+
+(define (default-ignorable-char? c)
+  (or (zero-width-space? c)
+      (and (char>=? c #\u200c) (char<=? c #\u200f))
+      (memv c '(#\u00ad #\u2061 #\u115f))))
+
 (define (next-token port s)
   (aset! s 2 (eq? (skip-ws port whitespace-newline) #t))
   (let ((c (peek-char port)))
@@ -401,7 +401,7 @@
 
 	  ((eqv? c #\#)         (skip-comment port) (next-token port s))
 
-	  ; . is difficult to handle; it could start a number or operator
+	  ;; . is difficult to handle; it could start a number or operator
 	  ((and (eqv? c #\.)
 		(let ((c (read-char port))
 		      (nextc (peek-char port)))
@@ -418,9 +418,13 @@
 
 	  ((opchar? c)  (read-operator port (read-char port)))
 
-	  ((identifier-char? c) (accum-julia-symbol c port))
+	  ((identifier-start-char? c) (accum-julia-symbol c port))
 
-	  (else (error (string "invalid character \"" (read-char port) "\""))))))
+	  (else
+	   (read-char port)
+	   (if (default-ignorable-char? c)
+	       (error (string "invisible character \\u" (number->string (fixnum c) 16)))
+	       (error (string "invalid character \"" c "\"")))))))
 
 ; --- parser ---
 
@@ -1523,7 +1527,7 @@
 (define (parse-interpolate s)
   (let* ((p (ts:port s))
          (c (peek-char p)))
-    (cond ((identifier-char? c)
+    (cond ((identifier-start-char? c)
            (parse-atom s))
           ((eqv? c #\()
            (read-char p)

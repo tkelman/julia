@@ -134,6 +134,9 @@ debug && println("symmetric eigen-decomposition")
         @test_approx_eq v*Diagonal(d)*v' asym
         @test isequal(eigvals(asym[1]), eigvals(asym[1:1,1:1]))
         @test_approx_eq abs(eigfact(Hermitian(asym), 1:2)[:vectors]'v[:,1:2]) eye(eltya, 2)
+        @test_approx_eq abs(eigfact(Hermitian(asym), d[1]-10*eps(d[1]), d[2]+10*eps(d[2]))[:vectors]'v[:,1:2]) eye(eltya, 2)
+        @test_approx_eq eigvals(Hermitian(asym), 1:2) d[1:2]
+        @test_approx_eq eigvals(Hermitian(asym), d[1]-10*eps(d[1]), d[2]+10*eps(d[2])) d[1:2]
     end
 
 debug && println("non-symmetric eigen decomposition")
@@ -204,9 +207,9 @@ debug && println("Solve upper triangular system")
     γ = n*ε/(1-n*ε)
     if eltya != BigFloat
         bigA = big(triu(a))
-        ̂x = bigA \ b
+        x̂ = bigA \ b
         for i=1:size(b, 2)
-            @test norm(̂x[:,i]-x[:,i], Inf)/norm(x[:,i], Inf) <= abs(condskeel(bigA, x[:,i])*γ/(1-condskeel(bigA)*γ))
+            @test norm(x̂[:,i]-x[:,i], Inf)/norm(x[:,i], Inf) <= abs(condskeel(bigA, x[:,i])*γ/(1-condskeel(bigA)*γ))
         end
     end
     #Test backward error [JIN 5705]
@@ -221,9 +224,9 @@ debug && println("Solve lower triangular system")
     γ = n*ε/(1-n*ε)
     if eltya != BigFloat
         bigA = big(tril(a))
-        ̂x = bigA \ b
+        x̂ = bigA \ b
         for i=1:size(b, 2)
-            @test norm(̂x[:,i]-x[:,i], Inf)/norm(x[:,i], Inf) <= abs(condskeel(bigA, x[:,i])*γ/(1-condskeel(bigA)*γ))
+            @test norm(x̂[:,i]-x[:,i], Inf)/norm(x[:,i], Inf) <= abs(condskeel(bigA, x[:,i])*γ/(1-condskeel(bigA)*γ))
         end
     end
     #Test backward error [JIN 5705]
