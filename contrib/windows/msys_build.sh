@@ -43,9 +43,9 @@ done
 # Download most recent Julia binary for dependencies
 echo "" > get-deps.log
 if ! [ -e julia-installer.exe ]; then
-  f=julia-0.3.0-prerelease-win$bits.exe
+  f=julia-nightly-win$bits.exe
   echo "Downloading $f"
-  curl -kLOsS http://s3.amazonaws.com/julialang/bin/winnt/x$archsuffix/0.3/$f
+  curl -kLsSo $f http://status.julialang.org/download/win$bits
   echo "Extracting $f"
   7z x -y $f >> get-deps.log
 fi
