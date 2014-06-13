@@ -194,3 +194,5 @@ fi
 
 time { make julia-release; }
 time { make; }
+# delete system image dll (can cause strange jl_profile_is_running errors otherwise)
+rm -f usr/lib/julia/sys.dll
