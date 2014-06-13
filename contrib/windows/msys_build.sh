@@ -131,7 +131,7 @@ for i in cat chmod echo false printf sort touch true; do
   mv bin/$i.exe usr/Git/bin
 done
 
-f=mingw$bits-pcre-8.34-1.fc21.noarch
+f=mingw$bits-pcre-8.34-2.fc21.noarch
 if ! [ -e $f.rpm ]; then
   echo "Downloading $f"
   curl -kLOsS http://rpmfind.net/linux/fedora/linux/development/rawhide/x86_64/os/Packages/m/$f.rpm
