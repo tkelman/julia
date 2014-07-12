@@ -5,7 +5,7 @@ function runtests(name)
     totalmem = int64(Sys.total_memory())
     println("$freemem bytes free out of $totalmem, $(100*(freemem/totalmem)) %")
     println("     \033[1m*\033[0m \033[31m$(name)\033[0m")
-    Core.include("$name.jl")
+    @time Core.include("$name.jl")
     nothing
 end
 
