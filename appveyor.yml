@@ -19,5 +19,6 @@ build_script:
   - ps: (Get-WMIObject Win32_PhysicalMemory | Measure-Object Capacity -Sum).sum
   - ps: (Get-Counter '\Memory\Available Bytes')
 #  - ps: (Get-Counter '\Memory\% Committed Bytes In Use')
-  - where sh.exe
+#  - where sh.exe
+  - set
   - cd test && C:\projects\julia-binary\bin\julia runtests.jl all
