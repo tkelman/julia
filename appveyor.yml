@@ -1,0 +1,13 @@
+environment:
+  matrix:
+  - JULIAVERSION: "win32"
+#  - JULIAVERSION: "win64"
+
+install:
+# Download most recent Julia Windows binary
+  - ps: (new-object net.webclient).DownloadFile($("http://status.julialang.org/download/"+$env:JULIAVERSION), "C:\projects\julia-binary.exe")
+# Run installer silently, output to C:\projects\julia-binary
+  - C:\projects\julia-binary.exe /S /D=C:\projects\julia-binary
+
+build_script:
+  - cd test && C:\projects\julia-binary\bin\julia runtests.jl all
