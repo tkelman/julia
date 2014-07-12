@@ -1,7 +1,9 @@
 environment:
   matrix:
-#  - JULIAVERSION: "win32"
-  - JULIAVERSION: "win64"
+  - JULIAVERSION: "win32"
+#  - JULIAVERSION: "win64"
+
+clone_depth: 50
 
 install:
 #  - ps: (Get-WMIObject Win32_PhysicalMemory | Measure-Object Capacity -Sum).sum
@@ -11,6 +13,7 @@ install:
   - ps: (new-object net.webclient).DownloadFile($("http://status.julialang.org/download/"+$env:JULIAVERSION), "C:\projects\julia-binary.exe")
 # Run installer silently, output to C:\projects\julia-binary
   - C:\projects\julia-binary.exe /S /D=C:\projects\julia-binary
+  - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
 
 build_script:
   - ps: (Get-WMIObject Win32_PhysicalMemory | Measure-Object Capacity -Sum).sum
