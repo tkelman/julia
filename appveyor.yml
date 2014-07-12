@@ -1,7 +1,7 @@
 environment:
   matrix:
-  - JULIAVERSION: "win32"
-#  - JULIAVERSION: "win64"
+#  - JULIAVERSION: "win32"
+  - JULIAVERSION: "win64"
 
 clone_depth: 50
 
