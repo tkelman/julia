@@ -1,12 +1,12 @@
 environment:
   matrix:
-  - JULIAVERSION: "win32"
-#  - JULIAVERSION: "win64"
+#  - JULIAVERSION: "win32"
+  - JULIAVERSION: "win64"
 
 install:
-  - ps: (Get-WMIObject Win32_PhysicalMemory | Measure-Object Capacity -Sum).sum
-  - ps: (Get-Counter '\Memory\Available Bytes')
-  - ps: (Get-Counter '\Memory\% Committed Bytes In Use')
+#  - ps: (Get-WMIObject Win32_PhysicalMemory | Measure-Object Capacity -Sum).sum
+#  - ps: (Get-Counter '\Memory\Available Bytes')
+#  - ps: (Get-Counter '\Memory\% Committed Bytes In Use')
 # Download most recent Julia Windows binary
   - ps: (new-object net.webclient).DownloadFile($("http://status.julialang.org/download/"+$env:JULIAVERSION), "C:\projects\julia-binary.exe")
 # Run installer silently, output to C:\projects\julia-binary
@@ -15,6 +15,6 @@ install:
 build_script:
   - ps: (Get-WMIObject Win32_PhysicalMemory | Measure-Object Capacity -Sum).sum
   - ps: (Get-Counter '\Memory\Available Bytes')
-  - ps: (Get-Counter '\Memory\% Committed Bytes In Use')
+#  - ps: (Get-Counter '\Memory\% Committed Bytes In Use')
   - where sh.exe
   - cd test && C:\projects\julia-binary\bin\julia runtests.jl all
