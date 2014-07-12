@@ -1,8 +1,8 @@
 using Base.Test
 
 function runtests(name)
-    freemem = int(Sys.free_memory())
-    totalmem = int(Sys.total_memory())
+    freemem = int64(Sys.free_memory())
+    totalmem = int64(Sys.total_memory())
     println("$freemem bytes free out of $totalmem, $(100*(freemem/totalmem)) %")
     println("     \033[1m*\033[0m \033[31m$(name)\033[0m")
     Core.include("$name.jl")
