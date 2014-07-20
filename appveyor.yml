@@ -21,5 +21,6 @@ build_script:
   - ps: (Get-Counter '\Memory\Available Bytes')
 #  - ps: (Get-Counter '\Memory\% Committed Bytes In Use')
 #  - where sh.exe
-  - set
+  - set OPENBLAS_CORETYPE=Bulldozer
+  - C:\projects\julia-binary\bin\julia -e "versioninfo()"
   - cd test && C:\projects\julia-binary\bin\julia runtests.jl all
