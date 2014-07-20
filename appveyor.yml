@@ -17,10 +17,10 @@ install:
   - set PATH=%PATH:C:\Program Files (x86)\Git\bin;=%
 
 build_script:
-  - ps: (Get-WMIObject Win32_PhysicalMemory | Measure-Object Capacity -Sum).sum
-  - ps: (Get-Counter '\Memory\Available Bytes')
+#  - ps: (Get-WMIObject Win32_PhysicalMemory | Measure-Object Capacity -Sum).sum
+#  - ps: (Get-Counter '\Memory\Available Bytes')
 #  - ps: (Get-Counter '\Memory\% Committed Bytes In Use')
 #  - where sh.exe
-  - set OPENBLAS_CORETYPE=Bulldozer
+  - set OPENBLAS_CORETYPE=opteron
   - C:\projects\julia-binary\bin\julia -e "versioninfo()"
   - cd test && C:\projects\julia-binary\bin\julia runtests.jl all
