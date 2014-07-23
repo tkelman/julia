@@ -18,8 +18,8 @@ script:
         export BUILDOPTS="$BUILDOPTS USE_SYSTEM_$lib=1";
       done;
       make $BUILDOPTS prefix=/tmp/julia install;
-      cd .. && mv julia julia2;
+      cd .. && mv code julia2;
       git config --global user.name "Travis CI";
       cd /tmp/julia/share/julia/test && /tmp/julia/bin/julia-debug --check-bounds=yes runtests.jl all && /tmp/julia/bin/julia-debug --check-bounds=yes runtests.jl pkg;
-      cd - && mv julia2 julia;
+      cd - && mv julia2 code;
       echo "Ready for packaging..."
