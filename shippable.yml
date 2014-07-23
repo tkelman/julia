@@ -1,4 +1,4 @@
-#language: python
+language: python # a lie because shippable "doesn't support" cpp
 #os:
 #    - linux
 #compiler: 
