@@ -517,6 +517,7 @@ UV_OBJ_TARGET = $(build_libdir)/libuv.a
 UV_CFLAGS = 
 ifeq ($(USEMSVC), 1)
 UV_CFLAGS += -DBUILDING_UV_SHARED
+UV_OPTS += --disable-shared
 endif
 ifeq ($(USEICC), 1)
 UV_CFLAGS += -static-intel
