@@ -84,7 +84,11 @@ else
   echo "override AR = $AR" >> Make.user
   echo "override LD = $LD" >> Make.user
 
-  f=llvm-3.3.1-$ARCH-msvc11-juliadeps.7z
+  for i in share/julia/base/pcre_h.jl; do
+    7z e -y julia-installer.exe "\$_OUTDIR/$i" -obase >> get-deps.log
+  done
+
+  f=llvm-3.3-$ARCH-msvc12-juliadeps.7z
 fi
 
 if ! [ -e $f ]; then
