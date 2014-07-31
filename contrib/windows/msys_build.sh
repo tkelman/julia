@@ -176,4 +176,4 @@ else
   echo 'override STAGE1_DEPS += openlibm' >> Make.user
 fi
 
-make
+make win-extras dist
