@@ -12,7 +12,7 @@ ifneq ($(USEMSVC), 1)
 CONFIGURE_COMMON += LDFLAGS=-Wl,--stack,8388608
 endif
 endif
-CONFIGURE_COMMON += F77="$(FC)" CC="$(CC)" CXX="$(CXX)"
+CONFIGURE_COMMON += F77="$(FC) $(JFFLAGS)" CC="$(CC) $(JCFLAGS)" CXX="$(CXX) $(JCXXFLAGS)"
 
 # If the top-level Makefile is called with environment variables,
 # they will override the values passed above to ./configure
@@ -654,7 +654,7 @@ install-double-conversion: $(GRISU_OBJ_TARGET)
 
 ## openlibm ##
 
-OPENLIBM_FLAGS = ARCH="$(ARCH)" CC="$(CC)" FC="$(FC)" AR="$(AR)" OS="$(OS)" USECLANG=$(USECLANG) USEGCC=$(USEGCC)
+OPENLIBM_FLAGS = ARCH="$(ARCH)" CC="$(CC) $(JCFLAGS)" AR="$(AR)" OS="$(OS)" USECLANG=$(USECLANG) USEGCC=$(USEGCC)
 
 OPENLIBM_OBJ_TARGET = $(build_shlibdir)/libopenlibm.$(SHLIB_EXT)
 OPENLIBM_OBJ_SOURCE = openlibm/libopenlibm.$(SHLIB_EXT)
@@ -691,7 +691,7 @@ install-openlibm: $(OPENLIBM_OBJ_TARGET)
 
 ## openspecfun ##
 
-OPENSPECFUN_FLAGS = ARCH="$(ARCH)" CC="$(CC)" FC="$(FC)" AR="$(AR)" OS="$(OS)" USECLANG=$(USECLANG) USEGCC=$(USEGCC) FFLAGS="$(JFFLAGS)"
+OPENSPECFUN_FLAGS = ARCH="$(ARCH)" CC="$(CC) $(JCFLAGS)" FC="$(FC) $(JFFLAGS)" AR="$(AR)" OS="$(OS)" USECLANG=$(USECLANG) USEGCC=$(USEGCC)
 
 ifeq ($(USE_SYSTEM_LIBM),0)
 	OPENSPECFUN_FLAGS += USE_OPENLIBM=1
@@ -1289,7 +1289,7 @@ ifeq (exists, $(shell [ -d $(JULIAHOME)/.git/modules/deps/libmojibake ] && echo 
 $(MOJIBAKE_SRC_TARGET): $(JULIAHOME)/.git/modules/deps/libmojibake/HEAD
 endif
 $(MOJIBAKE_SRC_TARGET): libmojibake/Makefile
-	$(MAKE) -C libmojibake cc="$(CC) -O2 -std=c99 $(fPIC)" AR="$(AR)" libmojibake.a
+	$(MAKE) -C libmojibake cc="$(CC) $(JCFLAGS) -O2 -std=c99 $(fPIC)" AR="$(AR)" libmojibake.a
 	touch -c $@
 libmojibake/checked: $(MOJIBAKE_SRC_TARGET)
 ifeq ($(OS),$(BUILD_OS))
@@ -1333,7 +1333,8 @@ endif
 ifneq ($(OS), WINNT)
 SUITE_SPARSE_LIB += -Wl,-rpath,'$(build_libdir)'
 endif
-SUITESPARSE_MFLAGS = CC="$(CC)" CXX="$(CXX)" F77="$(FC)" AR="$(AR)" RANLIB="$(RANLIB)" BLAS="$(LIBBLAS)" LAPACK="$(LIBLAPACK)" \
+SUITESPARSE_MFLAGS = CC="$(CC) $(JCFLAGS)" CXX="$(CXX) $(JCXXFLAGS)" F77="$(FC) $(JFFLAGS)" \
+	  AR="$(AR)" RANLIB="$(RANLIB)" BLAS="$(LIBBLAS)" LAPACK="$(LIBLAPACK)" \
 	  INSTALL_LIB="$(build_libdir)" INSTALL_INCLUDE="$(build_includedir)" LIB="$(SUITE_SPARSE_LIB)" \
 	  UMFPACK_CONFIG="$(UMFPACK_CONFIG)" CHOLMOD_CONFIG="$(CHOLMOD_CONFIG)"
 
@@ -1367,19 +1368,19 @@ $(SUITESPARSE_OBJ_TARGET): $(SUITESPARSE_OBJ_SOURCE)
 	cd SuiteSparse-$(SUITESPARSE_VER)/lib && \
 	rm -f *.a && \
 	cp -f `find .. -name libamd.a -o -name libcolamd.a -o -name libcamd.a -o -name libccolamd.a -o -name libcholmod.a -o -name libumfpack.a -o -name libsuitesparseconfig.a -o -name libspqr.a 2>/dev/null` . && \
-	$(CC) -shared $(WHOLE_ARCHIVE) libamd.a $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libamd.$(SHLIB_EXT) && \
+	$(CC) $(JCFLAGS) -shared $(WHOLE_ARCHIVE) libamd.a $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libamd.$(SHLIB_EXT) && \
 	$(INSTALL_NAME_CMD)libamd.$(SHLIB_EXT) $(build_shlibdir)/libamd.$(SHLIB_EXT) && \
-	$(CC) -shared $(WHOLE_ARCHIVE) libcolamd.a  $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libcolamd.$(SHLIB_EXT) && \
+	$(CC) $(JCFLAGS) -shared $(WHOLE_ARCHIVE) libcolamd.a  $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libcolamd.$(SHLIB_EXT) && \
 	$(INSTALL_NAME_CMD)libcolamd.$(SHLIB_EXT) $(build_shlibdir)/libcolamd.$(SHLIB_EXT) && \
-	$(CC) -shared $(WHOLE_ARCHIVE) libcamd.a $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libcamd.$(SHLIB_EXT) && \
+	$(CC) $(JCFLAGS) -shared $(WHOLE_ARCHIVE) libcamd.a $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libcamd.$(SHLIB_EXT) && \
 	$(INSTALL_NAME_CMD)libcamd.$(SHLIB_EXT) $(build_shlibdir)/libcamd.$(SHLIB_EXT) && \
-	$(CC) -shared $(WHOLE_ARCHIVE) libccolamd.a $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libccolamd.$(SHLIB_EXT) && \
+	$(CC) $(JCFLAGS) -shared $(WHOLE_ARCHIVE) libccolamd.a $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libccolamd.$(SHLIB_EXT) && \
 	$(INSTALL_NAME_CMD)libccolamd.$(SHLIB_EXT) $(build_shlibdir)/libccolamd.$(SHLIB_EXT) && \
-	$(CXX) -shared $(WHOLE_ARCHIVE) libsuitesparseconfig.a libcholmod.a  $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libcholmod.$(SHLIB_EXT) -L$(build_shlibdir) -lcolamd -lamd -lcamd -lccolamd $(LIBBLAS) $(RPATH_ORIGIN) && \
+	$(CXX) $(JCXXFLAGS) -shared $(WHOLE_ARCHIVE) libsuitesparseconfig.a libcholmod.a  $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libcholmod.$(SHLIB_EXT) -L$(build_shlibdir) -lcolamd -lamd -lcamd -lccolamd $(LIBBLAS) $(RPATH_ORIGIN) && \
 	$(INSTALL_NAME_CMD)libcholmod.$(SHLIB_EXT) $(build_shlibdir)/libcholmod.$(SHLIB_EXT) && \
-	$(CXX) -shared $(WHOLE_ARCHIVE) libsuitesparseconfig.a libumfpack.a  $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libumfpack.$(SHLIB_EXT) -L$(build_shlibdir) -lcholmod -lcolamd -lamd $(LIBBLAS) $(RPATH_ORIGIN) && \
+	$(CXX) $(JCXXFLAGS) -shared $(WHOLE_ARCHIVE) libsuitesparseconfig.a libumfpack.a  $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libumfpack.$(SHLIB_EXT) -L$(build_shlibdir) -lcholmod -lcolamd -lamd $(LIBBLAS) $(RPATH_ORIGIN) && \
 	$(INSTALL_NAME_CMD)libumfpack.$(SHLIB_EXT) $(build_shlibdir)/libumfpack.$(SHLIB_EXT) && \
-	$(CXX) -shared $(WHOLE_ARCHIVE) libsuitesparseconfig.a libspqr.a  $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libspqr.$(SHLIB_EXT) -L$(build_shlibdir) -lcholmod -lcolamd -lamd $(LIBLAPACK) $(RPATH_ORIGIN) && \
+	$(CXX) $(JCXXFLAGS) -shared $(WHOLE_ARCHIVE) libsuitesparseconfig.a libspqr.a  $(NO_WHOLE_ARCHIVE) -o $(build_shlibdir)/libspqr.$(SHLIB_EXT) -L$(build_shlibdir) -lcholmod -lcolamd -lamd $(LIBLAPACK) $(RPATH_ORIGIN) && \
 	$(INSTALL_NAME_CMD)libspqr.$(SHLIB_EXT) $(build_shlibdir)/libspqr.$(SHLIB_EXT)
 
 clean-suitesparse:

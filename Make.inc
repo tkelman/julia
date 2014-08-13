@@ -301,7 +301,7 @@ ifeq ($(LLVM_VER),svn)
 JCXXFLAGS += -std=c++11
 endif
 
-JFFLAGS = -O2 $(fPIC)
+JFFLAGS += -O2 $(fPIC)
 JF2CFLAGS = -ff2c -fno-second-underscore
 ifneq ($(USEMSVC),1)
 CPP = $(CC) -E
