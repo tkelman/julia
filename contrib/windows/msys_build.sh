@@ -46,8 +46,15 @@ if ! [ -e julia-installer.exe ]; then
 fi
 for i in bin/*.dll lib/julia/*.a include/julia/uv*.h include/julia/tree.h \
     Git/bin/msys-1.0.dll Git/bin/msys-perl5_8.dll Git/bin/*.exe; do
-  7z e -y julia-installer.exe "\$_OUTDIR/$i" \
-    -ousr\\`dirname $i | sed -e 's|/julia||' -e 's|/|\\\\|g'` >> get-deps.log
+  if [ -z "$(file `which 7z` | grep shell)" ]; then
+    # Windows version of 7z.exe, use backslashes
+    7z e -y julia-installer.exe "\$_OUTDIR/$i" \
+      -ousr\\`dirname $i | sed -e 's|/julia||' -e 's|/|\\\\|g'` >> get-deps.log
+  else
+    # p7zip, use forward slashes
+    7z e -y julia-installer.exe "\$_OUTDIR/$i" \
+      -ousr/`dirname $i | sed -e 's|/julia||'` >> get-deps.log
+  fi
 done
 # Remove libjulia.dll if it was copied from downloaded binary
 rm -f usr/bin/libjulia.dll
@@ -75,6 +82,11 @@ if [ -z "$USEMSVC" ]; then
   $AR cr usr/lib/libgtest_main.a
 else
   echo "override ARCH = $ARCH" >> Make.user
+  if [ $ARCH = x86_64 ]; then
+    echo "override MARCH = x86-64" >> Make.user
+  else
+    echo "override MARCH = $ARCH" >> Make.user
+  fi
   echo "override XC_HOST = " >> Make.user
   export CC="$PWD/deps/libuv/compile cl -nologo -MD"
   export AR="$PWD/deps/libuv/ar-lib lib"
@@ -145,11 +157,11 @@ echo 'override LIBUV_INC = $(JULIAHOME)/usr/include' >> Make.user
 
 # Remaining dependencies:
 # openlibm since we need it as a static library to work properly
-# utf8proc since its headers are not in the binary download
+# mojibake since its headers are not in the binary download
 echo 'override STAGE1_DEPS = ' >> Make.user
-echo 'override STAGE2_DEPS = utf8proc' >> Make.user
+echo 'override STAGE2_DEPS = mojibake' >> Make.user
 echo 'override STAGE3_DEPS = ' >> Make.user
-make -C deps get-openlibm get-utf8proc
+make -C deps get-openlibm get-mojibake
 
 # Disable git and enable verbose make in AppVeyor
 if [ -n "$APPVEYOR" ]; then
@@ -168,8 +180,8 @@ if [ -n "$USEMSVC" ]; then
   # Since we don't have a static library for openlibm
   echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 
-  # Compile libuv and utf8proc without -TP first, then add -TP
-  make -C deps install-uv install-utf8proc
+  # Compile libuv and mojibake without -TP first, then add -TP
+  make -C deps install-uv install-mojibake
   cp usr/lib/uv.lib usr/lib/libuv.a
   echo 'override CC += -TP' >> Make.user
 else
