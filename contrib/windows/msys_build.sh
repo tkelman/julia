@@ -116,14 +116,17 @@ if [ -z "`which make 2>/dev/null`" ]; then
     echo "Install the Cygwin package for 'make' and try again."
     exit 1
   fi
-  f="/make/make-3.81-2/make-3.81-2-msys-1.0.11-bin.tar"
-  if ! [ -e `basename $f.lzma` ]; then
-    echo "Downloading `basename $f`"
-    curl -kLOsS $mingw/files/MSYS/Base$f.lzma
-  fi
-  7z x -y `basename $f.lzma` >> get-deps.log
-  tar -xf `basename $f`
+  for f in /make/make-3.81-2/make-3.81-2-msys-1.0.11-bin.tar \
+      /coreutils/coreutils-5.97-2/coreutils-5.97-2-msys-1.0.11-bin.tar; do
+    if ! [ -e `basename $f.lzma` ]; then
+      echo "Downloading `basename $f`"
+      curl -kLOsS $mingw/files/MSYS/Base$f.lzma
+    fi
+    7z x -y `basename $f.lzma` >> get-deps.log
+    tar -xf `basename $f`
+  done
   mv bin/make.exe /usr/bin
+  mv bin/install* /usr/bin
   # msysgit has an ancient version of touch that fails with `touch -c nonexistent`
   cp usr/Git/bin/echo.exe /usr/bin/touch.exe
 fi
