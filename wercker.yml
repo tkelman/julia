@@ -2,7 +2,7 @@ box: ruudk/ubuntu14.04@1.0.0
 build:
   steps:
     - install-packages:
-        packages: --no-install-recommends make git curl patch p7zip-full wine gcc g++-mingw-w64 gfortran-mingw-w64
+        packages: --no-install-recommends make git curl patch m4 p7zip-full wine gcc g++-mingw-w64 gfortran-mingw-w64
 #    - script:
 #        name: add wine ppa
 #        code: sudo apt-add-repository ppa:ubuntu-wine/ppa -y
@@ -17,6 +17,7 @@ build:
                   ls -al $WERCKER_CACHE_DIR/$i/*;
                   cp -rf $WERCKER_CACHE_DIR/$i .;
                 fi;
+                ls -al $i/*;
               done;
               mkdir -p $WERCKER_CACHE_DIR/deps;
               for i in pcre fftw gmp mpfr arpack; do
