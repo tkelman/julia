@@ -1,12 +1,12 @@
 box: ruudk/ubuntu14.04@1.0.0
 build:
   steps:
-    - script:
-        name: copy saved apt-get cache
-        code: "ls -al $WERCKER_CACHE_DIR;
-              if [ -e $WERCKER_CACHE_DIR/archives ]; then
-                sudo cp -rf $WERCKER_CACHE_DIR/archives/*.deb /var/cache/apt/archives;
-              fi"
+#    - script:
+#        name: copy saved apt-get cache
+#        code: "ls -al $WERCKER_CACHE_DIR/*;
+#              if [ -e $WERCKER_CACHE_DIR/archives ]; then
+#                sudo cp -rf $WERCKER_CACHE_DIR/archives/*.deb /var/cache/apt/archives;
+#              fi"
     - install-packages:
         packages: --no-install-recommends make git curl patch p7zip-full wine gcc g++-mingw-w64 gfortran-mingw-w64
 #    - script:
@@ -18,12 +18,16 @@ build:
         name: cross-compile julia
         code: "echo 'XC_HOST = i686-w64-mingw32' >> Make.user;
               make win-extras;
-              if [ -e $WERCKER_CACHE_DIR/usr ]; then
-                cp -r $WERCKER_CACHE_DIR/usr .;
-              fi;
+              for i in usr deps; do
+                if [ -e $WERCKER_CACHE_DIR/$i ]; then
+                  ls -al $WERCKER_CACHE_DIR/$i/*;
+                  cp -rf $WERCKER_CACHE_DIR/$i .;
+                fi;
+              done;
+              mkdir -p $WERCKER_CACHE_DIR/deps;
               for i in pcre fftw; do
                 make -j8 -C deps install-$i;
+                cp -rf deps/$i-*/ $WERCKER_CACHE_DIR/deps
               done;
-              cp -rf usr $WERCKER_CACHE_DIR
-              sudo cp -rf /var/cache/apt/archives $WERCKER_CACHE_DIR"
+              cp -rf usr $WERCKER_CACHE_DIR"
 # make -j8 dist;
