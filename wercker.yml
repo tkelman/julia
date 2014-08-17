@@ -1,11 +1,12 @@
-box: ruudk/ubuntu14.04@1.0.0
+#box: ruudk/ubuntu14.04@1.0.0
+box: makespace/python-deploy@0.0.4
 build:
   steps:
     - script:
         name: add wine ppa
-        code: "sudo apt-get update -qq;
-              sudo apt-get install software-properties-common -qq -y;
-              sudo apt-add-repository ppa:ubuntu-wine/ppa"
+        code: sudo apt-add-repository ppa:ubuntu-wine/ppa -y
+#              "sudo apt-get update -qq;
+#              sudo apt-get install software-properties-common -qq -y;
     - install-packages:
         packages: --no-install-recommends make git p7zip-full wine1.7 gcc g++-mingw-w64 gfortran-mingw-w64
     - script:
