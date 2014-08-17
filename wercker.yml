@@ -5,6 +5,6 @@ build:
         packages: make git p7zip g++-mingw-w64 gfortran-mingw-w64
     - script:
         name: cross-compile julia
-        code: "sudo apt-get install wine -qq -y;
+        code: "sudo apt-get install wine --no-install-recommends -qq -y;
               echo 'XC_HOST = i686-w64-mingw32' >> Make.user;
               make win-extras && make dist;"
