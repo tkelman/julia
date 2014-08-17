@@ -2,8 +2,9 @@ box: ruudk/ubuntu14.04@1.0.0
 build:
   steps:
     - install-packages:
-        packages: make git p7zip wine g++-mingw-w64 gfortran-mingw-w64
+        packages: make git p7zip g++-mingw-w64 gfortran-mingw-w64
     - script:
         name: cross-compile julia
-        code: "echo 'XC_HOST = i686-w64-mingw32' >> Make.user;
+        code: "sudo apt-get install wine -qq -y;
+              echo 'XC_HOST = i686-w64-mingw32' >> Make.user;
               make win-extras && make dist;"
