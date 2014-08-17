@@ -16,10 +16,10 @@ build:
                 if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i ]; then
                   ls -al $WERCKER_CACHE_DIR/$XC_HOST/$i/*;
                   cp -rf $WERCKER_CACHE_DIR/$XC_HOST/$i .;
-                else
-                  mkdir -p $i;
                 fi;
-                ls -al $i/*;
+                if [ -e $i ]; then
+                  ls -al $i/*;
+                fi;
               done;
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
               for i in pcre; do
