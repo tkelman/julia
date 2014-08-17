@@ -22,7 +22,7 @@ build:
                 fi;
               done;
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
-              for i in pcre; do
+              for i in gmp mpfr; do
                 make -j8 -C deps install-$i;
               done;
               cp -rf usr $WERCKER_CACHE_DIR/$XC_HOST"
