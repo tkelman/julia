@@ -3,7 +3,8 @@ build:
   steps:
     - script:
         name: add wine ppa
-        code: apt-add-repository ppa:ubuntu-wine/ppa
+        code: "sudo apt-get install python-software-properties -qq -y;
+              apt-add-repository ppa:ubuntu-wine/ppa"
     - install-packages:
         packages: --no-install-recommends make git p7zip-full wine1.7 gcc g++-mingw-w64 gfortran-mingw-w64
     - script:
