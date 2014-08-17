@@ -2,7 +2,7 @@ box: ruudk/ubuntu14.04@1.0.0
 build:
   steps:
     - install-packages:
-        packages: --no-install-recommends make git p7zip-full wine gcc g++-mingw-w64 gfortran-mingw-w64
+        packages: --no-install-recommends make git curl p7zip-full wine gcc g++-mingw-w64 gfortran-mingw-w64
 #    - script:
 #        name: add wine ppa
 #        code: sudo apt-add-repository ppa:ubuntu-wine/ppa -y
