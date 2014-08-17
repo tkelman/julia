@@ -1,0 +1,6 @@
+box: tkelman/mingw@0.1.0
+build:
+  steps:
+    - script:
+        name: cross-compile julia for win32 and win64
+        code: bash contrib/windows/werckerbuild.sh
