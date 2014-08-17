@@ -1,6 +1,12 @@
 box: ruudk/ubuntu14.04@1.0.0
 build:
   steps:
+    - script:
+        name: copy saved apt-get cache
+        code: "ls -al $WERCKER_CACHE_DIR;
+              if [ -e $WERCKER_CACHE_DIR/archives ]; then
+                sudo cp -rf $WERCKER_CACHE_DIR/archives/*.deb /var/cache/apt/archives;
+              fi"
     - install-packages:
         packages: --no-install-recommends make git curl patch p7zip-full wine gcc g++-mingw-w64 gfortran-mingw-w64
 #    - script:
@@ -15,8 +21,9 @@ build:
               if [ -e $WERCKER_CACHE_DIR/usr ]; then
                 cp -r $WERCKER_CACHE_DIR/usr .;
               fi;
-              for i in pcre; do
+              for i in pcre fftw; do
                 make -j8 -C deps install-$i;
               done;
-              cp -rf usr $WERCKER_CACHE_DIR"
+              cp -rf usr $WERCKER_CACHE_DIR
+              sudo cp -rf /var/cache/apt/archives $WERCKER_CACHE_DIR"
 # make -j8 dist;
