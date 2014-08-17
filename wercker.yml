@@ -2,7 +2,8 @@
 box: tkelman/mingw@0.0.2
 build:
   steps:
-#    - install-packages:
+    - install-packages:
+         packages: g++
 #        packages: --no-install-recommends make git curl patch m4 p7zip-full wine gcc g++-mingw-w64 gfortran-mingw-w64
 #    - script:
 #        name: add wine ppa
