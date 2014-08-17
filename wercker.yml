@@ -24,8 +24,8 @@ build:
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
               for i in pcre; do
                 make -j8 -C deps install-$i;
-#                cp -rf deps/$i-*/ $WERCKER_CACHE_DIR/$XC_HOST/deps;
               done;
               cp -rf usr $WERCKER_CACHE_DIR/$XC_HOST"
+#                cp -rf deps/$i-*/ $WERCKER_CACHE_DIR/$XC_HOST/deps;
 #              make win-extras"
 # make -j8 dist;
