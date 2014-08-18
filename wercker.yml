@@ -4,6 +4,7 @@ build:
     - script:
         name: cross-compile julia for win32
         code: "export XC_HOST=i686-w64-mingw32;
+              make win-extras;
               mkdir -p usr/bin;
               for i in usr deps; do
                 if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i ]; then
@@ -14,7 +15,7 @@ build:
               done;
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
               rm -f deps/llvm-3.3/lib/CodeGen/SelectionDAG/LegalizeTypes.h.rej;
-              for i in openblas llvm fftw gmp mpfr suitesparse arpack pcre dsfmt; do
+              for i in openblas suitesparse arpack pcre dsfmt; do
                 make -j8 -C deps install-$i;
                 if [ $i = suitesparse ]; then
                   cp -rf deps/SuiteSparse-*/ $WERCKER_CACHE_DIR/$XC_HOST/deps;
@@ -24,6 +25,5 @@ build:
                   cp -rf deps/$i-*.tar.* $WERCKER_CACHE_DIR/$XC_HOST/deps;
                 fi
               done;
-              cp -rf usr $WERCKER_CACHE_DIR/$XC_HOST;
-              make win-extras;
-              make -j8 dist"
+              cp -rf usr $WERCKER_CACHE_DIR/$XC_HOST;"
+#              make -j8 dist"
