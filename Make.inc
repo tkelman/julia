@@ -756,7 +756,13 @@ endif
 
 ifneq (,$(findstring CYGWIN,$(BUILD_OS)))
 cygpath_w = `cygpath -w $(1)`
-else
+else ifeq ($(OS), WINNT)
+ifeq ($(BUILD_OS), WINNT) # MSYS
+cygpath_w = $(1)
+else # unix-to-Windows cross-compile
+cygpath_w = `winepath -w $(1)`
+endif
+else # not Windows
 cygpath_w = $(1)
 endif
 
