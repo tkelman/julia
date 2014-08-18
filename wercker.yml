@@ -8,7 +8,12 @@ build:
               mkdir -p usr/bin;
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST;
               ls -al $WERCKER_CACHE_DIR/$XC_HOST;
-              make win-extras;
+              if [ -e $WERCKER_CACHE_DIR/$XC_HOST/dist-extras.tar ]; then
+                tar -xf $WERCKER_CACHE_DIR/$XC_HOST/dist-extras.tar;
+              else
+                make win-extras;
+                tar -cf $WERCKER_CACHE_DIR/$XC_HOST/dist-extras.tar dist-extras;
+              fi;
               if [ -e $WERCKER_CACHE_DIR/$XC_HOST/usr.tar ]; then
                 tar -xf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar;
               fi;
@@ -24,5 +29,5 @@ build:
                 fi;
               done;
               tar -cf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar usr;
-              base/version_git.sh"
+              sh base/version_git.sh"
 #              make -j8 dist"
