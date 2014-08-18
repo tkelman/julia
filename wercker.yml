@@ -9,8 +9,9 @@ build:
               echo 'LLVM_FLAGS = ac_cv_have_decl_strerror_s=no' > Make.user;
               mkdir -p usr/bin;
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST;
-              if [ -e $WERCKER_CACHE_DIR/$XC_HOST/usr ]; then
-                cp -rf $WERCKER_CACHE_DIR/$XC_HOST/usr .;
+              ls -al $WERCKER_CACHE_DIR/$XC_HOST;
+              if [ -e $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz ]; then
+                tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz;
               fi;
               for i in llvm; do
                 if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz ]; then
@@ -23,7 +24,7 @@ build:
                   tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz deps/$i-*/ deps/$i-*.tar.*;
                 fi;
               done;
-              cp -rf usr $WERCKER_CACHE_DIR/$XC_HOST;"
+              tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz usr;"
 #              make win-extras;
 #              make -j8 dist"
 #              rm -f deps/llvm-3.3/lib/CodeGen/SelectionDAG/LegalizeTypes.h.rej;
