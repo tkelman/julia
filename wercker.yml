@@ -11,7 +11,7 @@ build:
               if [ -e $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz ]; then
                 tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz;
               fi;
-              for i in openblas; do
+              for i in fftw gmp mpfr pcre dsfmt; do
                 if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz ]; then
                   tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz;
                 fi;
