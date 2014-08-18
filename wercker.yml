@@ -11,18 +11,18 @@ build:
               if [ -e $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz ]; then
                 time(tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz);
               fi;
-              for i in llvm fftw gmp mpfr pcre dsfmt; do
+              for i in llvm fftw gmp mpfr pcre dsfmt openblas suitesparse arpack; do
                 if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz ]; then
                   time(tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz);
                 fi;
                 time(make -j8 -C deps install-$i);
                 if [ $i = suitesparse ]; then
-                  time(tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz deps/SuiteSparse-*/ deps/SuiteSparse-*.tar.gz);
+                  time(tar -cf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar deps/SuiteSparse-*/ deps/SuiteSparse-*.tar.gz);
                 else
-                  time(tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz deps/$i-*/ deps/$i-*.tar.*);
+                  time(tar -cf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar deps/$i-*/ deps/$i-*.tar.*);
                 fi;
               done;
-              time(tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz usr);"
+              time(tar -cf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar usr);"
 #              make win-extras;
 #              make -j8 dist"
 # llvm fftw gmp mpfr pcre dsfmt openblas suitesparse arpack
