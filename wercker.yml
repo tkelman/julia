@@ -9,17 +9,11 @@ build:
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST;
               ls -al $WERCKER_CACHE_DIR/$XC_HOST;
               make win-extras;
-              if [ -e $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz ]; then
-                tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz;
-                rm $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz;
-              elif [ -e $WERCKER_CACHE_DIR/$XC_HOST/usr.tar ]; then
+              if [ -e $WERCKER_CACHE_DIR/$XC_HOST/usr.tar ]; then
                 tar -xf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar;
               fi;
               for i in llvm fftw gmp mpfr pcre dsfmt openblas suitesparse arpack; do
-                if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz ]; then
-                  tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz;
-                  rm $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz;
-                elif [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i.tar ]; then
+                if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i.tar ]; then
                   tar -xf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar;
                 fi;
                 make -j8 -C deps install-$i;
@@ -30,4 +24,5 @@ build:
                 fi;
               done;
               tar -cf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar usr;
-              make -j8 dist"
+              base/version_git.sh"
+#              make -j8 dist"
