@@ -16,7 +16,7 @@ build:
                 ls -al $i;
               done;
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
-              curl -o wrap.rb https://gist.github.com/roidrage/5238585/raw;
+              curl -o wrap.rb https://gist.githubusercontent.com/roidrage/5238585/raw;
               chmod +x wrap.rb;
               for i in llvm fftw gmp mpfr pcre dsfmt openblas suitesparse arpack; do
                 ./wrap.rb \"nohup make -d -C deps install-$i\";
