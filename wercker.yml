@@ -9,20 +9,20 @@ build:
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST;
               ls -al $WERCKER_CACHE_DIR/$XC_HOST;
               if [ -e $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz ]; then
-                tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz;
+                time(tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz);
               fi;
-              for i in fftw gmp mpfr pcre dsfmt; do
+              for i in llvm fftw gmp mpfr pcre dsfmt; do
                 if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz ]; then
-                  tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz;
+                  time(tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz);
                 fi;
-                make -j8 -C deps install-$i;
+                time(make -j8 -C deps install-$i);
                 if [ $i = suitesparse ]; then
-                  tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz deps/SuiteSparse-*/ deps/SuiteSparse-*.tar.gz;
+                  time(tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz deps/SuiteSparse-*/ deps/SuiteSparse-*.tar.gz);
                 else
-                  tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz deps/$i-*/ deps/$i-*.tar.*;
+                  time(tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz deps/$i-*/ deps/$i-*.tar.*);
                 fi;
               done;
-              tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz usr;"
+              time(tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz usr);"
 #              make win-extras;
 #              make -j8 dist"
 # llvm fftw gmp mpfr pcre dsfmt openblas suitesparse arpack
