@@ -30,4 +30,5 @@ build:
                 fi;
               done;
               tar -cf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar usr;
-              NO_GIT=1 make -j8 dist"
+              make -j8 dist;
+              mv julia-*.exe $WERCKER_OUTPUT_DIR"
