@@ -8,28 +8,23 @@ build:
         code: "export XC_HOST=i686-w64-mingw32;
               echo 'LLVM_FLAGS = ac_cv_have_decl_strerror_s=no' > Make.user;
               mkdir -p usr/bin;
-              for i in usr deps; do
-                if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i ]; then
-                  ls -al $WERCKER_CACHE_DIR/$XC_HOST/$i;
-                  cp -rf $WERCKER_CACHE_DIR/$XC_HOST/$i .;
-                fi;
-                ls -al $i;
-              done;
-              mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
-              touch deps/llvm-*/configure;
-              touch deps/llvm-*/*/config.status;
-              touch usr/lib/libLLVMJIT.a;
-              for i in llvm fftw gmp mpfr pcre dsfmt openblas suitesparse arpack; do
+              mkdir -p $WERCKER_CACHE_DIR/$XC_HOST;
+              if [ -e $WERCKER_CACHE_DIR/$XC_HOST/usr ]; then
+                cp -rf $WERCKER_CACHE_DIR/$XC_HOST/usr .;
+              fi;
+              for i in llvm; do
+                if [ -e $WERCKER_CACHE_DIR/$i.tar.xz ]; then
+                  tar -xJf $WERCKER_CACHE_DIR/$i.tar.xz;
+                fi
                 make -j8 -C deps install-$i;
                 if [ $i = suitesparse ]; then
-                  cp -rf deps/SuiteSparse-*/ $WERCKER_CACHE_DIR/$XC_HOST/deps;
-                  cp -rf deps/SuiteSparse-*.tar.gz $WERCKER_CACHE_DIR/$XC_HOST/deps;
+                  tar -cJf $WERCKER_CACHE_DIR/$i.tar.xz deps/SuiteSparse-*/ deps/SuiteSparse-*.tar.gz;
                 else
-                  cp -rf deps/$i-*/ $WERCKER_CACHE_DIR/$XC_HOST/deps;
-                  cp -rf deps/$i-*.tar.* $WERCKER_CACHE_DIR/$XC_HOST/deps;
-                fi
+                  tar -cJf $WERCKER_CACHE_DIR/$i.tar.xz deps/$i-*/ deps/$i-*.tar.*;
+                fi;
               done;
               cp -rf usr $WERCKER_CACHE_DIR/$XC_HOST;"
 #              make win-extras;
 #              make -j8 dist"
 #              rm -f deps/llvm-3.3/lib/CodeGen/SelectionDAG/LegalizeTypes.h.rej;
+# fftw gmp mpfr pcre dsfmt openblas suitesparse arpack
