@@ -18,6 +18,7 @@ build:
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
               touch deps/llvm-*/configure;
               touch deps/llvm-*/*/config.status;
+              touch deps/llvm-*/*/*/config.status;
               for i in llvm fftw gmp mpfr pcre dsfmt openblas suitesparse arpack; do
                 make -d -C deps install-$i;
                 if [ $i = suitesparse ]; then
