@@ -284,6 +284,9 @@ endif
 
 	# Overwrite JL_SYSTEM_IMAGE_PATH in julia binaries:
 	for julia in $(DESTDIR)$(bindir)/julia* ; do \
+		strings -t x - $$julia; \
+		strings -t x - $$julia | grep "sys.ji$$"; \
+		strings -t x - $$julia | grep "sys.ji$$" | awk '{print $$1;}'; \
 		$(build_bindir)/stringreplace $$(strings -t x - $$julia | grep "sys.ji$$" | awk '{print $$1;}' ) "$(private_libdir_rel)/sys.ji" 256 $(call cygpath_w,$$julia); \
 	done
 
