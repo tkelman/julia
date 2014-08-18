@@ -3,10 +3,10 @@ build:
   steps:
     - script:
         name: cross-compile julia for win32
-#              curl https://gist.githubusercontent.com/jeffery/1115504/raw/GitRepoUpdateTimestamp.sh | bash;
         code: "export XC_HOST=i686-w64-mingw32;
               echo 'LLVM_FLAGS = ac_cv_have_decl_strerror_s=no' > Make.user;
               git checkout -b $WERCKER_GIT_BRANCH $WERCKER_GIT_COMMIT;
+              curl https://gist.githubusercontent.com/jeffery/1115504/raw/GitRepoUpdateTimestamp.sh | bash;
               mkdir -p usr/bin;
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST;
               ls -al $WERCKER_CACHE_DIR/$XC_HOST;
