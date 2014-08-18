@@ -1,6 +1,8 @@
 box: tkelman/mingw@0.1.0
 build:
   steps:
+    - install-packages:
+        packages: binutils gawk
     - script:
         name: cross-compile julia for win32
         code: "export XC_HOST=i686-w64-mingw32;
