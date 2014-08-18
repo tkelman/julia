@@ -30,5 +30,4 @@ build:
                 fi;
               done;
               tar -cf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar usr;
-              sh base/version_git.sh"
-#              make -j8 dist"
+              NO_GIT=1 make -j8 dist"
