@@ -22,6 +22,7 @@ build:
                 ./wrap.rb \"nohup make -d -C deps install-$i\";
                 echo MAKE LOGS FOR $i UPLOADED TO URL;
                 gist nohup.out;
+                rm nohup.out;
                 if [ $i = suitesparse ]; then
                   cp -rf deps/SuiteSparse-*/ $WERCKER_CACHE_DIR/$XC_HOST/deps;
                   cp -rf deps/SuiteSparse-*.tar.gz $WERCKER_CACHE_DIR/$XC_HOST/deps;
