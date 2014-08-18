@@ -13,14 +13,14 @@ build:
                 cp -rf $WERCKER_CACHE_DIR/$XC_HOST/usr .;
               fi;
               for i in llvm; do
-                if [ -e $WERCKER_CACHE_DIR/$i.tar.xz ]; then
-                  tar -xJf $WERCKER_CACHE_DIR/$i.tar.xz;
+                if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz ]; then
+                  tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz;
                 fi
                 make -j8 -C deps install-$i;
                 if [ $i = suitesparse ]; then
-                  tar -cJf $WERCKER_CACHE_DIR/$i.tar.xz deps/SuiteSparse-*/ deps/SuiteSparse-*.tar.gz;
+                  tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz deps/SuiteSparse-*/ deps/SuiteSparse-*.tar.gz;
                 else
-                  tar -cJf $WERCKER_CACHE_DIR/$i.tar.xz deps/$i-*/ deps/$i-*.tar.*;
+                  tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz deps/$i-*/ deps/$i-*.tar.*;
                 fi;
               done;
               cp -rf usr $WERCKER_CACHE_DIR/$XC_HOST;"
