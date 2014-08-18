@@ -15,7 +15,7 @@ build:
               done;
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
               rm -f deps/llvm-3.3/lib/CodeGen/SelectionDAG/LegalizeTypes.h.rej;
-              for i in openblas suitesparse arpack pcre dsfmt; do
+              for i in llvm fftw gmp mpfr; do
                 make -j8 -C deps install-$i;
                 if [ $i = suitesparse ]; then
                   cp -rf deps/SuiteSparse-*/ $WERCKER_CACHE_DIR/$XC_HOST/deps;
@@ -27,3 +27,4 @@ build:
               done;
               cp -rf usr $WERCKER_CACHE_DIR/$XC_HOST;"
 #              make -j8 dist"
+#openblas suitesparse arpack pcre dsfmt
