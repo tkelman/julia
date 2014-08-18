@@ -8,10 +8,10 @@ build:
               mkdir -p usr/bin;
               for i in usr deps; do
                 if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i ]; then
-                  ls -al $WERCKER_CACHE_DIR/$XC_HOST/$i/*;
+                  ls -al $WERCKER_CACHE_DIR/$XC_HOST/$i;
                   cp -rf $WERCKER_CACHE_DIR/$XC_HOST/$i .;
                 fi;
-                ls -al $i/*;
+                ls -al $i;
               done;
               make win-extras;
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
