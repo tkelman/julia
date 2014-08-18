@@ -16,9 +16,8 @@ build:
               make win-extras;
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
               sudo chown -R ubuntu .;
-              rm -f deps/llvm-3.3/lib/CodeGen/SelectionDAG/LegalizeTypes.h.rej;
               for i in openblas suitesparse arpack; do
-                make -j8 -C deps install-$i;
+                make -j4 -C deps install-$i;
                 if [ $i = suitesparse ]; then
                   cp -rf deps/SuiteSparse-*/ $WERCKER_CACHE_DIR/$XC_HOST/deps;
                   cp -rf deps/SuiteSparse-*.tar.gz $WERCKER_CACHE_DIR/$XC_HOST/deps;
@@ -28,5 +27,6 @@ build:
                 fi
               done;
               cp -rf usr $WERCKER_CACHE_DIR/$XC_HOST;"
-#              make -j8 dist"
+#              make -j4 dist"
+#              rm -f deps/llvm-3.3/lib/CodeGen/SelectionDAG/LegalizeTypes.h.rej;
 #llvm fftw gmp mpfr pcre dsfmt 
