@@ -1,14 +1,6 @@
-#box: ruudk/ubuntu14.04@1.0.0
 box: tkelman/mingw@0.0.3
 build:
   steps:
-#    - install-packages:
-#        packages: --no-install-recommends make git curl patch m4 p7zip-full wine g++ g++-mingw-w64 gfortran-mingw-w64
-#    - script:
-#        name: add wine ppa
-#        code: sudo apt-add-repository ppa:ubuntu-wine/ppa -y
-#    - install-packages
-#        packages: --no-install-recommends wine1.7
     - script:
         name: cross-compile julia for win32
         code: "export XC_HOST=i686-w64-mingw32;
@@ -20,11 +12,11 @@ build:
                 fi;
                 ls -al $i/*;
               done;
-              for i in pcre; do
+              mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
+              for i in openblas; do
                 make -j8 -C deps install-$i;
-              done;"
-#              mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
-#                cp -rf deps/$i-*/ $WERCKER_CACHE_DIR/$XC_HOST/deps;
-#              cp -rf usr $WERCKER_CACHE_DIR/$XC_HOST"
+                cp -rf deps/$i-*/ $WERCKER_CACHE_DIR/$XC_HOST/deps;
+              done;
+              cp -rf usr $WERCKER_CACHE_DIR/$XC_HOST"
 #              make win-extras"
 # make -j8 dist;
