@@ -25,6 +25,6 @@ build:
                   cp -rf deps/$i-*.tar.* $WERCKER_CACHE_DIR/$XC_HOST/deps;
                 fi
               done;
-              cp -rf usr $WERCKER_CACHE_DIR/$XC_HOST;
-              make -j8 dist"
+              cp -rf usr $WERCKER_CACHE_DIR/$XC_HOST;"
+#              make -j8 dist"
 #              rm -f deps/llvm-3.3/lib/CodeGen/SelectionDAG/LegalizeTypes.h.rej;
