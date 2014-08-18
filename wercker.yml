@@ -15,7 +15,7 @@ build:
               done;
               make win-extras;
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
-              sudo chown -R root .;
+              sudo chown -R ubuntu .;
               rm -f deps/llvm-3.3/lib/CodeGen/SelectionDAG/LegalizeTypes.h.rej;
               for i in openblas suitesparse arpack; do
                 make -j8 -C deps install-$i;
