@@ -14,7 +14,7 @@ build:
               elif [ -e $WERCKER_CACHE_DIR/$XC_HOST/usr.tar ]; then
                 time(tar -xf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar);
               fi;
-              for i in llvm fftw gmp mpfr pcre dsfmt openblas suitesparse arpack; do
+              for i in openblas suitesparse arpack llvm; do
                 if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz ]; then
                   time(tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz);
                   rm $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz;
@@ -31,3 +31,4 @@ build:
               time(tar -cf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar usr);"
 #              make win-extras;
 #              make -j8 dist"
+#llvm fftw gmp mpfr pcre dsfmt openblas suitesparse arpack
