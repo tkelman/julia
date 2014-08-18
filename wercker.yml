@@ -21,7 +21,7 @@ build:
                 if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i.tar ]; then
                   tar -xf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar;
                 fi;
-                touch -c usr/bin/lib$i.dll;
+                touch -c usr/bin/libpcre.dll;
                 make -j8 -C deps install-$i;
                 if [ $i = suitesparse ]; then
                   tar -cf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar deps/SuiteSparse-*/ deps/SuiteSparse-*.tar.gz;
