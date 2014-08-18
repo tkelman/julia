@@ -11,7 +11,7 @@ build:
               for i in usr deps; do
                 if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i ]; then
                   ls -al $WERCKER_CACHE_DIR/$XC_HOST/$i;
-                  cp -rf $WERCKER_CACHE_DIR/$XC_HOST/$i .;
+                  cp -rf --no-preserve=timestamps $WERCKER_CACHE_DIR/$XC_HOST/$i .;
                 fi;
                 ls -al $i;
               done;
