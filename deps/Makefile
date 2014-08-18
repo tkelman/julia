@@ -575,7 +575,7 @@ PCRE_OBJ_TARGET = $(build_shlibdir)/libpcre.$(SHLIB_EXT)
 
 pcre-$(PCRE_VER).tar.bz2:
 	$(JLDOWNLOAD) $@ http://sourceforge.net/projects/pcre/files/pcre/$(PCRE_VER)/$@/download
-pcre-$(PCRE_VER)/configure: pcre-$(PCRE_VER).tar.bz2 | pcre-gcc49-compile.patch
+pcre-$(PCRE_VER)/configure: pcre-$(PCRE_VER).tar.bz2 pcre-gcc49-compile.patch
 	$(JLCHECKSUM) $<
 	$(TAR) jxf $<
 	cd pcre-$(PCRE_VER) && patch -p1 < ../pcre-gcc49-compile.patch
