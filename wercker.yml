@@ -1,8 +1,8 @@
 box: tkelman/mingw@0.1.0
 build:
   steps:
-    - install-packages:
-        packages: gist
+#    - install-packages:
+#        packages: gist
     - script:
         name: cross-compile julia for win32
         code: "export XC_HOST=i686-w64-mingw32;
@@ -11,18 +11,14 @@ build:
               for i in usr deps; do
                 if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i ]; then
                   ls -al $WERCKER_CACHE_DIR/$XC_HOST/$i;
-                  cp -rf --no-preserve=timestamps $WERCKER_CACHE_DIR/$XC_HOST/$i .;
+                  cp -rf $WERCKER_CACHE_DIR/$XC_HOST/$i .;
                 fi;
                 ls -al $i;
               done;
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST/deps;
-              curl -o wrap.rb https://gist.githubusercontent.com/roidrage/5238585/raw;
-              chmod +x wrap.rb;
+              touch deps/llvm-*/configure;
               for i in llvm fftw gmp mpfr pcre dsfmt openblas suitesparse arpack; do
-                ./wrap.rb \"nohup make -d -C deps install-$i\";
-                echo MAKE LOGS FOR $i UPLOADED TO URL;
-                gist nohup.out;
-                rm nohup.out;
+                make -d -C deps install-$i;
                 if [ $i = suitesparse ]; then
                   cp -rf deps/SuiteSparse-*/ $WERCKER_CACHE_DIR/$XC_HOST/deps;
                   cp -rf deps/SuiteSparse-*.tar.gz $WERCKER_CACHE_DIR/$XC_HOST/deps;
