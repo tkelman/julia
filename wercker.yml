@@ -1,8 +1,6 @@
 box: tkelman/mingw@0.1.0
 build:
   steps:
-#    - install-packages:
-#        packages: gist
     - script:
         name: cross-compile julia for win32
         code: "export XC_HOST=i686-w64-mingw32;
@@ -11,9 +9,9 @@ build:
               mkdir -p $WERCKER_CACHE_DIR/$XC_HOST;
               ls -al $WERCKER_CACHE_DIR/$XC_HOST;
               if [ -e $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz ]; then
-                tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz;
+                tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz;
               fi;
-              for i in llvm; do
+              for i in openblas; do
                 if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz ]; then
                   tar -xJf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.xz;
                 fi;
@@ -27,5 +25,4 @@ build:
               tar -cJf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.xz usr;"
 #              make win-extras;
 #              make -j8 dist"
-#              rm -f deps/llvm-3.3/lib/CodeGen/SelectionDAG/LegalizeTypes.h.rej;
-# fftw gmp mpfr pcre dsfmt openblas suitesparse arpack
+# llvm fftw gmp mpfr pcre dsfmt openblas suitesparse arpack
