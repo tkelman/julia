@@ -1,6 +1,8 @@
 box: tkelman/mingw@0.1.0
 build:
   steps:
+    - install-packages:
+        packages: gist
     - script:
         name: cross-compile julia for win32
         code: "export XC_HOST=i686-w64-mingw32;
@@ -21,7 +23,12 @@ build:
                 if [ -e $WERCKER_CACHE_DIR/$XC_HOST/$i.tar ]; then
                   tar -xf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar;
                 fi;
-                make -d -C deps install-$i;
+                if [ $i = pcre ]; then
+                  nohup make -d -C deps install-$i;
+                  gist nohup.out;
+                else
+                  make -j8 -C deps install-$i
+                fi
                 if [ $i = suitesparse ]; then
                   tar -cf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar deps/SuiteSparse-*/ deps/SuiteSparse-*.tar.gz;
                 else
