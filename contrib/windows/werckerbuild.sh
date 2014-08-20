@@ -49,8 +49,8 @@ done
 
 # do make dist, if all the dependencies are ready for both 32 and 64 bit
 if [ $cache_ready = 1 ]; then
-  for XC_HOST in i686-w64-mingw32 x86_64-w64-mingw32; do
-    export XC_HOST
+  for ARCH in i686 x86_64; do
+    export XC_HOST=$ARCH-w64-mingw32
     make distcleanall > /dev/null 2>&1
     rm -rf dist-extras
     tar -xf $WERCKER_CACHE_DIR/$XC_HOST/dist-extras.tar
@@ -59,8 +59,7 @@ if [ $cache_ready = 1 ]; then
       tar -xf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar
     done
     make -j8 dist
+    curl -T julia-*.exe -utkelman:$BINTRAYKEY "https://api.bintray.com/content/tkelman/generic/Julia/0.4.0-dev/julia-0.4.0-dev-$WERCKER_GIT_COMMIT-$ARCH.exe;publish=1"
     mv julia-*.exe $WERCKER_OUTPUT_DIR
   done
 fi
-
-# TODO: deploy to S3?
