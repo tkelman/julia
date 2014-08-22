@@ -36,7 +36,8 @@ before_install:
         brew update;
         brew upgrade gcc;
         LDFLAGS="-L$(brew --prefix suite-sparse-julia)/lib" make $BUILDOPTS -C contrib -f repackage_system_suitesparse4.make;
-        BUILDOPTS="$BUILDOPTS LDFLAGS=-L$(brew --prefix openblas-julia)/lib CFLAGS=-I$(brew --prefix suite-sparse-julia)/include";
+        BUILDOPTS="$BUILDOPTS LDFLAGS=\"-L$(brew --prefix openblas-julia)/lib -L$(brew --prefix suitesparse-julia)/lib\"";
+        BUILDOPTS="$BUILDOPTS CFLAGS=-I$(brew --prefix suite-sparse-julia)/include";
       fi
 script:
     - make $BUILDOPTS prefix=/tmp/julia install
