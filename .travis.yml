@@ -35,10 +35,11 @@ before_install:
         brew install -v --only-dependencies --HEAD julia;
         brew update;
         brew upgrade gcc;
-        LDFLAGS="-L$(brew --prefix suite-sparse-julia)/lib" make $BUILDOPTS -C contrib -f repackage_system_suitesparse4.make;
+        BUILDOPTS="$BUILDOPTS LDFLAGS=\"-L$(brew --prefix suite-sparse-julia)/lib -L$(brew --prefix openblas-julia)/lib\""
+        make $BUILDOPTS -C contrib -f repackage_system_suitesparse4.make;
       fi
 script:
-    - LDFLAGS="-L$(brew --prefix suite-sparse-julia)/lib -L$(brew --prefix openblas-julia)/lib -L$(brew --prefix arpack-julia)/lib" make $BUILDOPTS prefix=/tmp/julia install
+    - make $BUILDOPTS prefix=/tmp/julia install
     - if [ `uname` = "Darwin" ]; then
         for name in spqr umfpack colamd cholmod amd suitesparse_wrapper; do
             install -pm755 usr/lib/lib${name}*.dylib* /tmp/julia/lib/julia/;
