@@ -16,19 +16,13 @@ notifications:
     #      - http://julia.mit.edu:8000/travis-hook
 before_install:
     - if [ `uname` = "Linux" ]; then
-        sudo apt-get update -qq -y;
-        sudo apt-get install -y update-manager-core;
-        sudo do-release-upgrade -f DistUpgradeViewNonInteractive -m server -d;
-        sudo apt-get install -y aptitude;
-        sudo aptitude update;
-        sudo aptitude safe-upgrade;
         BUILDOPTS="-j8";
-        export XC_HOST=i686-w64-mingw32;
-        sudo apt-get install software-properties-common -y;
+        export XC_HOST=x86_64-w64-mingw32;
         sudo add-apt-repository ppa:ubuntu-wine/ppa -y;
-        sudo add-apt-repository ppa:tkelman/mingw-backport -y;
+        sudo add-apt-repository ppa:tobydox/mingw -y;
         sudo apt-get update -qq -y;
-        sudo apt-get install --no-install-recommends wine1.7 binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686 gfortran-mingw-w64-i686 -y;
+        sudo apt-get install --no-install-recommends wine1.7 mingw64-x-gcc -y;
+        export PATH=$PATH:/opt/mingw64/bin
       elif [ `uname` = "Darwin" ]; then
         brew tap staticfloat/julia;
         brew install -v --only-dependencies --HEAD julia;
