@@ -22,7 +22,7 @@ before_install:
         sudo add-apt-repository ppa:tobydox/mingw -y;
         sudo apt-get update -qq -y;
         sudo apt-get install --no-install-recommends wine1.7 mingw64-x-gcc -y;
-        export PATH=$PATH:/opt/mingw64/bin
+        export PATH=$PATH:/opt/mingw64/bin;
       elif [ `uname` = "Darwin" ]; then
         brew tap staticfloat/julia;
         brew install -v --only-dependencies --HEAD julia;
