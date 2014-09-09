@@ -1,13 +1,12 @@
 language: python # a lie because shippable "doesn't support" cpp
 os:
     - linux
-image:
-    - shippable/minv2
 notifications:
     email: false
 before_install:
     - sudo apt-get update -qq -y
-    - sudo apt-get install zlib1g-dev
+    - sudo apt-get install zlib1g-dev lsb-release
+    - lsb_release -a
     - sudo add-apt-repository ppa:staticfloat/julia-deps -y
     - sudo apt-get update -qq -y
     - sudo apt-get install patchelf gfortran llvm-3.3-dev libsuitesparse-dev libopenblas-dev liblapack-dev libarpack2-dev libfftw3-dev libgmp-dev libpcre3-dev libunwind7-dev libdouble-conversion-dev libopenlibm-dev librmath-dev libmpfr-dev -y
