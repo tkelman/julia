@@ -1,4 +1,4 @@
-language: cpp # a lie because shippable "doesn't support" cpp
+language: python # a lie because shippable "doesn't support" cpp
 os:
     - linux
 notifications:
