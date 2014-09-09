@@ -1,6 +1,8 @@
 language: python # a lie because shippable "doesn't support" cpp
 os:
     - linux
+image:
+    - shippable/minv2
 notifications:
     email: false
 before_install:
