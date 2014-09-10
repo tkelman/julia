@@ -2,7 +2,7 @@ language: python # a lie because shippable "doesn't support" cpp
 os:
     - linux
 notifications:
-    email: false
+    - email: false
 before_install:
     - sudo apt-get update -qq -y
     - sudo apt-get install zlib1g-dev lsb-release
