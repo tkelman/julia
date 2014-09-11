@@ -1,22 +1,27 @@
 language: python # a lie because shippable "doesn't support" cpp
 os:
     - linux
+build_environment: Ubuntu 14.04
 notifications:
     - email: false
 before_install:
-    - sudo apt-get update -qq -y
-    - sudo apt-get install zlib1g-dev lsb-release
-    - lsb_release -a
-    - sudo add-apt-repository ppa:staticfloat/julia-deps -y
-    - sudo apt-get update -qq -y
-    - sudo apt-get install patchelf gfortran llvm-3.3-dev libsuitesparse-dev libopenblas-dev liblapack-dev libarpack2-dev libfftw3-dev libgmp-dev libpcre3-dev libunwind7-dev libdouble-conversion-dev libopenlibm-dev librmath-dev libmpfr-dev -y
+    - curl -sSL https://get.docker.io/ubuntu/ | sudo sh 
+    - sudo docker version
+    - sudo docker pull ubuntu
+#    - sudo apt-get update -qq -y
+#    - sudo apt-get install zlib1g-dev lsb-release
+#    - lsb_release -a
+#    - sudo add-apt-repository ppa:staticfloat/julia-deps -y
+#    - sudo apt-get update -qq -y
+#    - sudo apt-get install patchelf gfortran llvm-3.3-dev libsuitesparse-dev libopenblas-dev liblapack-dev libarpack2-dev libfftw3-dev libgmp-dev libpcre3-dev libunwind7-dev libdouble-conversion-dev libopenlibm-dev librmath-dev libmpfr-dev -y
 script:
-    - BUILDOPTS="-j4 USEGCC=1 LLVM_CONFIG=llvm-config-3.3 LLVM_LLC=llc-3.3 VERBOSE=1 USE_BLAS64=0";
-      for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR PCRE LIBUNWIND OPENLIBM RMATH; do
-        export BUILDOPTS="$BUILDOPTS USE_SYSTEM_$lib=1";
-      done;
-      make $BUILDOPTS prefix=/tmp/julia install;
-      cd .. && mv julia julia2;
-      cd /tmp/julia/share/julia/test && /tmp/julia/bin/julia-debug --check-bounds=yes runtests.jl all && /tmp/julia/bin/julia-debug --check-bounds=yes runtests.jl pkg;
-      cd - && mv julia2 julia;
-      echo "Ready for packaging..."
+    - sudo docker run --rm ubuntu echo "hello world"
+#    - BUILDOPTS="-j4 USEGCC=1 LLVM_CONFIG=llvm-config-3.3 LLVM_LLC=llc-3.3 VERBOSE=1 USE_BLAS64=0";
+#      for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR PCRE LIBUNWIND OPENLIBM RMATH; do
+#        export BUILDOPTS="$BUILDOPTS USE_SYSTEM_$lib=1";
+#      done;
+#      make $BUILDOPTS prefix=/tmp/julia install;
+#      cd .. && mv julia julia2;
+#      cd /tmp/julia/share/julia/test && /tmp/julia/bin/julia-debug --check-bounds=yes runtests.jl all && /tmp/julia/bin/julia-debug --check-bounds=yes runtests.jl pkg;
+#      cd - && mv julia2 julia;
+#      echo "Ready for packaging..."
