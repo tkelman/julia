@@ -56,7 +56,7 @@ if [ $cache_ready = 1 ]; then
     rm -rf dist-extras
     tar -xzf $WERCKER_CACHE_DIR/$XC_HOST/dist-extras.tar.gz
     tar -xzf $WERCKER_CACHE_DIR/$XC_HOST/usr.tar.gz
-    for i in llvm fftw gmp mpfr pcre dsfmt openblas suitesparse arpack; do
+    for i in llvm fftw gmp mpfr pcre openblas suitesparse-wrapper arpack; do
       tar -xzf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.gz
     done
     make -j8 dist
