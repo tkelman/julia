@@ -59,7 +59,7 @@ if [ $cache_ready = 1 ]; then
     for i in llvm fftw gmp mpfr pcre openblas suitesparse-wrapper arpack; do
       tar -xzf $WERCKER_CACHE_DIR/$XC_HOST/$i.tar.gz
     done
-    make -j8 dist
+    make -j8 dist || make dist
     curl -T julia-*.exe -utkelman:$BINTRAYKEY "https://api.bintray.com/content/tkelman/generic/Julia/0.4.0-dev/julia-0.4.0-dev-$WERCKER_GIT_COMMIT-$ARCH.exe;publish=1"
     mv julia-*.exe $WERCKER_OUTPUT_DIR
     unset XC_HOST
