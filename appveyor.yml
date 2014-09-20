@@ -1,11 +1,11 @@
 environment:
   SECUREVAR:
     secure: vWXnLbRt4x07IoEI3ef4yljFlhc7kfB5gOFrfdyQ0Qc=
-#  USEMSVC: "1"
+  USEMSVC: "1"
   matrix:
-  - ARCH: "i686"
+#  - ARCH: "i686"
   - ARCH: "x86_64"
-    JULIA_CPU_CORES: 1
+#    JULIA_CPU_CORES: 1
 # Run win64 tests in serial for now to avoid #7942 causing timeouts
 
 # Only build on master and PR's for now, not personal branches
@@ -14,6 +14,7 @@ branches:
   only:
     - master
     - release-0.3
+    - appveyor2
 
 notifications:
   - provider: Email
@@ -40,7 +41,7 @@ build_script:
 # Remove C:\MinGW\bin from the path, the version of MinGW installed on
 # AppVeyor is not compatible with the cross-compiled Julia Windows binaries
   - set PATH=%PATH:C:\MinGW\bin;=%
-#  - '"%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat" x86_amd64'
+  - '"%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat" x86_amd64'
 # Since the AppVeyor VMs have Git installed, they have MSYS1
   - sh --login /c/projects/julia/contrib/windows/msys_build.sh
 
