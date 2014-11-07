@@ -2,7 +2,7 @@ immutable Complex{T<:Real} <: Number
     re::T
     im::T
 end
-Complex(x::Real, y::Real) = Complex(promote(x,y)...)
+Complex(x::Real, y::Real) = Complex(promote(x,y)...)   
 Complex(x::Real) = Complex(x, zero(x))
 
 const im = Complex(false,true)
