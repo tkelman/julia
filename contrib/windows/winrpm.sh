@@ -31,13 +31,14 @@ case $href in
 esac
 
 # outputs <package> xml string for newest version
-# don't include arch=src packages
+# don't include arch=src packages, those will list build-time dependencies
 rpm_select() {
-  versions="<versions>$(echo $primary | $xp "//*[$loc'package'] \
-    [./*[$loc'name' and .='$1']][./*[$loc'arch' and .='noarch']] \
-    /*[$loc'version']" -)</versions>"
+  candidates="<c>$(echo $primary | $xp "//*[$loc'package'] \
+    [./*[$loc'name' and .='$1']][./*[$loc'arch' and .='noarch']]" - |
+    sed -e 's|<rpm:|<|g' -e 's|</rpm:|</|g')</c>"
+  # remove rpm namespacing so output can be parsed by xmllint later
   epochs=""
-  for i in $(echo $versions | $xp "/versions/version/@epoch" -); do
+  for i in $(echo $candidates | $xp "/c/package/version/@epoch" -); do
     eval $i
     if [ -z "$epochs" ]; then
       epochs=$epoch
@@ -47,7 +48,7 @@ rpm_select() {
   done
   maxepoch=$(echo -e $epochs | sort -V -u | tail -n 1)
   vers=""
-  for i in $(echo $versions | $xp "/versions/version \
+  for i in $(echo $candidates | $xp "/c/package/version \
       [@epoch='$maxepoch']/@ver" -); do
     eval $i
     if [ -z "$vers" ]; then
@@ -58,7 +59,7 @@ rpm_select() {
   done
   maxver=$(echo -e $vers | sort -V -u | tail -n 1)
   rels=""
-  for i in $(echo $versions | $xp "/versions/version \
+  for i in $(echo $candidates | $xp "/c/package/version \
       [@epoch='$maxepoch'][@ver='$maxver']/@rel" -); do
     eval $i
     if [ -z "$rels" ]; then
@@ -67,17 +68,14 @@ rpm_select() {
       rels="$rels\n$rel"
     fi
   done
-  repeats=$(echo -e $rels | sort -V | uniq -d | tail -n 1)
   maxrel=$(echo -e $rels | sort -V -u | tail -n 1)
+  repeats=$(echo -e $rels | sort -V | uniq -d | tail -n 1)
   if [ "$repeats" = "$maxrel" ]; then
     echo "warning: multiple candidates found for $1 with same version:" >&2
     echo "epoch $maxepoch, ver $maxver, rel $maxrel, picking at random" >&2
   fi
-  echo $primary | $xp "//*[$loc'package'][./*[$loc'name' and .='$1']] \
-    [./*[$loc'arch' and .='noarch']][./*[$loc'version'] \
-    [@epoch='$maxepoch'][@ver='$maxver'][@rel='$maxrel']][1]" - |
-    sed -e 's|<rpm:|<|g' -e 's|</rpm:|</|g'
-  # remove rpm namespacing so output can be parsed by xmllint later
+  echo $candidates | $xp "/c/package[version[@epoch='$maxepoch'] \
+    [@ver='$maxver'][@rel='$maxrel']][1]" -
 }
 #for i in $pkg; do
 #  echo "rpm_select $i:"
@@ -85,31 +83,28 @@ rpm_select() {
 #done
 
 # outputs package and dll names, e.g. mingw64(zlib1.dll)
-# don't want arch=src packages, those will list build-time dependencies
 rpm_requires() {
-  for i in $(echo $primary | $xp "//*[$loc'package'] \
-      [./*[$loc'name' and .='$1']][./*[$loc'arch' and .='noarch']] \
-      /*[$loc'format']/*[$loc'requires']/*[$loc'entry']/@name" -); do
+  for i in $(rpm_select $1 | $xp "/package/format/requires/entry/@name" -); do
     eval $i
     echo $name
   done
 }
-for i in $pkg; do
-  echo "rpm_requires $i:"
-  rpm_requires $i
-done
+#for i in $pkg; do
+#  echo "rpm_requires $i:"
+#  rpm_requires $i
+#done
 
-# outputs package name, fails if multiple candidates with different names
+# outputs package name, fails if multiple providers with different names
 rpm_provides() {
-  candidates=$(echo $primary | $xp "//*[$loc'package'] \
+  providers=$(echo $primary | $xp "//*[$loc'package'] \
     [./*[$loc'format']/*[$loc'provides']/*[$loc'entry'][@name='$1']] \
     /*[$loc'name']" - | sed -e 's|<name>||g' -e 's|</name>|\n|g' | sort -u)
-  if [ $(echo $candidates | wc -w) -gt 1 ]; then
-    echo "found multiple candidates $candidates for $1" >&2
+  if [ $(echo $providers | wc -w) -gt 1 ]; then
+    echo "found multiple providers $providers for $1" >&2
     echo "can't decide which to pick, bailing" >&2
     exit 1
   else
-    echo $candidates
+    echo $providers
   fi
 }
 #for i in $pkg; do
