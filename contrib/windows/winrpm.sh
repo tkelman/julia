@@ -5,7 +5,7 @@
 
 set -e
 url=$1
-pkg=$2
+toinstall=$2
 
 retry_curl() {
   for i in $(seq 10); do
@@ -34,42 +34,34 @@ esac
 # don't include arch=src packages, those will list build-time dependencies
 rpm_select() {
   candidates="<c>$(echo $primary | $xp "//*[$loc'package'] \
-    [./*[$loc'name' and .='$1']][./*[$loc'arch' and .='noarch']]" - |
-    sed -e 's|<rpm:|<|g' -e 's|</rpm:|</|g')</c>"
+    [./*[$loc'name' and .='$1']][./*[$loc'arch' and .='noarch']]" - \
+    2>/dev/null | sed -e 's|<rpm:|<|g' -e 's|</rpm:|</|g')</c>"
   # remove rpm namespacing so output can be parsed by xmllint later
+  if [ "$candidates" = "<c></c>" ]; then
+    echo "error: no package candidates found for $1" >&2
+    exit 1
+  fi
   epochs=""
   for i in $(echo $candidates | $xp "/c/package/version/@epoch" -); do
     eval $i
-    if [ -z "$epochs" ]; then
-      epochs=$epoch
-    else
-      epochs="$epochs\n$epoch"
-    fi
+    epochs="$epochs $epoch"
   done
-  maxepoch=$(echo -e $epochs | sort -V -u | tail -n 1)
+  maxepoch=$(echo $epochs | sed 's/ /\n/g' | sort -V -u | tail -n 1)
   vers=""
   for i in $(echo $candidates | $xp "/c/package/version \
       [@epoch='$maxepoch']/@ver" -); do
     eval $i
-    if [ -z "$vers" ]; then
-      vers=$ver
-    else
-      vers="$vers\n$ver"
-    fi
+    vers="$vers $ver"
   done
-  maxver=$(echo -e $vers | sort -V -u | tail -n 1)
+  maxver=$(echo $vers | sed 's/ /\n/g' | sort -V -u | tail -n 1)
   rels=""
   for i in $(echo $candidates | $xp "/c/package/version \
       [@epoch='$maxepoch'][@ver='$maxver']/@rel" -); do
     eval $i
-    if [ -z "$rels" ]; then
-      rels=$rel
-    else
-      rels="$rels\n$rel"
-    fi
+    rels="$rels $rel"
   done
-  maxrel=$(echo -e $rels | sort -V -u | tail -n 1)
-  repeats=$(echo -e $rels | sort -V | uniq -d | tail -n 1)
+  maxrel=$(echo $rels | sed 's/ /\n/g' | sort -V -u | tail -n 1)
+  repeats=$(echo $rels | sed 's/ /\n/g' | sort -V | uniq -d | tail -n 1)
   if [ "$repeats" = "$maxrel" ]; then
     echo "warning: multiple candidates found for $1 with same version:" >&2
     echo "epoch $maxepoch, ver $maxver, rel $maxrel, picking at random" >&2
@@ -77,19 +69,22 @@ rpm_select() {
   echo $candidates | $xp "/c/package[version[@epoch='$maxepoch'] \
     [@ver='$maxver'][@rel='$maxrel']][1]" -
 }
-#for i in $pkg; do
-#  echo "rpm_select $i:"
-#  rpm_select $i
-#done
+for i in $toinstall; do
+  # fail if no available candidates for requested packages
+  if [ -z "$(rpm_select $i)" ]; then
+    exit 1
+  fi
+done
 
 # outputs package and dll names, e.g. mingw64(zlib1.dll)
 rpm_requires() {
-  for i in $(rpm_select $1 | $xp "/package/format/requires/entry/@name" -); do
+  for i in $(rpm_select $1 | $xp "/package/format/requires/entry/@name" - \
+      2>/dev/null); do
     eval $i
     echo $name
   done
 }
-#for i in $pkg; do
+#for i in $toinstall; do
 #  echo "rpm_requires $i:"
 #  rpm_requires $i
 #done
@@ -107,19 +102,43 @@ rpm_provides() {
     echo $providers
   fi
 }
-#for i in $pkg; do
+#for i in $toinstall; do
 #  echo "rpm_provides $i:"
 #  rpm_provides $i
 #done
 
-#toinstall=$pkg
-#allrequires=""
-#for i in $pkg; do
-#  requires="$(rpm_requires $i)"
-#  echo "requires of $i:"
-#  echo $requires
-#  allrequires="$allrequires $requires"
-#  echo "all requires:"
-#  echo $allrequires
-#done
-#echo "packages to install: $toinstall"
+newpkgs=$toinstall
+allrequires=""
+while [ -n "$newpkgs" ]; do
+  newrequires=""
+  for i in $newpkgs; do
+    requires="$(rpm_requires $i)"
+    #echo "requires of $i:"
+    #echo $requires
+    case "$allrequires $newrequires" in
+      *$requires*) # already on list
+        ;;
+      *)
+        newrequires="$newrequires $requires";;
+    esac
+    #echo "new requires:"
+    #echo $newrequires
+  done
+  allrequires="$allrequires $newrequires"
+  newpkgs=""
+  for i in $newrequires; do
+    provides="$(rpm_provides $i)"
+    #echo "provides $i:"
+    #echo $provides
+    case "$toinstall $newpkgs" in
+      *$provides*) # already on list
+        ;;
+      *)
+        newpkgs="$newpkgs $provides";;
+    esac
+    #echo "new packages:"
+    #echo $newpkgs
+  done
+  toinstall="$toinstall $newpkgs"
+done
+echo "packages to install: $toinstall"
