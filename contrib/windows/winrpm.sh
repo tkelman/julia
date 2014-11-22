@@ -3,14 +3,11 @@
 # ./winrpm.sh http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_13.1/ mingw64-hdf5
 # depends on curl, xmllint, gunzip
 
-#PS4='+ $(date "+%s.%N")\011 '
-#exec 3>&2 2>/tmp/bashstart.$$.log
-#set -x
-
 set -e
 url=$1
 toinstall=$2
 
+# there is a curl --retry flag but it wasn't working here for some reason
 retry_curl() {
   for i in $(seq 10); do
     # TODO: checksum verify downloads
@@ -32,9 +29,8 @@ case $href in
   *.gz)
     retry_curl $url/$href | gunzip > $href;;
   *)
-    retry_curl -o $href $url/$href;;
+    retry_curl $url/$href > $href;;
 esac
-#href=primary.xml
 
 # outputs <package> xml string for newest version
 # don't include arch=src packages, those will list build-time dependencies
@@ -90,10 +86,6 @@ rpm_requires() {
     echo $name
   done
 }
-#for i in $toinstall; do
-#  echo "rpm_requires $i:"
-#  rpm_requires $i
-#done
 
 # outputs package name, fails if multiple providers with different names
 rpm_provides() {
@@ -108,10 +100,6 @@ rpm_provides() {
     echo $providers
   fi
 }
-#for i in $toinstall; do
-#  echo "rpm_provides $i:"
-#  rpm_provides $i
-#done
 
 newpkgs=$toinstall
 allrequires=""
@@ -119,8 +107,6 @@ while [ -n "$newpkgs" ]; do
   newrequires=""
   for i in $newpkgs; do
     requires="$(rpm_requires $i)"
-    #echo "requires of $i:"
-    #echo $requires
     # leading and trailing spaces to ensure word match
     case " $allrequires $newrequires " in
       *" $requires "*) # already on list
@@ -128,29 +114,20 @@ while [ -n "$newpkgs" ]; do
       *)
         newrequires="$newrequires $requires";;
     esac
-    #echo "new requires:"
-    #echo $newrequires
   done
   allrequires="$allrequires $newrequires"
   newpkgs=""
   for i in $newrequires; do
     provides="$(rpm_provides $i)"
-    #echo "provides $i:"
-    #echo $provides
     case " $toinstall $newpkgs " in
       *" $provides "*) # already on list
         ;;
       *)
         newpkgs="$newpkgs $provides";;
     esac
-    #echo "new packages:"
-    #echo $newpkgs
   done
   toinstall="$toinstall $newpkgs"
 done
 echo "packages to install: $toinstall"
 
-#set +x
-#exec 2>&3 3>&-
-
-#rm $href
+rm $href
