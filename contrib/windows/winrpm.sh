@@ -106,14 +106,15 @@ allrequires=""
 while [ -n "$newpkgs" ]; do
   newrequires=""
   for i in $newpkgs; do
-    requires="$(rpm_requires $i)"
-    # leading and trailing spaces to ensure word match
-    case " $allrequires $newrequires " in
-      *" $requires "*) # already on list
-        ;;
-      *)
-        newrequires="$newrequires $requires";;
-    esac
+    for j in $(rpm_requires $i); do
+      # leading and trailing spaces to ensure word match
+      case " $allrequires $newrequires " in
+        *" $j "*) # already on list
+          ;;
+        *)
+          newrequires="$newrequires $j";;
+      esac
+    done
   done
   allrequires="$allrequires $newrequires"
   newpkgs=""
