@@ -19,10 +19,12 @@ init:
 # Carriage returns are bad
   - git config --global core.autocrlf input
 
+# os: unstable switches to an image where cygwin is pre-installed
+os: unstable
+
 build_script:
   - dir C:\
-  - dir C:\Tools
-  - dir C:\Tools\cygwin
+  - dir C:\cygwin
 # temporarily disable backtrace test, failing right now for win64 on master
   - sed -i 's/"backtrace",//' test/runtests.jl
 # Remove C:\MinGW\bin from the path, the version of MinGW installed on
