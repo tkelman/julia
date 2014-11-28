@@ -8,9 +8,9 @@ environment:
 
 # Only build on master and PR's for now, not personal branches
 # Whether or not PR's get built is determined in the webhook settings
-branches:
-  only:
-    - master
+#branches:
+#  only:
+#    - master
 # TODO: - release-0.3
 
 clone_depth: 50
@@ -20,6 +20,8 @@ init:
   - git config --global core.autocrlf input
 
 build_script:
+  - dir C:\
+  - dir C:\cygwin
 # temporarily disable backtrace test, failing right now for win64 on master
   - sed -i 's/"backtrace",//' test/runtests.jl
 # Remove C:\MinGW\bin from the path, the version of MinGW installed on
