@@ -41,6 +41,7 @@ rpm_select() {
   # remove rpm namespacing so output can be parsed by xmllint later
   if [ "$candidates" = "<c></c>" ]; then
     echo "error: no package candidates found for $1" >&2
+    rm $href
     exit 1
   fi
   epochs=""
@@ -95,6 +96,7 @@ rpm_provides() {
   if [ $(echo $providers | wc -w) -gt 1 ]; then
     echo "found multiple providers $providers for $1" >&2
     echo "can't decide which to pick, bailing" >&2
+    rm $href
     exit 1
   else
     echo $providers
