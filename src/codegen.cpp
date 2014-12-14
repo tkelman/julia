@@ -174,6 +174,25 @@ void __attribute__(()) __stack_chk_fail()
     //assert(0 && "stack corruption detected");
     //abort();
 }
+
+#ifdef _OS_WINDOWS_
+#if defined(_CPU_X86_64_)
+#if defined(_COMPILER_MINGW_)
+extern void ___chkstk_ms(void);
+#else
+extern void __chkstk(void);
+#endif
+#else
+#if defined(_COMPILER_MINGW_)
+extern void _alloca(void);
+#else
+extern void _chkstk(void);
+#endif
+#endif
+//void *force_chkstk(void) {
+//    return alloca(40960);
+//}
+#endif
 }
 
 #define DISABLE_FLOAT16
@@ -4270,6 +4289,27 @@ static void init_julia_llvm_env(Module *m)
     resetstkoflw_func = Function::Create(FunctionType::get(T_void, false),
             Function::ExternalLinkage, "_resetstkoflw", m);
     add_named_global(resetstkoflw_func, (void*)&_resetstkoflw);
+#if defined(_CPU_X86_64_)
+#if defined(_COMPILER_MINGW_)
+    Function *chkstk_func = Function::Create(FunctionType::get(T_void, false),
+            Function::ExternalLinkage, "___chkstk_ms", m);
+    add_named_global(chkstk_func, (void*)&___chkstk_ms);
+#else
+    Function *chkstk_func = Function::Create(FunctionType::get(T_void, false),
+            Function::ExternalLinkage, "__chkstk", m);
+    add_named_global(chkstk_func, (void*)&__chkstk);
+#endif
+#else
+#if defined(_COMPILER_MINGW_)
+    Function *chkstk_func = Function::Create(FunctionType::get(T_void, false),
+            Function::ExternalLinkage, "_alloca", m);
+    add_named_global(chkstk_func, (void*)&_alloca);
+#else
+    Function *chkstk_func = Function::Create(FunctionType::get(T_void, false),
+            Function::ExternalLinkage, "_chkstk", m);
+    add_named_global(chkstk_func, (void*)&_chkstk);
+#endif
+#endif
 #endif
 
     std::vector<Type*> lhargs(0);
