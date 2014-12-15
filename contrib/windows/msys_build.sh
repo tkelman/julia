@@ -10,7 +10,8 @@ cd `dirname "$0"`/../..
 set -e
 
 echo "APPVEYOR_API_URL is: $APPVEYOR_API_URL"
-curl -X "DELETE" "$APPVEYOR_API_URL/$APPVEYOR_BUILD_NUMBER"
+echo "APPVEYOR_BUILD_VERSION is: $APPVEYOR_BUILD_VERSION"
+curl -X "DELETE" "$APPVEYOR_API_URL/$APPVEYOR_BUILD_VERSION"
 
 # Fail fast on AppVeyor if there are newer pending commits in this PR
 curlflags="curl --retry 10 -k -L -y 5"
