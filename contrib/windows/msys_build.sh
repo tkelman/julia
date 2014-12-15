@@ -23,7 +23,7 @@ if [ -n "$APPVEYOR_PULL_REQUEST_NUMBER" ]; then
   latestbuild="$(curl $av_api_url | ./jq "$query")"
   if [ -n "$latestbuild" -a "$latestbuild" != "null" -a "$latestbuild" != "$APPVEYOR_BUILD_NUMBER" ]; then
     echo "There are newer queued builds for this pull request, cancelling this build."
-    curl -X "DELETE" "$APPVEYOR_API_URL/$APPVEYOR_BUILD_NUMBER"
+    curl -X "DELETE" "$APPVEYOR_API_URL/builds/$APPVEYOR_BUILD_NUMBER"
     exit 1
   fi
 fi
