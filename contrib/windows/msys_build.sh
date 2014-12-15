@@ -11,6 +11,7 @@ set -e
 
 echo "APPVEYOR_API_URL is: $APPVEYOR_API_URL"
 echo "APPVEYOR_BUILD_VERSION is: $APPVEYOR_BUILD_VERSION"
+#curl -X "DELETE" "$APPVEYOR_API_URL/builds/tkelman/julia/$APPVEYOR_BUILD_VERSION"
 curl -H "Authorization: Bearer $SECUREVAR" -X "DELETE" "https://ci.appveyor.com/api/builds/tkelman/julia/$APPVEYOR_BUILD_VERSION"
 
 # Fail fast on AppVeyor if there are newer pending commits in this PR
