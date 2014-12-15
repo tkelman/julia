@@ -9,6 +9,8 @@ cd `dirname "$0"`/../..
 # Stop on error
 set -e
 
+echo "APPVEYOR_API_URL is: $APPVEYOR_API_URL"
+
 # Fail fast on AppVeyor if there are newer pending commits in this PR
 curlflags="curl --retry 10 -k -L -y 5"
 if [ -n "$APPVEYOR_PULL_REQUEST_NUMBER" ]; then
@@ -20,7 +22,8 @@ if [ -n "$APPVEYOR_PULL_REQUEST_NUMBER" ]; then
   query=".builds | map(select(.pullRequestId == \"$APPVEYOR_PULL_REQUEST_NUMBER\"))[0].buildNumber"
   latestbuild="$(curl $av_api_url | ./jq "$query")"
   if [ -n "$latestbuild" -a "$latestbuild" != "null" -a "$latestbuild" != "$APPVEYOR_BUILD_NUMBER" ]; then
-    echo "There are newer queued builds for this pull request, failing early."
+    echo "There are newer queued builds for this pull request, cancelling this build."
+    curl -X "DELETE" "$APPVEYOR_API_URL/builds/tkelman/julia/$APPVEYOR_BUILD_NUMBER"
     exit 1
   fi
 fi
