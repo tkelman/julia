@@ -1,6 +1,6 @@
 environment:
   SECUREVAR:
-    secure: vWXnLbRt4x07IoEI3ef4yljFlhc7kfB5gOFrfdyQ0Qc=
+    secure: "vWXnLbRt4x07IoEI3ef4yljFlhc7kfB5gOFrfdyQ0Qc="
   USEMSVC: "1"
   matrix:
 #  - ARCH: "i686"
