@@ -10,7 +10,7 @@ function build_sysimg(sysimg_path=default_sysimg_path, cpu_target="native", user
     # Quit out if a sysimg is already loaded and is in the same spot as sysimg_path, unless forcing
     sysimg = dlopen_e("sys")
     if sysimg != C_NULL
-        if !force && Sys.dlpath(sysimg) == "$(sysimg_path).$(Sys.dlext)"
+        if !force && Base.samefile(Sys.dlpath(sysimg), "$(sysimg_path).$(Sys.dlext)")
             info("System image already loaded at $(Sys.dlpath(sysimg)), set force to override")
             return
         end
@@ -62,7 +62,7 @@ function build_sysimg(sysimg_path=default_sysimg_path, cpu_target="native", user
                 info("System image successfully built at $sysimg_path.ji")
             end
 
-            if default_sysimg_path != sysimg_path
+            if !Base.samefile(default_sysimg_path, sysimg_path)
                 info("To run Julia with this image loaded, run: julia -J $sysimg_path.ji")
             else
                 info("Julia will automatically load this system image at next startup")
@@ -85,18 +85,19 @@ function find_system_linker()
         return ENV["LD"]
     end
 
-    # On Windows, check to see if WinRPM is installed, and if so, see if binutils is installed
+    # On Windows, check to see if WinRPM is installed, and if so, see if binutils and runtime are installed
     @windows_only try
         require("WinRPM")
         winrpmbinutilsdir = joinpath(WinRPM.installdir,"usr","$(Sys.ARCH)-w64-mingw32",
             "sys-root","mingw","$(Sys.ARCH)-w64-mingw32","bin")
-        if filesize(joinpath(winrpmbinutilsdir, "ld.exe")) > 0
+        if filesize(joinpath(winrpmbinutilsdir,"ld.exe")) > 0 &&
+                filesize(joinpath(winrpmbinutilsdir,"..","..","lib","crtbegin.o")) > 0
             ENV["PATH"] = "$(ENV["PATH"]);$winrpmbinutilsdir"
         else
             throw()
         end
     catch
-        warn("Install Binutils via WinRPM.install(\"binutils\") to generate sys.dll for faster startup times" )
+        warn("Install Binutils and MinGW-runtime via WinRPM.install([\"binutils\",\"runtime\"]) to generate sys.dll for faster startup times")
     end
 
 
@@ -114,7 +115,17 @@ end
 function link_sysimg(sysimg_path=default_sysimg_path, ld=find_system_linker())
     julia_libdir = dirname(Sys.dlpath("libjulia"))
 
-    FLAGS = ["-L$julia_libdir"]
+    @windows_only begin
+        require("WinRPM")
+        winrpmlibdir = joinpath(WinRPM.installdir,"usr",
+            "$(Sys.ARCH)-w64-mingw32","sys-root","mingw","lib")
+        FLAGS = ["-m", WORD_SIZE == 32 ? "i386pe" : "i386pep", "--shared", "-Bdynamic",
+            "-e", WORD_SIZE == 32 ? "_DllMainCRTStartup@12" : "DllMainCRTStartup",
+            "--enable-auto-image-base", "-o", "$sysimg_path.$(Sys.dlext)",
+            "$winrpmlibdir/dllcrt2.o", "$winrpmlibdir/crtbegin.o",
+            "-L$julia_libdir", "-L$winrpmlibdir", "$sysimg_path.o"]
+    end
+    @unix_only FLAGS = ["-L$julia_libdir"]
     if OS_NAME == :Darwin
         push!(FLAGS, "-dylib")
         push!(FLAGS, "-undefined")
@@ -128,10 +139,14 @@ function link_sysimg(sysimg_path=default_sysimg_path, ld=find_system_linker())
         push!(FLAGS, "--unresolved-symbols")
         push!(FLAGS, "ignore-all")
     end
-    @windows_only append!(FLAGS, ["-L$JULIA_HOME", "-ljulia", "-lssp-0"])
+    @windows_only append!(FLAGS, ["-ljulia", "-lssp-0", "-lmingw32",
+        WORD_SIZE == 32 ? "-lgcc_s_sjlj-1" : "-lgcc_s_seh-1",
+        "-lmoldname", "-lmingwex", "-lmsvcrt", "-ladvapi32",
+        "-lshell32", "-luser32", "-lkernel32", "$winrpmlibdir/crtend.o"])
+    @unix_only append!(FLAGS, ["-o", "$sysimg_path.$(Sys.dlext)", "$sysimg_path.o"])
 
     info("Linking sys.$(Sys.dlext)")
-    run(`$ld $FLAGS -o $sysimg_path.$(Sys.dlext) $sysimg_path.o`)
+    run(`$ld $FLAGS`)
 
     info("System image successfully built at $sysimg_path.$(Sys.dlext)")
     @windows_only begin
