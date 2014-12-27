@@ -4,7 +4,7 @@
 $url = 'http://download.opensuse.org/repositories/windows:mingw:/win64/openSUSE_13.1/'
 [Xml]$repomd = (New-Object Net.WebClient).DownloadString($url + 'repodata/repomd.xml')
 $ns = New-Object Xml.XmlNamespaceManager($repomd.NameTable)
-$ns.AddNamespace("ns", $repomd.DocumentElement.NamespaceURI)
+$ns.AddNamespace('ns', $repomd.DocumentElement.NamespaceURI)
 $primarygz = (New-Object Net.WebClient).DownloadData($url + $repomd.SelectSingleNode(
     "/ns:repomd/ns:data[@type='primary']/ns:location/@href", $ns).'#text')
 
@@ -30,3 +30,8 @@ finally {
     $outstream.Close();
     $instream.Close();
 }
+
+$ns = New-Object Xml.XmlNamespaceManager($primary.NameTable)
+$ns.AddNamespace('ns', $primary.DocumentElement.NamespaceURI)
+
+$primary.SelectNodes("//ns:package[ns:name='mingw64-hdf5' and ns:arch='noarch']", $ns)
