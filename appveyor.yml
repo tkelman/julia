@@ -12,6 +12,7 @@ branches:
   only:
     - master
     - release-0.3
+    - tk/fix2501
 
 skip_commits:
 # Add [av skip] to commit messages for docfixes, etc to reduce load on queue
