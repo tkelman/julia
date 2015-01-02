@@ -15,8 +15,8 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
 JULIA_ENV     = $(JULIAHOME)/deps/julia-env
-ACTIVATE      = $(JULIA_ENV)/*/activate
-SPHINX_BUILD  = $(JULIA_ENV)/*/sphinx-build
+ACTIVATE      = $(wildcard $(JULIA_ENV)/*/activate)
+SPHINX_BUILD  = $(wildcard $(JULIA_ENV)/*/sphinx-build)
 
 $(ACTIVATE):
 	$(MAKE) -C $(JULIAHOME)/deps install-virtualenv
