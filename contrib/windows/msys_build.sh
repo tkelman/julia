@@ -197,10 +197,8 @@ if [ -n "$USEMSVC" ]; then
   # Since we don't have a static library for openlibm
   echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
 
-  # Compile libuv and utf8proc without -TP first, then add -TP
-  make -C deps install-uv install-utf8proc
+  make -C deps install-uv
   cp usr/lib/uv.lib usr/lib/libuv.a
-  echo 'override CC += -TP' >> Make.user
   echo 'override STAGE1_DEPS += dsfmt' >> Make.user
 else
   echo 'override STAGE1_DEPS += openlibm' >> Make.user
