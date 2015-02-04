@@ -38,6 +38,8 @@ cache:
   - llvm-3.3-x86_64-w64-mingw32-juliadeps.7z
   - jq.exe
 
+os: Visual Studio 2015 CTP
+
 build_script:
 # Remove C:\MinGW\bin from the path, the version of MinGW installed on
 # AppVeyor is not compatible with the cross-compiled Julia Windows binaries
@@ -45,7 +47,7 @@ build_script:
 # Remove C:\Perl\bin from the path, otherwise it breaks shasum with an error
 # Unable to find Digest::SHA or Digest::SHA::PurePerl
   - set PATH=%PATH:C:\Perl\bin;=%
-  - '"%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat" x86_amd64'
+  - '"%VS140COMNTOOLS%\..\..\VC\vcvarsall.bat" x86_amd64'
 # Since the AppVeyor VMs have Git installed, they have MSYS1
   - sh --login /c/projects/julia/contrib/windows/msys_build.sh
 
