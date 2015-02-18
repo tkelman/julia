@@ -1,16 +1,17 @@
 #!/bin/sh
 # build-time mini version of WinRPM, usage:
 # ./winrpm.sh http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_13.1/ mingw64-hdf5
-# depends on curl, xmllint, gunzip
+# depends on curl, xmllint, gunzip, sort -V, sha256sum, and p7zip
 
 set -e
 url=$1
 toinstall=$2
+# run in contrib/windows
+cd $(dirname "$0")
 
 # there is a curl --retry flag but it wasn't working here for some reason
 retry_curl() {
   for i in $(seq 10); do
-    # TODO: checksum verify downloads
     curl -fLsS $1 && return
     #sleep 2
   done
@@ -23,25 +24,26 @@ xp="xmllint --xpath"
 loc="local-name()="
 eval $(retry_curl $url/repodata/repomd.xml | $xp "/*[$loc'repomd'] \
   /*[$loc'data'][@type='primary']/*[$loc'location']/@href" -)
+primary=$href
 
 mkdir -p repodata
-case $href in
+case $primary in
   *.gz)
-    retry_curl $url/$href | gunzip > $href;;
+    retry_curl $url/$primary | gunzip > $primary;;
   *)
-    retry_curl $url/$href > $href;;
+    retry_curl $url/$primary > $primary;;
 esac
 
 # outputs <package> xml string for newest version
 # don't include arch=src packages, those will list build-time dependencies
 rpm_select() {
   candidates="<c>$($xp "//*[$loc'package'][./*[$loc'name' and .='$1']] \
-    [./*[$loc'arch' and .='noarch']]" $href 2>/dev/null | \
+    [./*[$loc'arch' and .='noarch']]" $primary 2>/dev/null | \
     sed -e 's|<rpm:|<|g' -e 's|</rpm:|</|g')</c>"
   # remove rpm namespacing so output can be parsed by xmllint later
   if [ "$candidates" = "<c></c>" ]; then
     echo "error: no package candidates found for $1" >&2
-    rm $href
+    rm $primary
     exit 1
   fi
   epochs=""
@@ -91,12 +93,12 @@ rpm_requires() {
 # outputs package name, fails if multiple providers with different names
 rpm_provides() {
   providers=$($xp "//*[$loc'package'][./*[$loc'format']/*[$loc'provides'] \
-    /*[$loc'entry'][@name='$1']]/*[$loc'name']" $href | \
+    /*[$loc'entry'][@name='$1']]/*[$loc'name']" $primary | \
     sed -e 's|<name>||g' -e 's|</name>|\n|g' | sort -u)
   if [ $(echo $providers | wc -w) -gt 1 ]; then
     echo "found multiple providers $providers for $1" >&2
     echo "can't decide which to pick, bailing" >&2
-    rm $href
+    rm $primary
     exit 1
   else
     echo $providers
@@ -131,6 +133,23 @@ while [ -n "$newpkgs" ]; do
   done
   toinstall="$toinstall $newpkgs"
 done
-echo "packages to install: $toinstall"
 
-rm $href
+mkdir -p noarch
+for i in $toinstall; do
+  pkgi=$(rpm_select $i)
+  checksum=$(echo $pkgi | $xp "/package/checksum/text()" -)
+  eval $(echo $pkgi | $xp "/package/location/@href" -)
+  echo "downloading $href"
+  retry_curl $url/$href > $href
+  echo "$checksum *$href" | sha256sum -c
+  cd ../../usr/bin
+  7z x -y ../../contrib/windows/noarch/$(basename $href) > 7zip.log
+  cpiofile=$(basename $href | sed 's/.rpm$/.cpio/')
+  7z e -y $cpiofile > 7zip.log
+  rm $cpiofile 7zip.log
+  cd ../../contrib/windows
+  rm $href
+done
+
+rm $primary
+rmdir --ignore-fail-on-non-empty repodata noarch
