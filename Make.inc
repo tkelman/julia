@@ -170,13 +170,6 @@ override OPENBLAS_DYNAMIC_ARCH = 1
 override CROSS_COMPILE=$(XC_HOST)-
 ifneq (,$(findstring mingw,$(XC_HOST)))
 override OS := WINNT
-ifneq (,$(findstring CYGWIN,$(BUILD_OS)))
-export STD_LIB_PATH := $(shell $(CROSS_COMPILE)gcc -print-search-dirs | grep programs | sed -e "s/^programs: =//" -e "s!/lib/!/bin/!g")
-export STD_LIB_PATH := $(STD_LIB_PATH):$(shell $(CROSS_COMPILE)gcc -print-search-dirs | grep libraries | sed -e "s/^libraries: =//" -e "s!/lib/!/bin/!g")
-else
-export STD_LIB_PATH := $(shell $(CROSS_COMPILE)gcc -print-search-dirs | grep programs | sed "s/^programs: =//" | xargs -d":" winepath -w | tr '\n' ';')
-export STD_LIB_PATH := $(STD_LIB_PATH);$(shell $(CROSS_COMPILE)gcc -print-search-dirs | grep libraries | sed "s/^libraries: =//" | xargs -d":" winepath -w | tr '\n' ';')
-endif
 else
 $(error "unknown XC_HOST variable set")
 endif

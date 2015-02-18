@@ -227,24 +227,25 @@ endif
 
 ifeq ($(OS),WINNT)
 define std_dll
-julia-deps: | $$(build_bindir)/lib$(1).dll
-$$(build_bindir)/lib$(1).dll: | $$(build_bindir)
-ifeq ($$(BUILD_OS),$$(OS))
-	cp $$(call pathsearch,lib$(1).dll,$$(PATH)) $$(build_bindir) ;
+julia-deps: | $$(build_bindir)/$(1).dll
+$$(build_bindir)/$(1).dll: | $$(build_bindir)
+ifeq ($(ARCH),x86_64)
+	contrib/windows/winrpm.sh http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_13.1/ mingw64-$(subst -,,$(1))
 else
-	cp $$(call wine_pathsearch,lib$(1).dll,$$(STD_LIB_PATH)) $$(build_bindir) ;
+	contrib/windows/winrpm.sh http://download.opensuse.org/repositories/windows:/mingw:/win32/openSUSE_13.1/ mingw32-$(subst -,,$(1))
 endif
-JL_LIBS += $(1)
 endef
-$(eval $(call std_dll,gfortran-3))
-$(eval $(call std_dll,quadmath-0))
-$(eval $(call std_dll,stdc++-6))
-ifeq ($(ARCH),i686)
-$(eval $(call std_dll,gcc_s_sjlj-1))
+$(eval $(call std_dll,libgfortran-3))
+$(eval $(call std_dll,libquadmath-0))
+$(eval $(call std_dll,libstdc++-6))
+ifeq ($(ARCH),x86_64)
+$(eval $(call std_dll,libgcc_s_seh-1))
 else
-$(eval $(call std_dll,gcc_s_seh-1))
+$(eval $(call std_dll,libgcc_s_sjlj-1))
 endif
-$(eval $(call std_dll,ssp-0))
+$(eval $(call std_dll,libssp-0))
+$(eval $(call std_dll,libexpat-1))
+$(eval $(call std_dll,zlib1))
 endif
 
 install: $(build_bindir)/stringreplace
@@ -388,7 +389,7 @@ ifeq ($(ARCH),x86_64)
 endif
 
 	[ ! -d dist-extras ] || ( cd dist-extras && \
-		cp 7z.exe 7z.dll libexpat-1.dll zlib1.dll $(bindir) && \
+		cp 7z.exe 7z.dll $(bindir) && \
 	    mkdir $(DESTDIR)$(prefix)/Git && \
 	    7z x PortableGit.7z -o"$(DESTDIR)$(prefix)/Git" && \
 	    echo "[core] eol = lf" >> "$(DESTDIR)$(prefix)/Git/etc/gitconfig" && \
@@ -496,20 +497,12 @@ ifneq (,$(filter $(ARCH), i386 i486 i586 i686))
 	cd dist-extras && \
 	$(JLDOWNLOAD) http://downloads.sourceforge.net/sevenzip/7z920.exe && \
 	7z x -y 7z920.exe 7z.exe 7z.dll && \
-	$(JLDOWNLOAD) http://download.opensuse.org/repositories/windows:/mingw:/win32/openSUSE_13.1/noarch/mingw32-libexpat1-2.0.1-8.1.noarch.rpm && \
-	mv mingw32-libexpat1-*.rpm mingw-libexpat.rpm && \
-	$(JLDOWNLOAD) http://download.opensuse.org/repositories/windows:/mingw:/win32/openSUSE_13.1/noarch/mingw32-zlib-1.2.8-3.12.noarch.rpm && \
-	mv mingw32-zlib-*.rpm mingw-zlib.rpm
 else ifeq ($(ARCH),x86_64)
 	cd dist-extras && \
 	$(JLDOWNLOAD) 7z920-x64.msi http://downloads.sourceforge.net/sevenzip/7z920-x64.msi && \
 	7z x -y 7z920-x64.msi _7z.exe _7z.dll && \
 	mv _7z.dll 7z.dll && \
 	mv _7z.exe 7z.exe && \
-	$(JLDOWNLOAD) http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_13.1/noarch/mingw64-libexpat1-2.0.1-7.1.noarch.rpm && \
-	mv mingw64-libexpat1-*.rpm mingw-libexpat.rpm && \
-	$(JLDOWNLOAD) http://download.opensuse.org/repositories/windows:/mingw:/win64/openSUSE_13.1/noarch/mingw64-zlib-1.2.8-3.1.noarch.rpm && \
-	mv mingw64-zlib-*.rpm mingw-zlib.rpm
 else
 	$(error no win-extras target for ARCH=$(ARCH))
 endif
@@ -522,8 +515,4 @@ endif
 	$(call spawn,./7z.exe) x -y -onsis nsis-2.46.5-Unicode-setup.exe && \
 	chmod a+x ./nsis/makensis.exe && \
 	chmod a+x busybox.exe && \
-	7z x -y mingw-libexpat.rpm -so > mingw-libexpat.cpio && \
-	7z e -y mingw-libexpat.cpio && \
-	7z x -y mingw-zlib.rpm -so > mingw-zlib.cpio && \
-	7z e -y mingw-zlib.cpio && \
 	$(JLDOWNLOAD) PortableGit.7z https://github.com/msysgit/msysgit/releases/download/Git-1.9.5-preview20141217/PortableGit-1.9.5-preview20141217.7z
