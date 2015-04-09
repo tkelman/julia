@@ -205,5 +205,6 @@ else
 fi
 
 cat Make.user
+make VERBOSE=1 julia-libccalltest
 make VERBOSE=1
 #make debug
