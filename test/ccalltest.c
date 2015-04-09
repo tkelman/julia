@@ -90,7 +90,12 @@ int verbose = 1;
 int xs[300] = {0,0,0,1,0};
 
 //int testUcharX(unsigned char x);
-int __attribute__((noinline)) testUcharX(unsigned char x) {
+#ifdef _MSC_VER
+int __declspec(noinline)
+#else
+int __attribute__((noinline))
+#endif
+testUcharX(unsigned char x) {
     return xs[x];
 }
 
