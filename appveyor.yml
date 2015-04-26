@@ -12,6 +12,7 @@ branches:
   only:
     - master
     - release-0.3
+    - tk/avtest
 
 skip_commits:
 # Add [av skip] to commit messages for docfixes, etc to reduce load on queue
@@ -51,4 +52,4 @@ build_script:
 test_script:
   - usr\bin\julia -e "versioninfo()"
   - copy usr\lib\julia\sys.ji local.ji && usr\bin\julia -J local.ji -e "true" && del local.ji
-  - cd test && ..\usr\bin\julia runtests.jl all
+  - cd test && ..\usr\bin\julia runtests.jl unicode
