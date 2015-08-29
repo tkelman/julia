@@ -80,6 +80,10 @@ debug && println("lower Cholesky factor")
         @test_approx_eq full(lapd) apd
         l = lapd[:L]
         @test_approx_eq l*l' apd
+        if eltya != BigFloat && eltyb != BigFloat
+            @test norm(apd * (lapd\b) - b)/norm(b) <= ε*κ*n
+            @test norm(apd * (lapd\b[1:n]) - b[1:n])/norm(b[1:n]) <= ε*κ*n
+        end
 
 debug && println("pivoted Choleksy decomposition")
         if eltya != BigFloat && eltyb != BigFloat # Note! Need to implement pivoted cholesky decomposition in julia
@@ -87,13 +91,23 @@ debug && println("pivoted Choleksy decomposition")
             @test rank(cpapd) == n
             @test all(diff(diag(real(cpapd.factors))).<=0.) # diagonal should be non-increasing
             @test norm(apd * (cpapd\b) - b)/norm(b) <= ε*κ*n # Ad hoc, revisit
+            @test norm(apd * (cpapd\b[1:n]) - b[1:n])/norm(b[1:n]) <= ε*κ*n
             if isreal(apd)
                 @test_approx_eq apd * inv(cpapd) eye(n)
             end
-            @test_approx_eq full(cpapd) apd
+            @test full(cpapd) ≈ apd
 
             #getindex
             @test_throws KeyError cpapd[:Z]
+
+            @test size(cpapd) == size(apd)
+            @test full(copy(cpapd)) ≈ apd
+            @test det(cpapd) ≈ det(apd)
+            @test cpapd[:P]*cpapd[:L]*cpapd[:U]*cpapd[:P]' ≈ apd
+
+            lpapd = cholfact(apd, :L, Val{true})
+            @test norm(apd * (lpapd\b) - b)/norm(b) <= ε*κ*n # Ad hoc, revisit
+            @test norm(apd * (lpapd\b[1:n]) - b[1:n])/norm(b[1:n]) <= ε*κ*n
         end
     end
 end
