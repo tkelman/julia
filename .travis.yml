@@ -22,6 +22,7 @@ matrix:
             - libopenblas-base:i386
             - libblas-dev:i386
             - liblapack-dev:i386
+            - liblapack3gf:i386
             - libfftw3-dev:i386
             - libgmp-dev:i386
             - libpcre3-dev:i386
