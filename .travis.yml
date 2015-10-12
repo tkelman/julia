@@ -1,14 +1,59 @@
 language: cpp
-os:
-    - linux
-    - osx
-env:
-    - ARCH="i686"
-    - ARCH="x86_64"
+sudo: false
 matrix:
-  exclude:
-    - os: osx
+  include:
+    - os: linux
       env: ARCH="i686"
+      addons:
+        apt:
+          packages:
+#           - jq # https://github.com/travis-ci/apt-package-whitelist/issues/1394
+            - binutils:i386
+            - gcc:i386
+            - g++:i386
+            - make:i386
+            - cpp:i386
+            - g++-4.6:i386
+            - gcc-4.6:i386
+            - libssl-dev:i386
+            - patchelf:i386
+            - gfortran:i386
+            - llvm-3.3-dev:i386
+            - libsuitesparse-dev:i386
+            - libopenblas-dev:i386
+            - libopenblas-base:i386
+            - libblas-dev:i386
+            - liblapack-dev:i386
+            - liblapack3:i386
+            - libarpack2-dev:i386
+            - libarpack2:i386
+            - libfftw3-dev:i386
+            - libgmp-dev:i386
+            - libpcre3-dev:i386
+            - libunwind7-dev:i386
+            - libopenlibm-dev:i386
+            - libmpfr-dev:i386
+    - os: linux
+      env: ARCH="x86_64"
+      addons:
+        apt:
+          packages:
+#           - jq # https://github.com/travis-ci/apt-package-whitelist/issues/1394
+            - patchelf
+            - gfortran
+            - llvm-3.3-dev
+            - libsuitesparse-dev
+            - libopenblas-dev
+            - liblapack-dev
+            - libarpack2-dev
+            - libfftw3-dev
+            - libgmp-dev
+            - libpcre3-dev
+            - libunwind7-dev
+            - libopenlibm-dev
+            - libmpfr-dev
+    - os: osx
+      env: ARCH="x86_64"
 notifications:
     email: false
     irc:
@@ -22,22 +67,14 @@ notifications:
           - http://julia.mit.edu:8000/travis-hook
 before_install:
     - make check-whitespace
+#        contrib/travis_fastfail.sh || exit 1; # put this back when https://github.com/travis-ci/apt-package-whitelist/issues/1394 is closed
     - if [ `uname` = "Linux" ]; then
-        sudo apt-get install jq -y;
-        contrib/travis_fastfail.sh || exit 1;
         BUILDOPTS="-j3 USEGCC=1 LLVM_CONFIG=llvm-config-3.3 VERBOSE=1 USE_BLAS64=0 FORCE_ASSERTIONS=1 STAGE2_DEPS=utf8proc";
         for lib in LLVM SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR LIBUNWIND OPENLIBM; do
             export BUILDOPTS="$BUILDOPTS USE_SYSTEM_$lib=1";
         done;
-        sudo add-apt-repository ppa:staticfloat/julia-deps -y;
-        sudo apt-get update -qq -y;
         if [ "$ARCH" = "i686" ]; then
           export BUILDOPTS="$BUILDOPTS MARCH=pentium4";
-          sudo apt-get remove libblas3gf liblapack3gf libarmadillo2 -y;
-          sudo apt-get install binutils:i386 -y;
-          sudo apt-get install gcc:i386 g++:i386 make:i386 cpp:i386 g++-4.6:i386 gcc-4.6:i386 libssl-dev:i386 patchelf:i386 gfortran:i386 llvm-3.3-dev:i386 libsuitesparse-dev:i386 libopenblas-dev:i386 libopenblas-base:i386 libblas-dev:i386 liblapack-dev:i386 liblapack3:i386 libarpack2-dev:i386 libarpack2:i386 libfftw3-dev:i386 libgmp-dev:i386 libpcre3-dev:i386 libunwind7-dev:i386 libopenlibm-dev:i386 libmpfr-dev:i386 -y;
-        else
-          sudo apt-get install patchelf gfortran llvm-3.3-dev libsuitesparse-dev libopenblas-dev liblapack-dev libarpack2-dev libfftw3-dev libgmp-dev libpcre3-dev libunwind7-dev libopenlibm-dev libmpfr-dev -y;
         fi;
       elif [ `uname` = "Darwin" ]; then
         brew tap staticfloat/julia;
@@ -69,5 +106,4 @@ script:
     - /tmp/julia/bin/julia -e 'versioninfo()'
     - export JULIA_CPU_CORES=2 && cd /tmp/julia/share/julia/test && /tmp/julia/bin/julia --check-bounds=yes runtests.jl all && /tmp/julia/bin/julia --check-bounds=yes runtests.jl libgit2-online pkg
     - cd - && mv julia2 julia
-    - sudo dmesg
-    - echo "Ready for packaging..."
+    - if [ `uname` = "Darwin" ]; then sudo dmesg; else dmesg; fi
