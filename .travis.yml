@@ -60,7 +60,7 @@ before_install:
 #        contrib/travis_fastfail.sh || exit 1; # put this back when https://github.com/travis-ci/apt-package-whitelist/issues/1394 is closed
     - if [ `uname` = "Linux" ]; then
         BUILDOPTS="-j3 USEGCC=1 LLVM_CONFIG=llvm-config-3.3 VERBOSE=1 USE_BLAS64=0 FORCE_ASSERTIONS=1 STAGE2_DEPS=utf8proc";
-        for lib in LLVM ARPACK BLAS FFTW LAPACK GMP MPFR LIBUNWIND OPENLIBM; do
+        for lib in LLVM ARPACK BLAS FFTW LAPACK GMP MPFR OPENLIBM; do
             export BUILDOPTS="$BUILDOPTS USE_SYSTEM_$lib=1";
         done;
         if [ "$ARCH" = "i686" ]; then
