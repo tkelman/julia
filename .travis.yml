@@ -37,6 +37,7 @@ matrix:
             - llvm-3.3-dev
             - libopenblas-dev
             - liblapack-dev
+            - liblapack3gf
             - libarpack2-dev
             - libfftw3-dev
             - libgmp-dev
