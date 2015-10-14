@@ -85,7 +85,7 @@ notifications:
 #        make $BUILDOPTS -C contrib -f repackage_system_suitesparse4.make;
 #      fi
 script:
-    - sudo docker run tkelman/julia-llvm33 "cd /home/julia-$ARCH && make -j3 testall && echo ok"
+    - sudo docker run -w /home/julia-$ARCH tkelman/julia-llvm33 make -j3 testall
 #    - make $BUILDOPTS -C base version_git.jl.phony
 #    - git clone -q git://git.kitenet.net/moreutils
 #    - make $BUILDOPTS NO_GIT=1 JULIA_SYSIMG_BUILD_FLAGS="--output-ji ../usr/lib/julia/sys.ji" prefix=/tmp/julia install | moreutils/ts -s "%.s"
