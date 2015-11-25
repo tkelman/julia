@@ -104,6 +104,8 @@ echo "override PCRE_INCL_PATH =" >> Make.user
 # Remove libjulia.dll if it was copied from downloaded binary
 rm -f usr/bin/libjulia.dll
 rm -f usr/bin/libjulia-debug.dll
+mkdir -p usr/tools
+cp usr/bin/*.dll usr/tools
 
 if [ -z "$USEMSVC" ]; then
   if [ -z "`which ${CROSS_COMPILE}gcc 2>/dev/null`" -o -n "$APPVEYOR" ]; then
@@ -117,6 +119,7 @@ if [ -z "$USEMSVC" ]; then
     rm -f mingw$bits/bin/make.exe
   fi
   export AR=${CROSS_COMPILE}ar
+  echo 'override LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config.exe' >> Make.user
 
   f=llvm-3.7.1-$ARCH-w64-mingw32-juliadeps-r09.7z
 else
@@ -130,6 +133,8 @@ else
   echo 'override CXX = $(CC) -EHsc' >> Make.user
   echo "override AR = $AR" >> Make.user
   echo "override LD = $LD -DEBUG" >> Make.user
+  echo 'override LLVM_CONFIG = $(JULIAHOME)/usr/bin/llvm-config' >> Make.user
+  echo 'override USE_LLVM_SHLIB = 0' >> Make.user
 
   f=llvm-3.3-$ARCH-msvc12-juliadeps.7z
 fi
@@ -138,7 +143,6 @@ checksum_download \
     "$f" "https://bintray.com/artifact/download/tkelman/generic/$f"
 echo "Extracting $f"
 $SEVENZIP x -y $f >> get-deps.log
-echo 'override LLVM_CONFIG := $(JULIAHOME)/usr/bin/llvm-config.exe' >> Make.user
 echo 'override LLVM_SIZE := $(JULIAHOME)/usr/bin/llvm-size.exe' >> Make.user
 
 if [ -z "`which make 2>/dev/null`" ]; then
@@ -182,6 +186,9 @@ if [ -n "$USEMSVC" ]; then
   echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
   # Since we don't have a static library for openlibm
   echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
+  # set DEPS_GIT=1 so libuv (and its automake compile script)
+  # ends up at a predictable location
+  echo 'override DEPS_GIT = 1' >> Make.user
 
   # Compile libuv and utf8proc without -TP first, then add -TP
   make -C deps install-libuv install-utf8proc
@@ -202,6 +209,6 @@ fi
 echo 'FORCE_ASSERTIONS = 1' >> Make.user
 
 cat Make.user
-make -j3 VERBOSE=1
+make VERBOSE=1
 make build-stats
 #make debug
