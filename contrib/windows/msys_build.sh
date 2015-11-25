@@ -136,7 +136,7 @@ else
   echo "override AR = $AR" >> Make.user
   echo "override LD = $LD -DEBUG" >> Make.user
 
-  f=llvm-3.3-$ARCH-msvc12-juliadeps.7z
+  f=llvm-3.3.1-$ARCH-msvc11-juliadeps.7z
 fi
 
 checksum_download \
