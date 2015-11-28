@@ -1,11 +1,12 @@
-language: cpp
-sudo: required
-dist: trusty
-services: docker
-matrix:
-  include:
-    - os: linux
-      env: ARCH="i686"
+language: julia
+julia: nightly
+sudo: false
+#dist: trusty
+#services: docker
+#matrix:
+#  include:
+#    - os: linux
+#      env: ARCH="i686"
 #      addons:
 #        apt:
 #          packages:
@@ -29,8 +30,8 @@ matrix:
 #            - libgmp-dev:i386
 #            - libpcre3-dev:i386
 #            - libmpfr-dev:i386
-    - os: linux
-      env: ARCH="x86_64"
+#    - os: linux
+#      env: ARCH="x86_64"
 #      addons:
 #        apt:
 #          packages:
@@ -58,9 +59,9 @@ notifications:
         urls:
           - http://status.julialang.org/put/travis
           - http://julia.mit.edu:8000/travis-hook
-before_install:
-    - make check-whitespace
-    - contrib/travis_fastfail.sh || exit 1
+#before_install:
+#    - make check-whitespace
+#    - contrib/travis_fastfail.sh || exit 1
 #    - if [ `uname` = "Linux" ]; then
 #        BUILDOPTS="-j3 USEGCC=1 LLVM_CONFIG=llvm-config-3.3 VERBOSE=1 USE_BLAS64=0 FORCE_ASSERTIONS=1 STAGE2_DEPS=utf8proc";
 #        for lib in LLVM ARPACK BLAS FFTW LAPACK GMP MPFR OPENLIBM; do
@@ -86,17 +87,18 @@ before_install:
 #        make $BUILDOPTS -C contrib -f repackage_system_suitesparse4.make;
 #      fi
 script:
-    - git clone -q git://git.kitenet.net/moreutils
-    - make -C moreutils mispipe
-    - |
-        moreutils/mispipe "sudo docker run -w /home/julia-$ARCH tkelman/julia32-part2:master sh -c \
-        \"git remote add tkelman https://github.com/tkelman/julia && \
-        if [ $TRAVIS_PULL_REQUEST = false ]; then git fetch tkelman $TRAVIS_BRANCH: ; else \
-        git fetch origin +refs/pull/$TRAVIS_PULL_REQUEST/merge: ; fi && \
-        git checkout -qf FETCH_HEAD && \
-        make -j3 install VERBOSE=1 && \
-        ./julia -e 'versioninfo()' && \
-        make testall test-pkg test-libgit2-online\"" 'moreutils/ts -s "%.s"'
+    - julia -e 'Base.runtests("all", 4)' && julia -e 'Base.runtests("pkg libgit2-online", 2)'
+#    - git clone -q git://git.kitenet.net/moreutils
+#    - make -C moreutils mispipe
+#    - |
+#        moreutils/mispipe "sudo docker run -w /home/julia-$ARCH tkelman/julia32-part2:master sh -c \
+#        \"git remote add tkelman https://github.com/tkelman/julia && \
+#        if [ $TRAVIS_PULL_REQUEST = false ]; then git fetch tkelman $TRAVIS_BRANCH: ; else \
+#        git fetch origin +refs/pull/$TRAVIS_PULL_REQUEST/merge: ; fi && \
+#        git checkout -qf FETCH_HEAD && \
+#        make -j3 install VERBOSE=1 && \
+#        ./julia -e 'versioninfo()' && \
+#        make testall test-pkg test-libgit2-online\"" 'moreutils/ts -s "%.s"'
 #    - make $BUILDOPTS -C base version_git.jl.phony
 #    - make $BUILDOPTS NO_GIT=1 JULIA_SYSIMG_BUILD_FLAGS="--output-ji ../usr/lib/julia/sys.ji" prefix=/tmp/julia install | moreutils/ts -s "%.s"
 #    - if [ `uname` = "Darwin" ]; then
