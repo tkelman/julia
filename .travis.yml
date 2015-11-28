@@ -86,6 +86,7 @@ before_install:
 #        make $BUILDOPTS -C contrib -f repackage_system_suitesparse4.make;
 #      fi
 script:
+    - sudo apt-get update -qq -y
     - sudo apt-get install -y moreutils
     - mispipe "sudo docker run -w /home/julia-$ARCH tkelman/julia32-part2:master sh -c
         \"git clone -q git://git.kitenet.net/moreutils &&
