@@ -86,11 +86,12 @@ before_install:
 #        make $BUILDOPTS -C contrib -f repackage_system_suitesparse4.make;
 #      fi
 script:
-    - git clone -q git://git.kitenet.net/moreutils
     - sudo docker run -w /home/julia-$ARCH tkelman/julia32-part2:master sh -c
-        "git remote add tkelman https://github.com/tkelman/julia && git fetch --all && if [ $TRAVIS_PULL_REQUEST = false ]; then git checkout tkelman/$TRAVIS_BRANCH; fi &&
-        make -j3 install VERBOSE=1 && make testall test-pkg test-libgit2-online"
-# | moreutils/ts -s "%.s"
+        "git clone -q git://git.kitenet.net/moreutils &&
+        git remote add tkelman https://github.com/tkelman/julia && git fetch --all &&
+        if [ $TRAVIS_PULL_REQUEST = false ]; then git checkout tkelman/$TRAVIS_BRANCH; fi &&
+        make -j3 install VERBOSE=1 | moreutils/ts -s '%.s' &&
+        make testall test-pkg test-libgit2-online"
 #    - make $BUILDOPTS -C base version_git.jl.phony
 #    - make $BUILDOPTS NO_GIT=1 JULIA_SYSIMG_BUILD_FLAGS="--output-ji ../usr/lib/julia/sys.ji" prefix=/tmp/julia install | moreutils/ts -s "%.s"
 #    - if [ `uname` = "Darwin" ]; then
