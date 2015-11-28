@@ -18,7 +18,6 @@ extern "C" {
 
 #define JL_ARRAY_ALIGN(jl_value, nbytes) LLT_ALIGN(jl_value, nbytes)
 
-fail
 // array constructors ---------------------------------------------------------
 
 static inline int store_unboxed(jl_value_t *el_type)
