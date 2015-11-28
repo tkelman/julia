@@ -88,10 +88,11 @@ before_install:
 script:
     - git clone -q git://git.kitenet.net/moreutils
     - make -C moreutils mispipe
-    - moreutils/mispipe "sudo docker run -w /home/julia-$ARCH tkelman/julia32-part2:master sh -c
+    - |
+        moreutils/mispipe "sudo docker run -w /home/julia-$ARCH tkelman/julia32-part2:master sh -c
         \"git remote add tkelman https://github.com/tkelman/julia &&
-        if [ $TRAVIS_PULL_REQUEST = false ]; then git fetch tkelman $TRAVIS_BRANCH\: ; else
-        git fetch origin +refs/pull/$TRAVIS_PULL_REQUEST/merge\: ; fi &&
+        if [ $TRAVIS_PULL_REQUEST = false ]; then git fetch tkelman $TRAVIS_BRANCH: ; else
+        git fetch origin +refs/pull/$TRAVIS_PULL_REQUEST/merge: ; fi &&
         git checkout -qf FETCH_HEAD &&
         make -j3 install VERBOSE=1 &&
         ./julia -e 'versioninfo()' &&
