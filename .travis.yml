@@ -23,8 +23,9 @@ matrix:
     - os: osx
       env: ARCH="x86_64"
 cache:
-    - deps/srccache
-    - deps/build
+  directories:
+    - $TRAVIS_BUILD_DIR/deps/srccache
+    - $TRAVIS_BUILD_DIR/deps/build
 notifications:
     email: false
     irc:
