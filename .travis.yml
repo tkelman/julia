@@ -25,7 +25,8 @@ matrix:
 cache:
   directories:
     - $TRAVIS_BUILD_DIR/deps/srccache
-    - $TRAVIS_BUILD_DIR/deps/build-$ARCH
+    - $TRAVIS_BUILD_DIR/deps/build-i686
+    - $TRAVIS_BUILD_DIR/deps/build-x86_64
 notifications:
     email: false
     irc:
