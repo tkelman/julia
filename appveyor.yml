@@ -40,5 +40,7 @@ build_script:
 #test_script:
 #  - git config --global user.name "appveyor test"
 #  - git config --global user.email "appveyor@test.com"
+  - C:\projects\julia\bin\%JULIAEXE% -e "versioninfo()"
+  - C:\projects\julia\bin\%JULIAEXE% -e "@time svd(rand(1000,1000))"
   - C:\projects\julia\bin\%JULIAEXE% -e "Base.runtests(\"all\", 4)"
   - C:\projects\julia\bin\%JULIAEXE% -e "Base.runtests(\"pkg git\", 2)"
