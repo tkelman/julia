@@ -1,8 +1,8 @@
 environment:
-#  USEMSVC: "1"
-  matrix:
-  - ARCH: "i686"
-  - ARCH: "x86_64"
+  USEMSVC: "1"
+#  matrix:
+#  - ARCH: "i686"
+  ARCH: "x86_64"
 
 # Only build on master and PR's for now, not personal branches
 # Whether or not PR's get built is determined in the webhook settings
@@ -10,6 +10,7 @@ branches:
   only:
     - master
     - /release-.*/
+    - tk/avmsvc0.4
 
 skip_commits:
 # Add [av skip] to commit messages for docfixes, etc to reduce load on queue
@@ -46,7 +47,9 @@ build_script:
 # Remove C:\Perl\bin from the path, otherwise it breaks shasum with an error
 # Unable to find Digest::SHA or Digest::SHA::PurePerl
   - set PATH=%PATH:C:\Perl\bin;=%
-#  - '"%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat" x86_amd64'
+  - '"%VS120COMNTOOLS%\..\..\VC\vcvarsall.bat" x86_amd64'
+# Remove msys link.exe
+  - del C:\MinGW\msys\1.0\bin\link.exe
   - C:\MinGW\msys\1.0\bin\sh --login /c/projects/julia/contrib/windows/msys_build.sh
 
 test_script:
