@@ -89,9 +89,9 @@ esac
 # Fix directory not found error during decompression on msys2
 mkdir -p usr/Git/usr
 if ! [ -e julia-installer.exe ]; then
-  f=julia-latest-win$bits.exe
+  f=julia-0.4.2-9f8ec24adb-win$bits.exe
   echo "Downloading $f"
-  $curlflags -O https://s3.amazonaws.com/julianightlies/bin/winnt/x$archsuffix/$f
+  $curlflags -O https://s3.amazonaws.com/julianightlies/bin/winnt/x$archsuffix/0.4/$f
   echo "Extracting $f"
   $SEVENZIP x -y $f >> get-deps.log
 fi
