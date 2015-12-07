@@ -1,13 +1,13 @@
 environment:
   matrix:
-#  - JULIAVERSION: "julianightlies/bin/winnt/x86/0.4/julia-0.4.2-bb73f3489d-win32.exe"
-#    JULIAEXE: "julia"
-#  - JULIAVERSION: "julianightlies/bin/winnt/x86/0.4/julia-0.4.2-bb73f3489d-win32.exe"
-#    JULIAEXE: "julia-debug"
-  - JULIAVERSION: "julianightlies/bin/winnt/x64/0.4/julia-0.4.2-bb73f3489d-win64.exe"
+  - JULIAVERSION: "julianightlies/bin/winnt/x86/0.4/julia-0.4.2-bb73f3489d-win32.exe"
     JULIAEXE: "julia"
-  - JULIAVERSION: "julianightlies/bin/winnt/x64/0.4/julia-0.4.2-bb73f3489d-win64.exe"
+  - JULIAVERSION: "julianightlies/bin/winnt/x86/0.4/julia-0.4.2-bb73f3489d-win32.exe"
     JULIAEXE: "julia-debug"
+#  - JULIAVERSION: "julianightlies/bin/winnt/x64/0.4/julia-0.4.2-bb73f3489d-win64.exe"
+#    JULIAEXE: "julia"
+#  - JULIAVERSION: "julianightlies/bin/winnt/x64/0.4/julia-0.4.2-bb73f3489d-win64.exe"
+#    JULIAEXE: "julia-debug"
 
 branches:
   only:
