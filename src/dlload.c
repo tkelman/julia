@@ -254,6 +254,8 @@ const char *jl_dlfind_win32(const char *f_name)
 #if defined(_MSC_VER)
 #if _MSC_VER == 1800
         return "msvcr120";
+#elif _MSC_VER == 1900
+        return "ucrtbase";
 #else
 #error This version of MSVC has not been tested.
 #endif
