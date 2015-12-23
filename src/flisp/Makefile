@@ -12,8 +12,6 @@ LIBTARGET := lib$(NAME)
 
 SRCS := flisp.c builtins.c string.c equalhash.c table.c iostream.c \
         julia_extensions.c
-# MSVC HACK
-SRCS += ../../deps/srccache/libuv/src/win/snprintf.c
 
 HEADERS := $(wildcard *.h) $(LIBUV_INC)/uv.h
 

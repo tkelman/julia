@@ -187,7 +187,7 @@ if [ -n "$USEMSVC" ]; then
   # Compile libuv and utf8proc without -TP first, then add -TP
   make -C deps install-libuv install-utf8proc
   cp usr/lib/uv.lib usr/lib/libuv.a
-  #echo 'override CC += -TP' >> Make.user
+  echo 'override CC += -TP' >> Make.user
   echo 'override DEP_LIBS += dsfmt' >> Make.user
 
   # Create a modified version of compile for wrapping link

@@ -4,9 +4,6 @@
 #include <setjmp.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #include "platform.h"
 #include "libsupport.h"
 #include "uv.h"
@@ -23,6 +20,9 @@ typedef int_t fixnum_t;
 #define T_FIXNUM T_INT32
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef struct _fl_context_t fl_context_t;
 typedef struct {
     value_t car;
