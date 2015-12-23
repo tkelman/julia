@@ -96,10 +96,10 @@ julia-inference : julia-base julia-ui-$(JULIA_BUILD_MODE) $(build_prefix)/.examp
 	@$(MAKE) $(QUIET_MAKE) -C $(BUILDROOT) $(build_private_libdir)/inference.ji JULIA_BUILD_MODE=$(JULIA_BUILD_MODE)
 
 julia-sysimg-release : julia-inference julia-ui-release
-	@$(MAKE) $(QUIET_MAKE) -C $(BUILDROOT) $(build_private_libdir)/sys.$(SHLIB_EXT) JULIA_BUILD_MODE=release
+	@$(MAKE) $(QUIET_MAKE) -C $(BUILDROOT) $(build_private_libdir)/sys.ji JULIA_BUILD_MODE=release
 
 julia-sysimg-debug : julia-inference julia-ui-debug
-	@$(MAKE) $(QUIET_MAKE) -C $(BUILDROOT) $(build_private_libdir)/sys-debug.$(SHLIB_EXT) JULIA_BUILD_MODE=debug
+	@$(MAKE) $(QUIET_MAKE) -C $(BUILDROOT) $(build_private_libdir)/sys-debug.ji JULIA_BUILD_MODE=debug
 
 julia-debug julia-release : julia-% : julia-ui-% julia-sysimg-% julia-symlink julia-libccalltest
 
@@ -219,12 +219,12 @@ $(build_private_libdir)/inference.ji: $(CORE_SRCS) | $(build_private_libdir)
 RELBUILDROOT := $(shell $(JULIAHOME)/contrib/relative_path.sh "$(JULIAHOME)/base" "$(BUILDROOT)/base/")
 COMMA:=,
 define sysimg_builder
-$$(build_private_libdir)/sys$1.o: $$(build_private_libdir)/inference.ji $$(JULIAHOME)/VERSION $$(BASE_SRCS)
+$$(build_private_libdir)/sys$1.ji: $$(build_private_libdir)/inference.ji $$(JULIAHOME)/VERSION $$(BASE_SRCS)
 	@$$(call PRINT_JULIA, cd $$(JULIAHOME)/base && \
-	$$(call spawn,$3) $2 -C $$(JULIA_CPU_TARGET) --output-o $$(call cygpath_w,$$@) $$(JULIA_SYSIMG_BUILD_FLAGS) \
+	$$(call spawn,$3) $2 -C $$(JULIA_CPU_TARGET) --output-ji $$(call cygpath_w,$$@) $$(JULIA_SYSIMG_BUILD_FLAGS) \
 		--startup-file=no --sysimage $$(call cygpath_w,$$<) sysimg.jl $$(RELBUILDROOT) \
 		|| { echo '*** This error is usually fixed by running `make clean`. If the error persists$$(COMMA) try `make cleanall`. ***' && false; } )
-.SECONDARY: $(build_private_libdir)/sys$1.o
+.SECONDARY: $(build_private_libdir)/sys$1.ji
 endef
 $(eval $(call sysimg_builder,,-O3,$(JULIA_EXECUTABLE_release)))
 $(eval $(call sysimg_builder,-debug,-O0,$(JULIA_EXECUTABLE_debug)))
