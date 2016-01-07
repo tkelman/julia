@@ -207,3 +207,5 @@ end
 whos(IOBuffer(), Tmp14173) # warm up
 @test @allocated(whos(IOBuffer(), Tmp14173)) < 10000
 
+# check that versioninfo(IOBuffer(), true) works
+versioninfo(IOBuffer(), true)
