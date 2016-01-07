@@ -1,9 +1,11 @@
 environment:
   matrix:
-  - JULIAVERSION: "julianightlies/bin/winnt/x86/0.4/julia-0.4.2-bb73f3489d-win32.exe"
+  - JULIAVERSION: "julialang/bin/winnt/x64/0.4/julia-0.4.1-win64.exe"
     JULIAEXE: "julia"
-  - JULIAVERSION: "julianightlies/bin/winnt/x86/0.4/julia-0.4.2-bb73f3489d-win32.exe"
-    JULIAEXE: "julia-debug"
+  - JULIAVERSION: "julialang/bin/winnt/x64/0.4/julia-0.4.2-win64.exe"
+    JULIAEXE: "julia"
+#  - JULIAVERSION: "julianightlies/bin/winnt/x86/0.4/julia-0.4.2-bb73f3489d-win32.exe"
+#    JULIAEXE: "julia-debug"
 #  - JULIAVERSION: "julianightlies/bin/winnt/x64/0.4/julia-0.4.2-bb73f3489d-win64.exe"
 #    JULIAEXE: "julia"
 #  - JULIAVERSION: "julianightlies/bin/winnt/x64/0.4/julia-0.4.2-bb73f3489d-win64.exe"
@@ -40,6 +42,7 @@ build_script:
 #test_script:
 #  - git config --global user.name "appveyor test"
 #  - git config --global user.email "appveyor@test.com"
+  - C:\projects\julia\bin\%JULIAEXE% -e "using Base.Test; let a = rand(200, 200); f = eigfact(a); @test a ≈ f[:vectors] * Diagonal(f[:values]) / f[:vectors]; end"
   - set OPENBLAS_CORETYPE=Nehalem
   - C:\projects\julia\bin\%JULIAEXE% -e "versioninfo()"
   - C:\projects\julia\bin\%JULIAEXE% -e "@time svd(rand(1000,1000))"
