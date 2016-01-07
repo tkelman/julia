@@ -42,7 +42,7 @@ build_script:
 #test_script:
 #  - git config --global user.name "appveyor test"
 #  - git config --global user.email "appveyor@test.com"
-  - C:\projects\julia\bin\%JULIAEXE% -e "using Base.Test; let a = rand(200, 200); f = eigfact(a); @test a ≈ f[:vectors] * Diagonal(f[:values]) / f[:vectors]; end"
+  - C:\projects\julia\bin\%JULIAEXE% -e "using Base.Test; a = rand(200, 200); f = eigfact(a); @test a ≈ f[:vectors] * Diagonal(f[:values]) / f[:vectors]"
   - set OPENBLAS_CORETYPE=Nehalem
   - C:\projects\julia\bin\%JULIAEXE% -e "versioninfo()"
   - C:\projects\julia\bin\%JULIAEXE% -e "@time svd(rand(1000,1000))"
