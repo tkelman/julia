@@ -42,12 +42,12 @@ build_script:
 #test_script:
 #  - git config --global user.name "appveyor test"
 #  - git config --global user.email "appveyor@test.com"
-  - C:\projects\julia\bin\%JULIAEXE% -e "eigfact(rand(200, 200))"
+  - C:\projects\julia\bin\%JULIAEXE% -e "eigfact(200*(rand(200, 200)-0.5))"
   - set OPENBLAS_CORETYPE=Nehalem
   - C:\projects\julia\bin\%JULIAEXE% -e "versioninfo()"
   - C:\projects\julia\bin\%JULIAEXE% -e "@time svd(rand(1000,1000))"
   - set OPENBLAS_CORETYPE=Haswell
   - C:\projects\julia\bin\%JULIAEXE% -e "versioninfo()"
   - C:\projects\julia\bin\%JULIAEXE% -e "@time svd(rand(1000,1000))"
-  - C:\projects\julia\bin\%JULIAEXE% -e "Base.runtests(\"all\", 2)"
-  - C:\projects\julia\bin\%JULIAEXE% -e "Base.runtests(\"pkg git\", 2)"
+#  - C:\projects\julia\bin\%JULIAEXE% -e "Base.runtests(\"all\", 2)"
+#  - C:\projects\julia\bin\%JULIAEXE% -e "Base.runtests(\"pkg git\", 2)"
