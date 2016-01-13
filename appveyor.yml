@@ -1,13 +1,17 @@
 environment:
   matrix:
-  - JULIAVERSION: "julialang/bin/winnt/x64/0.4/julia-0.4.1-win64.exe"
-    JULIAEXE: "julia"
-  - JULIAVERSION: "julialang/bin/winnt/x64/0.4/julia-0.4.2-win64.exe"
-    JULIAEXE: "julia"
-#  - JULIAVERSION: "julianightlies/bin/winnt/x86/0.4/julia-0.4.2-bb73f3489d-win32.exe"
-#    JULIAEXE: "julia-debug"
-#  - JULIAVERSION: "julianightlies/bin/winnt/x64/0.4/julia-0.4.2-bb73f3489d-win64.exe"
+#  - JULIAVERSION: "julialang/bin/winnt/x64/0.4/julia-0.4.1-win64.exe"
 #    JULIAEXE: "julia"
+#  - JULIAVERSION: "julialang/bin/winnt/x64/0.4/julia-0.4.2-win64.exe"
+#    JULIAEXE: "julia"
+  - JULIAVERSION: "julianightlies/bin/winnt/x86/0.4/julia-0.4.3-a2f713dea5-win32.exe"
+    JULIAEXE: "julia"
+  - JULIAVERSION: "julianightlies/bin/winnt/x86/0.4/julia-0.4.3-a2f713dea5-win32.exe"
+    JULIAEXE: "julia-debug"
+  - JULIAVERSION: "julianightlies/bin/winnt/x64/0.4/julia-0.4.3-a2f713dea5-win64.exe"
+    JULIAEXE: "julia"
+  - JULIAVERSION: "julianightlies/bin/winnt/x64/0.4/julia-0.4.3-a2f713dea5-win64.exe"
+    JULIAEXE: "julia-debug"
 #  - JULIAVERSION: "julianightlies/bin/winnt/x64/0.4/julia-0.4.2-bb73f3489d-win64.exe"
 #    JULIAEXE: "julia-debug"
 
@@ -40,14 +44,14 @@ build_script:
 # Need to convert from shallow to complete for Pkg.clone to work
 #  - IF EXIST .git\shallow (git fetch --unshallow)
 #test_script:
-#  - git config --global user.name "appveyor test"
-#  - git config --global user.email "appveyor@test.com"
-  - C:\projects\julia\bin\%JULIAEXE% -e "eigfact(200*(rand(200, 200)-0.5))"
-  - set OPENBLAS_CORETYPE=Nehalem
+  - git config --global user.name "appveyor test"
+  - git config --global user.email "appveyor@test.com"
+#  - C:\projects\julia\bin\%JULIAEXE% -e "eigfact(200*(rand(200, 200)-0.5))"
+#  - set OPENBLAS_CORETYPE=Nehalem
+#  - C:\projects\julia\bin\%JULIAEXE% -e "versioninfo()"
+#  - C:\projects\julia\bin\%JULIAEXE% -e "@time svd(rand(1000,1000))"
+#  - set OPENBLAS_CORETYPE=Haswell
   - C:\projects\julia\bin\%JULIAEXE% -e "versioninfo()"
-  - C:\projects\julia\bin\%JULIAEXE% -e "@time svd(rand(1000,1000))"
-  - set OPENBLAS_CORETYPE=Haswell
-  - C:\projects\julia\bin\%JULIAEXE% -e "versioninfo()"
-  - C:\projects\julia\bin\%JULIAEXE% -e "@time svd(rand(1000,1000))"
-#  - C:\projects\julia\bin\%JULIAEXE% -e "Base.runtests(\"all\", 2)"
-#  - C:\projects\julia\bin\%JULIAEXE% -e "Base.runtests(\"pkg git\", 2)"
+#  - C:\projects\julia\bin\%JULIAEXE% -e "@time svd(rand(1000,1000))"
+  - C:\projects\julia\bin\%JULIAEXE% -e "Base.runtests(\"all\", 2)"
+  - C:\projects\julia\bin\%JULIAEXE% -e "Base.runtests(\"pkg git\", 2)"
