@@ -355,7 +355,7 @@ function wait_readbyte(x::LibuvStream, c::UInt8)
     nothing
 end
 
-function wait_readnb(x::LibuvStream, nb::Int)
+function wait_readnb(x::LibuvStream, nb::Integer)
     if isopen(x) # fast path
         nb_available(x.buffer) >= nb && return
     else
@@ -1209,7 +1209,7 @@ nb_available(s::BufferStream) = nb_available(s.buffer)
 isreadable(s::BufferStream) = s.buffer.readable
 iswritable(s::BufferStream) = s.buffer.writable
 
-function wait_readnb(s::BufferStream, nb::Int)
+function wait_readnb(s::BufferStream, nb::Integer)
     while isopen(s) && nb_available(s.buffer) < nb
         wait(s.r_c)
     end
