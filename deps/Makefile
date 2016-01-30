@@ -31,7 +31,7 @@ include $(JULIAHOME)/Make.inc
 
 ## Some shared configuration options ##
 
-CONFIGURE_COMMON := --prefix=$(abspath $(build_prefix)) --build=$(BUILD_MACHINE) --libdir=$(abspath $(build_libdir)) $(CUSTOM_LD_LIBRARY_PATH)
+CONFIGURE_COMMON := --prefix=$(abspath $(build_prefix)) --build=$(BUILD_MACHINE) --libdir=$(abspath $(build_libdir)) --bindir=$(abspath $(build_depsbindir)) $(CUSTOM_LD_LIBRARY_PATH)
 ifneq ($(XC_HOST),)
 CONFIGURE_COMMON += --host=$(XC_HOST)
 endif
@@ -71,7 +71,7 @@ endif
 
 # If the top-level Makefile is called with environment variables,
 # they will override the values passed above to ./configure
-MAKE_COMMON := DESTDIR="" prefix=$(build_prefix) bindir=$(build_bindir) libdir=$(build_libdir) libexecdir=$(build_libexecdir) datarootdir=$(build_datarootdir) includedir=$(build_includedir) sysconfdir=$(build_sysconfdir) O=
+MAKE_COMMON := DESTDIR="" prefix=$(build_prefix) libdir=$(build_libdir) libexecdir=$(build_libexecdir) datarootdir=$(build_datarootdir) includedir=$(build_includedir) sysconfdir=$(build_sysconfdir) O=
 
 
 ## Overall configuration of which rules exist and should be run by default ##
@@ -106,7 +106,7 @@ endif
 ifeq ($(OS), Linux)
 ifeq ($(USE_SYSTEM_PATCHELF), 0)
 STAGE1_DEPS += patchelf
-PATCHELF:=$(build_bindir)/patchelf
+PATCHELF:=$(build_depsbindir)/patchelf
 else
 PATCHELF:=patchelf
 endif
@@ -211,7 +211,7 @@ getall: get-llvm get-libuv get-pcre get-openlibm get-openspecfun get-dsfmt get-R
 
 ## PATHS ##
 # sort is used to remove potential duplicates
-DIRS := $(sort $(build_bindir) $(build_libdir) $(build_includedir) $(build_sysconfdir) $(build_datarootdir) $(build_staging))
+DIRS := $(sort $(build_bindir) $(build_depsbindir) $(build_libdir) $(build_includedir) $(build_sysconfdir) $(build_datarootdir) $(build_staging))
 
 $(foreach dir,$(DIRS),$(eval $(call dir_target,$(dir))))
 
@@ -404,7 +404,7 @@ LLVM_FLAGS += --disable-profiling --enable-static $(LLVM_TARGET_FLAGS)
 LLVM_FLAGS += --disable-bindings --disable-docs --disable-libedit --disable-terminfo
 # LLVM has weird install prefixes (see llvm-$(LLVM_VER)/build_$(LLVM_BUILDTYPE)/Makefile.config for the full list)
 # We map them here to the "normal" ones, which means just prefixing "PROJ_" to the variable name.
-LLVM_MFLAGS := PROJ_libdir=$(build_libdir) PROJ_bindir=$(build_bindir) PROJ_includedir=$(build_includedir)
+LLVM_MFLAGS := PROJ_libdir=$(build_libdir) PROJ_bindir=$(build_depsbindir) PROJ_includedir=$(build_includedir)
 ifeq ($(LLVM_ASSERTIONS), 1)
 LLVM_FLAGS += --enable-assertions
 LLVM_CMAKE += -DLLVM_ENABLE_ASSERTIONS:BOOL=ON
@@ -793,7 +793,7 @@ reinstall-llvm:
 
 clean-llvm:
 	-$(MAKE) -C $(LLVM_BUILDDIR_withtype) clean
-	-rm -f $(build_bindir)/llvm-config
+	-rm -f $(build_depsbindir)/llvm-config
 distclean-llvm:
 	-rm -rf $(LLVM_TAR) $(LLVM_CLANG_TAR) \
 		$(LLVM_COMPILER_RT_TAR) $(LLVM_LIBCXX_TAR) $(LLVM_LLDB_TAR) \
@@ -1087,7 +1087,7 @@ install-Rmath-julia: $(RMATH_JULIA_OBJ_TARGET)
 ## objconv ##
 
 OBJCONV_SOURCE := $(BUILDDIR)/objconv/objconv
-OBJCONV_TARGET := $(build_bindir)/objconv
+OBJCONV_TARGET := $(build_depsbindir)/objconv
 
 $(SRCDIR)/srccache/objconv.zip: | $(SRCDIR)/srccache
 	$(JLDOWNLOAD) $@ http://www.agner.org/optimize/objconv.zip
@@ -1098,7 +1098,7 @@ $(BUILDDIR)/objconv/config.status: $(SRCDIR)/srccache/objconv.zip
 	echo 1 > $@
 $(OBJCONV_SOURCE): $(BUILDDIR)/objconv/config.status
 	cd $(dir $<) && $(CXX) -o objconv -O2 *.cpp
-$(OBJCONV_TARGET): $(OBJCONV_SOURCE) | $(build_bindir)
+$(OBJCONV_TARGET): $(OBJCONV_SOURCE) | $(build_depsbindir)
 	cp -f $< $@
 
 clean-objconv:
@@ -1958,7 +1958,7 @@ install-mpfr: $(MPFR_OBJ_TARGET)
 ## patchelf ##
 
 PATCHELF_SOURCE := $(BUILDDIR)/patchelf-$(PATCHELF_VER)/src/patchelf
-PATCHELF_TARGET := $(build_bindir)/patchelf
+PATCHELF_TARGET := $(build_depsbindir)/patchelf
 
 $(SRCDIR)/srccache/patchelf-$(PATCHELF_VER).tar.gz: | $(SRCDIR)/srccache
 	$(JLDOWNLOAD) $@ http://nixos.org/releases/patchelf/patchelf-$(PATCHELF_VER)/patchelf-$(PATCHELF_VER).tar.gz
