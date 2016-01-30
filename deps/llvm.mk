@@ -78,7 +78,7 @@ LLVM_FLAGS += --disable-profiling --enable-static $(LLVM_TARGET_FLAGS)
 LLVM_FLAGS += --disable-bindings --disable-docs --disable-libedit --disable-terminfo
 # LLVM has weird install prefixes (see llvm-$(LLVM_VER)/build_$(LLVM_BUILDTYPE)/Makefile.config for the full list)
 # We map them here to the "normal" ones, which means just prefixing "PROJ_" to the variable name.
-LLVM_MFLAGS := PROJ_libdir=$(build_libdir) PROJ_bindir=$(build_bindir) PROJ_includedir=$(build_includedir)
+LLVM_MFLAGS := PROJ_libdir=$(build_libdir) PROJ_bindir=$(build_depsbindir) PROJ_includedir=$(build_includedir)
 ifeq ($(LLVM_ASSERTIONS), 1)
 LLVM_FLAGS += --enable-assertions
 LLVM_CMAKE += -DLLVM_ENABLE_ASSERTIONS:BOOL=ON
@@ -491,7 +491,7 @@ reinstall-llvm:
 
 clean-llvm:
 	-$(MAKE) -C $(LLVM_BUILDDIR_withtype) clean
-	-rm -f $(build_bindir)/llvm-config
+	-rm -f $(build_depsbindir)/llvm-config
 distclean-llvm:
 	-rm -rf $(LLVM_TAR) $(LLVM_CLANG_TAR) \
 		$(LLVM_COMPILER_RT_TAR) $(LLVM_LIBCXX_TAR) $(LLVM_LLDB_TAR) \
