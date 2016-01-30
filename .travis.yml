@@ -52,6 +52,7 @@ before_install:
     - make check-whitespace
     - if [ `uname` = "Linux" ]; then
         contrib/travis_fastfail.sh || exit 1;
+        rm -f deps/build/patchelf-*/config.status;
         mkdir -p $HOME/bin;
         ln -s /usr/bin/gcc-5 $HOME/bin/gcc;
         ln -s /usr/bin/g++-5 $HOME/bin/g++;
