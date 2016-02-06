@@ -1250,6 +1250,15 @@ scale!(a::Complex, x::AbstractSparseVector) = scale!(nonzeros(x), a)
 .*(a::Number, x::AbstractSparseVector) = SparseVector(length(x), copy(nonzeroinds(x)), a * nonzeros(x))
 ./(x::AbstractSparseVector, a::Number) = SparseVector(length(x), copy(nonzeroinds(x)), nonzeros(x) / a)
 
+function /(x::AbstractSparseVector, a::Number)
+    if a == 0 || isnan(a)
+        throw(ArgumentError("Cannot divide sparse vector by provided argument"))
+    end
+    SparseVector(length(x), copy(x.nzind), x.nzval/a)
+end
+
+./(x::AbstractSparseVector, a::Number) = /(x,a)
+
 
 # dot
 
