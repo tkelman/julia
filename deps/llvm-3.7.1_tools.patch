@@ -1,0 +1,58 @@
+diff --git a/cmake/modules/AddLLVM.cmake b/cmake/modules/AddLLVM.cmake
+index 45f6746..dc1f37b 100644
+--- a/cmake/modules/AddLLVM.cmake
++++ b/cmake/modules/AddLLVM.cmake
+@@ -613,13 +613,16 @@ macro(add_llvm_tool name)
+     set(EXCLUDE_FROM_ALL ON)
+   endif()
+   add_llvm_executable(${name} ${ARGN})
++  if( NOT DEFINED LLVM_TOOLS_INSTALL_DIR )
++    set(LLVM_TOOLS_INSTALL_DIR bin)
++  endif()
+ 
+   list(FIND LLVM_TOOLCHAIN_TOOLS ${name} LLVM_IS_${name}_TOOLCHAIN_TOOL)
+   if (LLVM_IS_${name}_TOOLCHAIN_TOOL GREATER -1 OR NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
+     if( LLVM_BUILD_TOOLS )
+       install(TARGETS ${name}
+               EXPORT LLVMExports
+-              RUNTIME DESTINATION bin
++              RUNTIME DESTINATION ${LLVM_TOOLS_INSTALL_DIR}
+               COMPONENT ${name})
+ 
+       if (NOT CMAKE_CONFIGURATION_TYPES)
+diff --git a/cmake/modules/TableGen.cmake b/cmake/modules/TableGen.cmake
+index 85d720e..f37f174 100644
+--- a/cmake/modules/TableGen.cmake
++++ b/cmake/modules/TableGen.cmake
+@@ -116,10 +116,13 @@ macro(add_tablegen target project)
+       set_target_properties(${target} PROPERTIES LINK_FLAGS -Wl,--stack,16777216)
+     endif(CMAKE_SIZEOF_VOID_P MATCHES "8")
+   endif( MINGW )
++  if( NOT DEFINED LLVM_TOOLS_INSTALL_DIR )
++    set(LLVM_TOOLS_INSTALL_DIR bin)
++  endif()
+   if (${project} STREQUAL LLVM AND NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
+     install(TARGETS ${target}
+             EXPORT LLVMExports
+-            RUNTIME DESTINATION bin)
++            RUNTIME DESTINATION ${LLVM_TOOLS_INSTALL_DIR})
+   endif()
+   set_property(GLOBAL APPEND PROPERTY LLVM_EXPORTS ${target})
+ endmacro()
+diff --git a/tools/llvm-ar/install_symlink.cmake b/tools/llvm-ar/install_symlink.cmake
+index d48431b..8d29e0b 100644
+--- a/tools/llvm-ar/install_symlink.cmake
++++ b/tools/llvm-ar/install_symlink.cmake
+@@ -16,7 +16,11 @@ else()
+   set(EXECUTABLE_SUFFIX "")
+ endif()
+ 
+-set(bindir "${DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/")
++if( NOT DEFINED LLVM_TOOLS_INSTALL_DIR )
++  set(bindir "${DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/")
++else()
++  set(bindir "${DESTDIR}${LLVM_TOOLS_INSTALL_DIR}")
++endif()
+ 
+ message("Creating llvm-ranlib")
+ 
