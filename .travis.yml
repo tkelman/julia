@@ -37,10 +37,6 @@ cache:
   directories:
     - $TRAVIS_BUILD_DIR/deps/srccache
     - $TRAVIS_BUILD_DIR/deps/build
-branches:
-  only:
-    - master
-    - /release-.*/
 notifications:
     email: false
     irc:
