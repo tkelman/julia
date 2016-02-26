@@ -61,7 +61,7 @@ before_install:
         ln -s /usr/bin/gfortran-5 $HOME/bin/gfortran;
         gcc --version;
         BUILDOPTS="-j3 VERBOSE=1 FORCE_ASSERTIONS=1";
-        export OPENSSL_ROOT_DIR="/usr/lib/`uname -m`-linux-gnu";
+        BUILDOPTS="$BUILDOPTS OPENSSL_ROOT_DIR=/usr/lib/`uname -m`-linux-gnu";
         TESTSTORUN="all";
       elif [ `uname` = "Darwin" ]; then
         brew update;
