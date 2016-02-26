@@ -18,21 +18,20 @@ matrix:
             - make:i386
             - cpp-5:i386
             - libssl-dev:i386
-            - gfortran-5:i386
-    - os: linux
-      env: ARCH="x86_64"
-      compiler: "g++-5 -m64"
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - bar
-            - time
-            - g++-5
-            - gfortran-5
-    - os: osx
-      env: ARCH="x86_64"
+#    - os: linux
+#      env: ARCH="x86_64"
+#      compiler: "g++-5 -m64"
+#      addons:
+#        apt:
+#          sources:
+#            - ubuntu-toolchain-r-test
+#          packages:
+#            - bar
+#            - time
+#            - g++-5
+#            - gfortran-5
+#    - os: osx
+#      env: ARCH="x86_64"
 cache:
   directories:
     - $TRAVIS_BUILD_DIR/deps/srccache
