@@ -19,6 +19,7 @@ matrix:
             - g++-5-multilib
             - make:i386
             - libssl-dev:i386
+            - pkg-config:i386
             - gfortran-5
             - gfortran-5-multilib
 #    - os: linux
