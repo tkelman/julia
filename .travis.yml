@@ -13,6 +13,7 @@ matrix:
             - bar
             - time
             - binutils:i386
+            - gcc-5
             - g++-5
             - gcc-5-multilib
             - g++-5-multilib
