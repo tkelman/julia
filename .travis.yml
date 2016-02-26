@@ -13,11 +13,27 @@ matrix:
             - bar
             - time
             - binutils:i386
-            - gcc-5:i386
-            - g++-5:i386
+            - gcc-5-multilib:i386
+            - g++-5-multilib:i386
             - make:i386
             - cpp-5:i386
             - libssl-dev:i386
+            - gfortran-5-multilib:i386
+            - lib64gfortran-5-dev:i386
+            - lib64stdc++-5-dev:i386
+            - libc6-dev-amd64:i386
+            - lib64gcc-5-dev:i386
+            - lib64gcc1:i386
+            - lib64gomp1:i386
+            - lib64itm1:i386
+            - lib64atomic1:i386
+            - lib64asan2:i386
+            - lib64ubsan0:i386
+            - lib64cilkrts5:i386
+            - lib64quadmath0:i386
+            - lib64gfortran3:i386
+            - lib64stdc++6:i386
+            - libc6-amd64:i386
 #    - os: linux
 #      env: ARCH="x86_64"
 #      compiler: "g++-5 -m64"
