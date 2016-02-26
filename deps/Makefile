@@ -16,8 +16,8 @@ include $(JULIAHOME)/Make.inc
 # additionally all targets should be listed in the getall target for easier off-line compilation
 # if you are adding a new target, it can help to copy an similar, existing target
 #
-# autoconf configure-driven scripts: llvm pcre arpack fftw unwind gmp mpfr patchelf libuv git
-# custom Makefile rules: openlibm Rmath-julia dsfmt suitesparse-wrapper suitesparse lapack openblas utf8proc objconv osxunwind
+# autoconf configure-driven scripts: llvm pcre fftw unwind gmp mpfr patchelf libuv git
+# custom Makefile rules: openlibm Rmath-julia dsfmt suitesparse-wrapper suitesparse lapack openblas utf8proc objconv osxunwind arpack
 # entirely custom: virtualenv
 # CMake libs: libgit2
 #
@@ -1393,35 +1393,26 @@ ARPACK_FFLAGS += $(foreach fcn, $(ARPACK_OPENBLASFCNS1) $(ARPACK_OPENBLASFCNS2),
 ARPACK_FFLAGS += $(foreach fcn, $(ARPACK_OPENBLASFCNS1) $(ARPACK_OPENBLASFCNS3), -Dc$(fcn)=c$(fcn)_64 -Dz$(fcn)=z$(fcn)_64)
 ARPACK_FFLAGS += $(foreach fcn, $(ARPACK_OPENBLASFCNS4), -DS$(fcn)=S$(fcn)_64 -DD$(fcn)=D$(fcn)_64)
 ARPACK_FFLAGS += -Dscnrm2=scnrm2_64 -Ddznrm2=dznrm2_64 -Dcsscal=csscal_64 -Dzdscal=zdscal_64
-# CFLAGS are for the configure checks
-ARPACK_CFLAGS += -Dsgemm_=sgemm_64_ -Dcheev_=cheev_64_
 endif
 endif
 endif
 endif
 
-ifeq ($(OS),WINNT)
-ARPACK_OBJ_SOURCE := $(BUILDDIR)/arpack-ng-$(ARPACK_VER)/.libs/libarpack-2.$(SHLIB_EXT)
-else
-ARPACK_OBJ_SOURCE := $(BUILDDIR)/arpack-ng-$(ARPACK_VER)/.libs/libarpack.$(SHLIB_EXT)
-endif
+ARPACK_OBJ_SOURCE := $(BUILDDIR)/arpack-ng-$(ARPACK_VER)/libarpack.$(SHLIB_EXT)
 ARPACK_OBJ_TARGET := $(build_shlibdir)/libarpack.$(SHLIB_EXT)
 
-ARPACK_MFLAGS := F77="$(FC)" MPIF77="$(FC)"
 ARPACK_FFLAGS += $(FFLAGS) $(JFFLAGS)
-ARPACK_FLAGS := --with-blas="$(LIBBLAS)" --with-lapack="$(LIBLAPACK)" --disable-mpi --enable-shared FFLAGS="$(ARPACK_FFLAGS)" CFLAGS="$(CFLAGS) $(ARPACK_CFLAGS)"
 ifneq ($(OS),WINNT)
-ARPACK_FLAGS += LDFLAGS="$(LDFLAGS) -Wl,-rpath,'$(build_libdir)'"
+ARPACK_FFLAGS += $(LDFLAGS) -Wl,-rpath,'$(build_libdir)'
 endif
 
-# ARPACK-NG upstream keeps changing their download filenames
 $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER).tar.gz: | $(SRCDIR)/srccache
 	$(JLDOWNLOAD) $@ https://github.com/opencollab/arpack-ng/archive/$(ARPACK_VER).tar.gz
 	touch -c $@
 $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)-testA.mtx: | $(SRCDIR)/srccache
 	$(JLDOWNLOAD) $@ https://raw.githubusercontent.com/opencollab/arpack-ng/$(ARPACK_VER)/TESTS/testA.mtx
 	touch -c $@
-$(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/configure: $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER).tar.gz
+$(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/configure.ac: $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER).tar.gz
 	$(JLCHECKSUM) $<
 	cd $(dir $<) && $(TAR) zxf $<
 	touch -c $@
@@ -1436,32 +1427,30 @@ else ifeq ($(USE_SYSTEM_LAPACK), 0)
 $(BUILDDIR)/arpack-ng-$(ARPACK_VER)/config.status: | $(LAPACK_OBJ_TARGET)
 endif
 
-$(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/arpack-tests-blasint.patch-applied: $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/configure
+$(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/arpack-tests-blasint.patch-applied: $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/configure.ac
 	cd $(dir $@) && patch -p1 < $(SRCDIR)/arpack-tests-blasint.patch
 	echo 1 > $@
-$(BUILDDIR)/arpack-ng-$(ARPACK_VER)/config.status: $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/configure $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/arpack-tests-blasint.patch-applied
+$(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/arpack-rename-second.patch-applied: $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/configure.ac
+	cd $(dir $@) && patch -p1 < $(SRCDIR)/arpack-rename-second.patch
+	echo 1 > $@
+$(BUILDDIR)/arpack-ng-$(ARPACK_VER)/config.status: $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/configure.ac $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/arpack-tests-blasint.patch-applied $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/arpack-rename-second.patch-applied
 	mkdir -p $(dir $@)
-	cd $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER) && \
-	./bootstrap && \
-	cd ../../$(dir $@) && \
-	$< $(CONFIGURE_COMMON) $(ARPACK_FLAGS)
 	touch -c $@
 $(ARPACK_OBJ_SOURCE): $(BUILDDIR)/arpack-ng-$(ARPACK_VER)/config.status
-	$(MAKE) -C $(dir $<) $(ARPACK_MFLAGS)
+	$(FC) -shared $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/SRC/*.f \
+		$(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)/UTIL/*.f \
+		$(ARPACK_FFLAGS) $(LIBBLAS) $(LIBLAPACK) -o $@
 	touch -c $@
 $(BUILDDIR)/arpack-ng-$(ARPACK_VER)/checked: $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)-testA.mtx $(ARPACK_OBJ_SOURCE)
 	$(JLCHECKSUM) $<
 	cp $< $(dir $@)/TESTS/testA.mtx
-ifeq ($(OS),$(BUILD_OS))
-	$(MAKE) -C $(dir $@) check $(ARPACK_MFLAGS)
-endif
+#ifeq ($(OS),$(BUILD_OS))
+#	$(MAKE) -C $(dir $@) check $(ARPACK_MFLAGS)
+#endif
 	echo 1 > $@
 $(ARPACK_OBJ_TARGET): $(ARPACK_OBJ_SOURCE) | $(build_shlibdir)
-	$(call make-install,arpack-ng-$(ARPACK_VER),$(ARPACK_MFLAGS))
-ifeq ($(OS), WINNT)
-	mv $(build_shlibdir)/libarpack-2.dll $@
-endif
-	$(INSTALL_NAME_CMD)libarpack.$(SHLIB_EXT) $(build_shlibdir)/libarpack.$(SHLIB_EXT)
+	cp $< $@
+	$(INSTALL_NAME_CMD)libarpack.$(SHLIB_EXT) $@
 ifeq ($(OS), Linux)
 	for filename in $(build_shlibdir)/libarpack.so* ; do \
 		[ -L $$filename ] || $(PATCHELF_BIN) --set-rpath '$$ORIGIN' $$filename ;\
@@ -1473,12 +1462,11 @@ $(ARPACK_OBJ_TARGET): $(PATCHELF)
 endif
 
 clean-arpack:
-	-$(MAKE) -C $(BUILDDIR)/arpack-ng-$(ARPACK_VER) clean
 	-rm -f $(ARPACK_OBJ_SOURCE) $(ARPACK_OBJ_TARGET)
 distclean-arpack:
 	-rm -rf $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER).tar.gz \
 		$(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER) \
-		$(SRCDIR)/srccache/arpack-ng-3.2.0-testA.mtx \
+		$(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)-testA.mtx \
 		$(BUILDDIR)/arpack-ng-$(ARPACK_VER)
 
 get-arpack: $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER).tar.gz $(SRCDIR)/srccache/arpack-ng-$(ARPACK_VER)-testA.mtx

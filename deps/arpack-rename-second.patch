@@ -1,0 +1,8 @@
+--- arpack-ng-3.3.0-ORIG/UTIL/second.f	2016-02-26 03:19:35.685778900 -0800
++++ arpack-ng-3.3.0/UTIL/second.f	2016-02-26 03:18:28.849213400 -0800
+@@ -1,4 +1,4 @@
+-      SUBROUTINE ARSCND( T )
++      SUBROUTINE ARSCND_ORIG( T )
+ *
+       REAL       T
+ *
