@@ -109,18 +109,16 @@ rm -f usr/bin/libjulia-debug.dll
 
 if [ -z "$USEMSVC" ]; then
   if [ -z "`which ${CROSS_COMPILE}gcc 2>/dev/null`" -o -n "$APPVEYOR" ]; then
-    f=$ARCH-4.9.2-release-win32-$exc-rt_v4-rev3.7z
+    f=$ARCH-5.3.0-opensuse-win32-$exc-r02.7z
     checksum_download \
         "$f" "https://bintray.com/artifact/download/tkelman/generic/$f"
     echo "Extracting $f"
     $SEVENZIP x -y $f >> get-deps.log
-    export PATH=$PWD/mingw$bits/bin:$PATH
-    # If there is a version of make.exe here, it is mingw32-make which won't work
-    rm -f mingw$bits/bin/make.exe
+    export PATH=$PWD/usr/$ARCH-w64-mingw32/sys-root/mingw/bin:$PATH
   fi
   export AR=${CROSS_COMPILE}ar
 
-  f=llvm-3.7.1-$ARCH-w64-mingw32-juliadeps-r04.7z
+  f=llvm-3.7.1-$ARCH-w64-mingw32-juliadeps-r07.7z
 else
   echo "override USEMSVC = 1" >> Make.user
   echo "override ARCH = $ARCH" >> Make.user
@@ -140,8 +138,8 @@ checksum_download \
     "$f" "https://bintray.com/artifact/download/tkelman/generic/$f"
 echo "Extracting $f"
 $SEVENZIP x -y $f >> get-deps.log
-echo 'override LLVM_CONFIG := $(JULIAHOME)/usr/tools/llvm-config.exe' >> Make.user
-echo 'override LLVM_SIZE := $(JULIAHOME)/usr/tools/llvm-size.exe' >> Make.user
+echo 'override LLVM_CONFIG := $(JULIAHOME)/usr/bin/llvm-config.exe' >> Make.user
+echo 'override LLVM_SIZE := $(JULIAHOME)/usr/bin/llvm-size.exe' >> Make.user
 
 if [ -z "`which make 2>/dev/null`" ]; then
   if [ -n "`uname | grep CYGWIN`" ]; then
