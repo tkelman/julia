@@ -43,6 +43,7 @@ branches:
   only:
     - master
     - /release-.*/
+    - jn/grabbag3
 notifications:
     email: false
     irc:
