@@ -5,7 +5,7 @@
 # Assumes that row values in rowval for each column are sorted
 #      issorted(rowval[colptr[i]:(colptr[i+1]-1)]) == true
 
-type SparseMatrixCSC{Tv,Ti<:Integer} <: AbstractSparseMatrix{Tv,Ti}
+immutable SparseMatrixCSC{Tv,Ti<:Integer} <: AbstractSparseMatrix{Tv,Ti}
     m::Int                  # Number of rows
     n::Int                  # Number of columns
     colptr::Vector{Ti}      # Column i is in colptr[i]:(colptr[i+1]-1)
@@ -2282,6 +2282,22 @@ setindex!(A::SparseMatrixCSC, x, i::Union{Integer, AbstractVector}, ::Colon) = s
 setindex!{Tv,T<:Integer}(A::SparseMatrixCSC{Tv}, x::Number, I::AbstractVector{T}, J::AbstractVector{T}) =
     (0 == x) ? spdelete!(A, I, J) : spset!(A, convert(Tv,x), I, J)
 
+function _copy_and_resize!(a::AbstractVector, b::AbstractVector)
+    if pointer(a) == pointer(b)
+        return
+    else
+        resize!(a, length(b))
+        copy!(a, b)
+    end
+    return
+end
+
+function update_fields!(A::SparseMatrixCSC, colptr, rowval, nzval)
+    _copy_and_resize!(A.colptr, colptr)
+    _copy_and_resize!(A.rowval, rowval)
+    _copy_and_resize!(A.nzval, nzval)
+end
+
 function spset!{Tv,Ti<:Integer}(A::SparseMatrixCSC{Tv}, x::Tv, I::AbstractVector{Ti}, J::AbstractVector{Ti})
     !issorted(I) && (@inbounds I = I[sortperm(I)])
     !issorted(J) && (@inbounds J = J[sortperm(J)])
@@ -2383,9 +2399,7 @@ function spset!{Tv,Ti<:Integer}(A::SparseMatrixCSC{Tv}, x::Tv, I::AbstractVector
         deleteat!(rowvalA, rowidx:nnzA)
         deleteat!(nzvalA, rowidx:nnzA)
 
-        A.colptr = colptrA
-        A.rowval = rowvalA
-        A.nzval = nzvalA
+        update_fields!(A, colptrA, rowvalA, nzvalA)
     end
     return A
 end
@@ -2440,9 +2454,7 @@ function spdelete!{Tv,Ti<:Integer}(A::SparseMatrixCSC{Tv}, I::AbstractVector{Ti}
         deleteat!(rowvalA, rowidx:nnzA)
         deleteat!(nzvalA, rowidx:nnzA)
 
-        A.colptr = colptrA
-        A.rowval = rowvalA
-        A.nzval = nzvalA
+        update_fields!(A, colptrA, rowvalA, nzvalA)
     end
     return A
 end
@@ -2568,9 +2580,7 @@ function setindex!{Tv,Ti,T<:Integer}(A::SparseMatrixCSC{Tv,Ti}, B::SparseMatrixC
     deleteat!(rowvalS, colptrS[end]:length(rowvalS))
     deleteat!(nzvalS, colptrS[end]:length(nzvalS))
 
-    A.colptr = colptrS
-    A.rowval = rowvalS
-    A.nzval = nzvalS
+    update_fields!(A, colptr, rowval, nzval)
     return A
 end
 
@@ -2682,7 +2692,7 @@ function setindex!{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, x, I::AbstractMatrix{Bool})
             deleteat!(nzvalB, bidx:n)
             deleteat!(rowvalB, bidx:n)
         end
-        A.nzval = nzvalB; A.rowval = rowvalB; A.colptr = colptrB
+        update_fields!(A, colptrB, rowvalB, nzvalB)
     end
     A
 end
@@ -2788,7 +2798,7 @@ function setindex!{Tv,Ti,T<:Real}(A::SparseMatrixCSC{Tv,Ti}, x, I::AbstractVecto
             deleteat!(nzvalB, bidx:n)
             deleteat!(rowvalB, bidx:n)
         end
-        A.nzval = nzvalB; A.rowval = rowvalB; A.colptr = colptrB
+        update_fields!(A, colptrB, rowvalB, nzvalB)
     end
     A
 end
