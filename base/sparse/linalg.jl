@@ -61,8 +61,6 @@ for (f, op, transp) in ((:A_mul_B, :identity, false),
                 A.m == size(C, 1) || throw(DimensionMismatch())
             end
             size(B, 2) == size(C, 2) || throw(DimensionMismatch())
-            nzv = A.nzval
-            rv = A.rowval
             if β != 1
                 β != 0 ? scale!(C, β) : fill!(C, zero(eltype(C)))
             end
@@ -70,14 +68,14 @@ for (f, op, transp) in ((:A_mul_B, :identity, false),
                 for k = 1:size(C, 2)
                     if $transp
                         tmp = zero(eltype(C))
-                        @inbounds for j = A.colptr[col]:(A.colptr[col + 1] - 1)
-                            tmp += $(op)(nzv[j])*B[rv[j],k]
+                        @inbounds for j = nzrange(A, col)
+                            tmp += $(op)(A.nzval[j])*B[A.rowval[j],k]
                         end
                         C[col,k] += α*tmp
                     else
                         αxj = α*B[col,k]
-                        @inbounds for j = A.colptr[col]:(A.colptr[col + 1] - 1)
-                            C[rv[j], k] += nzv[j]*αxj
+                        @inbounds for j = nzrange(A, col)
+                            C[A.rowval[j], k] += A.nzval[j]*αxj
                         end
                     end
                 end
@@ -107,10 +105,8 @@ function (*){TX,TvA,TiA}(X::StridedMatrix{TX}, A::SparseMatrixCSC{TvA,TiA})
     mX, nX = size(X)
     nX == A.m || throw(DimensionMismatch())
     Y = zeros(promote_type(TX,TvA), mX, A.n)
-    rowval = A.rowval
-    nzval = A.nzval
     @inbounds for multivec_row=1:mX, col = 1:A.n, k=A.colptr[col]:(A.colptr[col+1]-1)
-        Y[multivec_row, col] += X[multivec_row, rowval[k]] * nzval[k]
+        Y[multivec_row, col] += X[multivec_row, A.rowval[k]] * A.nzval[k]
     end
     Y
 end
@@ -147,13 +143,9 @@ function spmatmul{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, B::SparseMatrixCSC{Tv,Ti};
     mB, nB = size(B)
     nA==mB || throw(DimensionMismatch())
 
-    colptrA = A.colptr; rowvalA = A.rowval; nzvalA = A.nzval
-    colptrB = B.colptr; rowvalB = B.rowval; nzvalB = B.nzval
     # TODO: Need better estimation of result space
-    nnzC = min(mA*nB, length(nzvalA) + length(nzvalB))
-    colptrC = Array(Ti, nB+1)
-    rowvalC = Array(Ti, nnzC)
-    nzvalC = Array(Tv, nnzC)
+    nnzC = min(mA*nB, length(A.nzval) + length(B.nzval))
+    C = SparseMatrixCSC(mA, nB, Array(Ti, nB+1), Array(Ti, nnzC), Array(Tv, nnzC))
 
     @inbounds begin
         ip = 1
@@ -161,19 +153,19 @@ function spmatmul{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, B::SparseMatrixCSC{Tv,Ti};
         x  = zeros(Tv, mA)
         for i in 1:nB
             if ip + mA - 1 > nnzC
-                resize!(rowvalC, nnzC + max(nnzC,mA))
-                resize!(nzvalC, nnzC + max(nnzC,mA))
-                nnzC = length(nzvalC)
+                resize!(C.rowval, nnzC + max(nnzC,mA))
+                resize!(C.nzval, nnzC + max(nnzC,mA))
+                nnzC = length(C.nzval)
             end
-            colptrC[i] = ip
-            for jp in colptrB[i]:(colptrB[i+1] - 1)
-                nzB = nzvalB[jp]
-                j = rowvalB[jp]
-                for kp in colptrA[j]:(colptrA[j+1] - 1)
-                    nzC = nzvalA[kp] * nzB
-                    k = rowvalA[kp]
+            C.colptr[i] = ip
+            for jp in nzrange(B, i)
+                nzB = B.nzval[jp]
+                j = B.rowval[jp]
+                for kp in nzrange(A, j)
+                    nzC = A.nzval[kp] * nzB
+                    k = A.rowval[kp]
                     if xb[k] != i
-                        rowvalC[ip] = k
+                        C.rowval[ip] = k
                         ip += 1
                         xb[k] = i
                         x[k] = nzC
@@ -182,20 +174,18 @@ function spmatmul{Tv,Ti}(A::SparseMatrixCSC{Tv,Ti}, B::SparseMatrixCSC{Tv,Ti};
                     end
                 end
             end
-            for vp in colptrC[i]:(ip - 1)
-                nzvalC[vp] = x[rowvalC[vp]]
+            for vp in C.colptr[i]:(ip - 1)
+                C.nzval[vp] = x[C.rowval[vp]]
             end
         end
-        colptrC[nB+1] = ip
+        C.colptr[nB+1] = ip
     end
 
-    deleteat!(rowvalC, colptrC[end]:length(rowvalC))
-    deleteat!(nzvalC, colptrC[end]:length(nzvalC))
+    deleteat!(C.rowval, C.colptr[end]:length(C.rowval))
+    deleteat!(C.nzval, C.colptr[end]:length(C.nzval))
 
     # The Gustavson algorithm does not guarantee the product to have sorted row indices.
-    Cunsorted = SparseMatrixCSC(mA, nB, colptrC, rowvalC, nzvalC)
-    C = SparseArrays.sortSparseMatrixCSC!(Cunsorted, sortindices=sortindices)
-    return C
+    return SparseArrays.sortSparseMatrixCSC!(C, sortindices=sortindices)
 end
 
 ## solvers
@@ -207,27 +197,23 @@ function fwdTriSolve!(A::SparseMatrixCSC, B::AbstractVecOrMat)
         throw(DimensionMismatch("A is $(ncol) columns and B has $(nrowB) rows"))
     end
 
-    aa = A.nzval
-    ja = A.rowval
-    ia = A.colptr
-
     joff = 0
     for k = 1:ncolB
         for j = 1:nrowB
-            i1 = ia[j]
-            i2 = ia[j + 1] - 1
+            i1 = A.colptr[j]
+            i2 = A.colptr[j + 1] - 1
 
             # loop through the structural zeros
             ii = i1
-            jai = ja[ii]
+            jai = A.rowval[ii]
             while ii <= i2 && jai < j
                 ii += 1
-                jai = ja[ii]
+                jai = A.rowval[ii]
             end
 
             # check for zero pivot and divide with pivot
             if jai == j
-                bj = B[joff + jai]/aa[ii]
+                bj = B[joff + jai]/A.nzval[ii]
                 B[joff + jai] = bj
                 ii += 1
             else
@@ -236,7 +222,7 @@ function fwdTriSolve!(A::SparseMatrixCSC, B::AbstractVecOrMat)
 
             # update remaining part
             for i = ii:i2
-                B[joff + ja[i]] -= bj*aa[i]
+                B[joff + A.rowval[i]] -= bj*A.nzval[i]
             end
         end
         joff += nrowB
@@ -252,27 +238,23 @@ function bwdTriSolve!(A::SparseMatrixCSC, B::AbstractVecOrMat)
         throw(DimensionMismatch("A is $(ncol) columns and B has $(nrowB) rows"))
     end
 
-    aa = A.nzval
-    ja = A.rowval
-    ia = A.colptr
-
     joff = 0
     for k = 1:ncolB
         for j = nrowB:-1:1
-            i1 = ia[j]
-            i2 = ia[j + 1] - 1
+            i1 = A.colptr[j]
+            i2 = A.colptr[j + 1] - 1
 
             # loop through the structural zeros
             ii = i2
-            jai = ja[ii]
+            jai = A.rowval[ii]
             while ii >= i1 && jai > j
                 ii -= 1
-                jai = ja[ii]
+                jai = A.rowval[ii]
             end
 
             # check for zero pivot and divide with pivot
             if jai == j
-                bj = B[joff + jai]/aa[ii]
+                bj = B[joff + jai]/A.nzval[ii]
                 B[joff + jai] = bj
                 ii -= 1
             else
@@ -281,7 +263,7 @@ function bwdTriSolve!(A::SparseMatrixCSC, B::AbstractVecOrMat)
 
             # update remaining part
             for i = ii:-1:i1
-                B[joff + ja[i]] -= bj*aa[i]
+                B[joff + A.rowval[i]] -= bj*A.nzval[i]
             end
         end
         joff += nrowB
@@ -308,7 +290,7 @@ function triu{Tv,Ti}(S::SparseMatrixCSC{Tv,Ti}, k::Integer=0)
         colptr[col] = 1
     end
     for col = max(k+1,1) : n
-        for c1 = S.colptr[col] : S.colptr[col+1]-1
+        for c1 = nzrange(S, col)
             S.rowval[c1] > col - k && break
             nnz += 1
         end
@@ -319,7 +301,7 @@ function triu{Tv,Ti}(S::SparseMatrixCSC{Tv,Ti}, k::Integer=0)
     A = SparseMatrixCSC(m, n, colptr, rowval, nzval)
     for col = max(k+1,1) : n
         c1 = S.colptr[col]
-        for c2 = A.colptr[col] : A.colptr[col+1]-1
+        for c2 = nzrange(A, col)
             A.rowval[c2] = S.rowval[c1]
             A.nzval[c2] = S.nzval[c1]
             c1 += 1
@@ -376,7 +358,7 @@ function sparse_diff1{Tv,Ti}(S::SparseMatrixCSC{Tv,Ti})
     for col = 1 : n
         last_row = 0
         last_val = 0
-        for k = S.colptr[col] : S.colptr[col+1]-1
+        for k = nzrange(S, col)
             row = S.rowval[k]
             val = S.nzval[k]
             if row > 1
@@ -414,35 +396,31 @@ function sparse_diff2{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti})
 
     z = zero(Tv)
 
-    colptr_a = a.colptr
-    rowval_a = a.rowval
-    nzval_a = a.nzval
-
     ptrS = 1
     colptr[1] = 1
 
     n == 0 && return SparseMatrixCSC(m, n, colptr, rowval, nzval)
 
-    startA = colptr_a[1]
-    stopA = colptr_a[2]
+    startA = a.colptr[1]
+    stopA = a.colptr[2]
 
     rA = startA : stopA - 1
-    rowvalA = rowval_a[rA]
-    nzvalA = nzval_a[rA]
+    rowvalA = a.rowval[rA]
+    nzvalA = a.nzval[rA]
     lA = stopA - startA
 
     for col = 1:n-1
         startB, stopB = startA, stopA
-        startA = colptr_a[col+1]
-        stopA = colptr_a[col+2]
+        startA = a.colptr[col+1]
+        stopA = a.colptr[col+2]
 
         rowvalB = rowvalA
         nzvalB = nzvalA
         lB = lA
 
         rA = startA : stopA - 1
-        rowvalA = rowval_a[rA]
-        nzvalA = nzval_a[rA]
+        rowvalA = a.rowval[rA]
+        nzvalA = a.nzval[rA]
         lA = stopA - startA
 
         ptrB = 1
@@ -741,23 +719,16 @@ function kron{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, b::SparseMatrixCSC{Tv,Ti})
 
     colptr[1] = 1
 
-    colptrA = a.colptr
-    colptrB = b.colptr
-    rowvalA = a.rowval
-    rowvalB = b.rowval
-    nzvalA = a.nzval
-    nzvalB = b.nzval
-
     col = 1
 
     @inbounds for j = 1:nA
-        startA = colptrA[j]
-        stopA = colptrA[j+1]-1
+        startA = a.colptr[j]
+        stopA = a.colptr[j+1]-1
         lA = stopA - startA + 1
 
         for i = 1:nB
-            startB = colptrB[i]
-            stopB = colptrB[i+1]-1
+            startB = b.colptr[i]
+            stopB = b.colptr[i+1]-1
             lB = stopB - startB + 1
 
             ptr_range = (1:lB) + (colptr[col]-1)
@@ -768,8 +739,8 @@ function kron{Tv,Ti}(a::SparseMatrixCSC{Tv,Ti}, b::SparseMatrixCSC{Tv,Ti})
             for ptrA = startA : stopA
                 ptrB = startB
                 for ptr = ptr_range
-                    rowval[ptr] = (rowvalA[ptrA]-1)*mB + rowvalB[ptrB]
-                    nzval[ptr] = nzvalA[ptrA] * nzvalB[ptrB]
+                    rowval[ptr] = (a.rowval[ptrA]-1)*mB + b.rowval[ptrB]
+                    nzval[ptr] = a.nzval[ptrA] * b.nzval[ptrB]
                     ptrB += 1
                 end
                 ptr_range += lB
@@ -815,11 +786,9 @@ function scale!(C::SparseMatrixCSC, A::SparseMatrixCSC, b::Vector)
     m, n = size(A)
     (n==length(b) && size(A)==size(C)) || throw(DimensionMismatch())
     copyinds!(C, A)
-    Cnzval = C.nzval
-    Anzval = A.nzval
-    resize!(Cnzval, length(Anzval))
-    for col = 1:n, p = A.colptr[col]:(A.colptr[col+1]-1)
-        @inbounds Cnzval[p] = Anzval[p] * b[col]
+    resize!(C.nzval, length(A.nzval))
+    for col = 1:n, p = nzrange(A, col)
+        @inbounds C.nzval[p] = A.nzval[p] * b[col]
     end
     C
 end
@@ -828,12 +797,9 @@ function scale!(C::SparseMatrixCSC, b::Vector, A::SparseMatrixCSC)
     m, n = size(A)
     (m==length(b) && size(A)==size(C)) || throw(DimensionMismatch())
     copyinds!(C, A)
-    Cnzval = C.nzval
-    Anzval = A.nzval
-    Arowval = A.rowval
-    resize!(Cnzval, length(Anzval))
-    for col = 1:n, p = A.colptr[col]:(A.colptr[col+1]-1)
-        @inbounds Cnzval[p] = Anzval[p] * b[Arowval[p]]
+    resize!(C.nzval, length(A.nzval))
+    for col = 1:n, p = nzrange(A, col)
+        @inbounds C.nzval[p] = A.nzval[p] * b[A.rowval[p]]
     end
     C
 end
