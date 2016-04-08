@@ -186,6 +186,9 @@ if [ -n "$USEMSVC" ]; then
   echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
   # Since we don't have a static library for openlibm
   echo 'override UNTRUSTED_SYSTEM_LIBM = 0' >> Make.user
+  # set DEPS_GIT=1 so libuv (and its automake compile script)
+  # ends up at a predictable location
+  echo 'override DEPS_GIT = 1' >> Make.user
 
   # Compile libuv and utf8proc without -TP first, then add -TP
   make -C deps install-libuv install-utf8proc
