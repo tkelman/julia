@@ -1,0 +1,51 @@
+diff --git a/cmake/modules/AddLLVM.cmake b/cmake/modules/AddLLVM.cmake
+index a829751..d251932 100644
+--- a/cmake/modules/AddLLVM.cmake
++++ b/cmake/modules/AddLLVM.cmake
+@@ -696,13 +696,16 @@ macro(add_llvm_tool name)
+     set(EXCLUDE_FROM_ALL ON)
+   endif()
+   add_llvm_executable(${name} ${ARGN})
++  if( NOT DEFINED LLVM_TOOLS_INSTALL_DIR )
++    set(LLVM_TOOLS_INSTALL_DIR bin)
++  endif()
+ 
+   list(FIND LLVM_TOOLCHAIN_TOOLS ${name} LLVM_IS_${name}_TOOLCHAIN_TOOL)
+   if (LLVM_IS_${name}_TOOLCHAIN_TOOL GREATER -1 OR NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
+     if( LLVM_BUILD_TOOLS )
+       install(TARGETS ${name}
+               EXPORT LLVMExports
+-              RUNTIME DESTINATION bin
++              RUNTIME DESTINATION ${LLVM_TOOLS_INSTALL_DIR}
+               COMPONENT ${name})
+ 
+       if (NOT CMAKE_CONFIGURATION_TYPES)
+diff --git a/cmake/modules/TableGen.cmake b/cmake/modules/TableGen.cmake
+index fca7d1b..e55d4d7 100644
+--- a/cmake/modules/TableGen.cmake
++++ b/cmake/modules/TableGen.cmake
+@@ -138,10 +138,13 @@ macro(add_tablegen target project)
+       set_target_properties(${target} PROPERTIES LINK_FLAGS -Wl,--stack,16777216)
+     endif(CMAKE_SIZEOF_VOID_P MATCHES "8")
+   endif( MINGW )
++  if( NOT DEFINED LLVM_TOOLS_INSTALL_DIR )
++    set(LLVM_TOOLS_INSTALL_DIR bin)
++  endif()
+   if (${project} STREQUAL LLVM AND NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
+     install(TARGETS ${target}
+             EXPORT LLVMExports
+-            RUNTIME DESTINATION bin)
++            RUNTIME DESTINATION ${LLVM_TOOLS_INSTALL_DIR})
+   endif()
+   set_property(GLOBAL APPEND PROPERTY LLVM_EXPORTS ${target})
+ endmacro()
+diff --git a/tools/llvm-ar/CMakeLists.txt b/tools/llvm-ar/CMakeLists.txt
+index 86233df..d693124 100644
+--- a/tools/llvm-ar/CMakeLists.txt
++++ b/tools/llvm-ar/CMakeLists.txt
+@@ -10,5 +10,3 @@ add_llvm_tool(llvm-ar
+   llvm-ar.cpp
+   )
+ 
+-add_llvm_tool_symlink(llvm-ranlib llvm-ar)
+-add_llvm_tool_symlink(llvm-lib llvm-ar)
