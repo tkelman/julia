@@ -430,10 +430,9 @@ test_typed_ast_printing(g15714, Tuple{Vector{Float32}},
 @test used_unique_var_tested15714
 
 let li = typeof(getfield).name.mt.cache.func::LambdaInfo,
-    lrepr = string(li),
-    mrepr = string(li.def),
-    lmime = stringmime("text/plain", li)
-
+        lrepr = string(li),
+        mrepr = string(li.def),
+        lmime = stringmime("text/plain", li)
     @test lrepr == "LambdaInfo template for getfield(...)"
     @test mrepr == "getfield(...)"
 end

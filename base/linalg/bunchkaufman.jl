@@ -17,8 +17,7 @@ BunchKaufman{T}(A::AbstractMatrix{T}, ipiv::Vector{BlasInt}, uplo::Char, symmetr
         BunchKaufman{T,typeof(A)}(A, ipiv, uplo, symmetric, rook, info)
 
 function bkfact!{T<:BlasReal}(A::StridedMatrix{T}, uplo::Symbol = :U,
-    symmetric::Bool = issymmetric(A), rook::Bool = false)
-
+        symmetric::Bool = issymmetric(A), rook::Bool = false)
     if !symmetric
         throw(ArgumentError("Bunch-Kaufman decomposition is only valid for symmetric matrices"))
     end
@@ -30,8 +29,7 @@ function bkfact!{T<:BlasReal}(A::StridedMatrix{T}, uplo::Symbol = :U,
     BunchKaufman(LD, ipiv, char_uplo(uplo), symmetric, rook, info)
 end
 function bkfact!{T<:BlasComplex}(A::StridedMatrix{T}, uplo::Symbol=:U,
-    symmetric::Bool=issymmetric(A), rook::Bool=false)
-
+        symmetric::Bool=issymmetric(A), rook::Bool=false)
     if rook
         if symmetric
             LD, ipiv, info = LAPACK.sytrf_rook!(char_uplo(uplo), A)

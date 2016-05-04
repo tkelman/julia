@@ -459,7 +459,7 @@ function edit_insert(s::PromptState, c)
     edit_insert(buf, str)
     offset = s.ias.curs_row == 1 ? sizeof(s.p.prompt) : s.indent
     if !('\n' in str) && eof(buf) &&
-        ((line_size() + offset + sizeof(str) - 1) < width(terminal(s)))
+            ((line_size() + offset + sizeof(str) - 1) < width(terminal(s)))
         # Avoid full update when appending characters to the end
         # and an update of curs_row isn't necessary (conservatively estimated)
         write(terminal(s), str)

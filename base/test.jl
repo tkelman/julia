@@ -228,7 +228,7 @@ function get_test_result(ex)
     orig_ex = Expr(:inert, ex)
     # Normalize comparison operator calls to :comparison expressions
     if isa(ex, Expr) && ex.head == :call && length(ex.args)==3 &&
-        (ex.args[1] === :(==) || Base.operator_precedence(ex.args[1]) == comparison_prec)
+            (ex.args[1] === :(==) || Base.operator_precedence(ex.args[1]) == comparison_prec)
         testret = :(eval_comparison(Expr(:comparison,
                                          $(esc(ex.args[2])), $(esc(ex.args[1])), $(esc(ex.args[3])))))
     elseif isa(ex, Expr) && ex.head == :comparison

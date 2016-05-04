@@ -568,7 +568,7 @@ JL_DLLEXPORT jl_value_t *jl_module_names(jl_module_t *m, int all, int imported)
             jl_binding_t *b = (jl_binding_t*)table[i];
             int hidden = jl_symbol_name(b->name)[0]=='#';
             if ((b->exportp || ((imported || b->owner == m) && (all || m == jl_main_module))) &&
-                (all || (!b->deprecated && !hidden))) {
+                    (all || (!b->deprecated && !hidden))) {
                 jl_array_grow_end(a, 1);
                 //XXX: change to jl_arrayset if array storage allocation for Array{Symbols,1} changes:
                 jl_array_ptr_set(a, jl_array_dim0(a)-1, (jl_value_t*)b->name);

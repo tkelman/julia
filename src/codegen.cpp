@@ -850,8 +850,8 @@ extern "C" void jl_compile_linfo(jl_lambda_info_t *li)
 
     // if not inlineable, code won't be needed again
     if (JL_DELETE_NON_INLINEABLE &&
-        li->def && li->inferred && !li->inlineable &&
-        li != li->def->lambda_template && !imaging_mode) {
+            li->def && li->inferred && !li->inlineable &&
+            li != li->def->lambda_template && !imaging_mode) {
         jl_set_lambda_code_null(li);
     }
 
@@ -1753,9 +1753,9 @@ static void simple_escape_analysis(jl_value_t *expr, bool esc, jl_codectx_t *ctx
                     }
                     else {
                         if ((fv==jl_builtin_getfield && alen==3 &&
-                             expr_type(jl_exprarg(e,2),ctx) == (jl_value_t*)jl_long_type) ||
-                            fv==jl_builtin_nfields ||
-                            (fv==jl_builtin__apply && alen==3)) {
+                                 expr_type(jl_exprarg(e,2),ctx) == (jl_value_t*)jl_long_type) ||
+                                fv==jl_builtin_nfields ||
+                                (fv==jl_builtin__apply && alen==3)) {
                             esc = false;
                         }
                     }
@@ -3430,7 +3430,7 @@ static Function *gen_cfun_wrapper(jl_function_t *ff, jl_value_t *jlrettype, jl_t
         name = jl_symbol_name(lam->def->name);
         astrt = lam->rettype;
         if (astrt != (jl_value_t*)jl_bottom_type &&
-            jl_type_intersection(astrt, declrt) == jl_bottom_type) {
+                jl_type_intersection(astrt, declrt) == jl_bottom_type) {
             // Do not warn if the function does not return since it is
             // occasionally required by the C API (typically error callbacks)
             // and doesn't capture the majority of the case when a function

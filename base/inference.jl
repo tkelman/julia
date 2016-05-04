@@ -1029,8 +1029,8 @@ function abstract_call(f::ANY, fargs, argtypes::Vector{Any}, vtypes::VarTable, s
     if length(argtypes)>2 && argtypes[3] ⊑ Int
         at2 = widenconst(argtypes[2])
         if (at2 <: Tuple ||
-            (isa(at2, DataType) && isdefined(Main, :Base) && isdefined(Main.Base, :Pair) &&
-             (at2::DataType).name === Main.Base.Pair.name))
+                (isa(at2, DataType) && isdefined(Main, :Base) && isdefined(Main.Base, :Pair) &&
+                 (at2::DataType).name === Main.Base.Pair.name))
             # allow tuple indexing functions to take advantage of constant
             # index arguments.
             if istopfunction(tm, f, :getindex)
@@ -1057,10 +1057,9 @@ function abstract_call(f::ANY, fargs, argtypes::Vector{Any}, vtypes::VarTable, s
         # need to model the special inliner for ^
         # to ensure we have added the same edge
         if isdefined(Main, :Base) &&
-            ((isdefined(Main.Base, :^) && is(f, Main.Base.:^)) ||
-             (isdefined(Main.Base, :.^) && is(f, Main.Base.:.^))) &&
-            length(argtypes) == 3 && (argtypes[3] ⊑ Int32 || argtypes[3] ⊑ Int64)
-
+                ((isdefined(Main.Base, :^) && is(f, Main.Base.:^)) ||
+                 (isdefined(Main.Base, :.^) && is(f, Main.Base.:.^))) &&
+                length(argtypes) == 3 && (argtypes[3] ⊑ Int32 || argtypes[3] ⊑ Int64)
             a1 = argtypes[2]
             basenumtype = Union{corenumtype, Main.Base.Complex64, Main.Base.Complex128, Main.Base.Rational}
             if a1 ⊑ basenumtype
@@ -1292,7 +1291,7 @@ function tmerge(typea::ANY, typeb::ANY)
             return typejoin(typea, typeb)
         end
         if isa(typea, Union) || isa(typeb, Union) || (isa(typea,DataType) && length(typea.parameters)>3) ||
-            (isa(typeb,DataType) && length(typeb.parameters)>3)
+                (isa(typeb,DataType) && length(typeb.parameters)>3)
             # widen tuples faster (see #6704), but not too much, to make sure we can infer
             # e.g. (t::Union{Tuple{Bool},Tuple{Bool,Int}})[1]
             return Tuple
@@ -1486,8 +1485,8 @@ function typeinf_edge(method::Method, atypes::ANY, sparams::SimpleVector, needtr
                 if length(argtypes)>2 && argtypes[3] ⊑ Int
                     at2 = widenconst(argtypes[2])
                     if (at2 <: Tuple ||
-                        (isa(at2, DataType) && isdefined(Main, :Base) && isdefined(Main.Base, :Pair) &&
-                         (at2::DataType).name === Main.Base.Pair.name))
+                            (isa(at2, DataType) && isdefined(Main, :Base) && isdefined(Main.Base, :Pair) &&
+                             (at2::DataType).name === Main.Base.Pair.name))
                         skip = false
                     end
                 end
@@ -1859,7 +1858,7 @@ function isinlineable(linfo::LambdaInfo)
             name = linfo.def.name
             sig = linfo.def.sig
             if ((name === :+ || name === :* || name === :min || name === :max) &&
-                sig == Tuple{sig.parameters[1],Any,Any,Any,Vararg{Any}})
+                    sig == Tuple{sig.parameters[1],Any,Any,Any,Vararg{Any}})
                 inlineable = true
             elseif (name === :next || name === :done || name === :unsafe_convert ||
                     name === :cconvert)
@@ -1918,7 +1917,7 @@ function finish(me::InferenceState)
     ccall(:jl_set_lambda_rettype, Void, (Any, Any), me.linfo, widenconst(me.bestguess))
 
     if (isa(me.bestguess,Const) && me.bestguess.val !== nothing) ||
-        (isType(me.bestguess) && !has_typevars(me.bestguess.parameters[1],true))
+            (isType(me.bestguess) && !has_typevars(me.bestguess.parameters[1],true))
         if !ispure && length(me.linfo.code) < 10
             ispure = true
             for stmt in me.linfo.code
@@ -2248,7 +2247,7 @@ function effect_free(e::ANY, linfo::LambdaInfo, allow_volatile::Bool)
         e = e::Expr
         head = e.head
         if head === :static_parameter || head === :meta || head === :line ||
-            head === :inbounds || head === :boundscheck
+                head === :inbounds || head === :boundscheck
             return true
         end
         ea = e.args
@@ -2349,8 +2348,8 @@ function inlineable(f::ANY, ft::ANY, e::Expr, atypes::Vector{Any}, sv::Inference
     if sv.inlining
         if isType(e.typ) && !has_typevars(e.typ.parameters[1],true)
             if (is(f, apply_type) || is(f, fieldtype) || is(f, typeof) ||
-                istopfunction(topmod, f, :typejoin) ||
-                istopfunction(topmod, f, :promote_type))
+                    istopfunction(topmod, f, :typejoin) ||
+                    istopfunction(topmod, f, :promote_type))
                 # XXX: compute effect_free for the actual arguments
                 if length(argexprs) < 2 || effect_free(argexprs[2], enclosing, true)
                     return (e.typ.parameters[1],())
@@ -2360,7 +2359,7 @@ function inlineable(f::ANY, ft::ANY, e::Expr, atypes::Vector{Any}, sv::Inference
             end
         end
         if istopfunction(topmod, f, :isbits) && length(atypes)==2 && isType(atypes[2]) &&
-            effect_free(argexprs[2], enclosing, true) && isleaftype(atypes[2].parameters[1])
+                effect_free(argexprs[2], enclosing, true) && isleaftype(atypes[2].parameters[1])
             return (isbits(atypes[2].parameters[1]),())
         end
         if is(f, Core.kwfunc) && length(argexprs) == 2 && isa(e.typ, Const)
@@ -2499,8 +2498,9 @@ function inlineable(f::ANY, ft::ANY, e::Expr, atypes::Vector{Any}, sv::Inference
     methsp = meth[2]
     method = meth[3]::Method
     # check whether call can be inlined to just a quoted constant value
-    if isa(f, widenconst(ft)) && !method.isstaged && (method.lambda_template.pure || f === return_type) &&
-        (isType(e.typ) || isa(e.typ,Const))
+    if isa(f, widenconst(ft)) && !method.isstaged &&
+            (method.lambda_template.pure || f === return_type) &&
+            (isType(e.typ) || isa(e.typ,Const))
         if isType(e.typ)
             if !has_typevars(e.typ.parameters[1])
                 return inline_as_constant(e.typ.parameters[1], argexprs, enclosing)
@@ -2763,9 +2763,9 @@ inline_worthy(body::ANY, cost::Integer) = true
 # should the expression be part of the inline cost model
 function inline_ignore(ex::ANY)
     isa(ex, LineNumberNode) ||
-    ex === nothing ||
-    isa(ex, Expr) && ((ex::Expr).head === :line ||
-                      (ex::Expr).head === :meta)
+        ex === nothing ||
+        isa(ex, Expr) && ((ex::Expr).head === :line ||
+                          (ex::Expr).head === :meta)
 end
 
 function inline_worthy(body::Expr, cost::Integer=1000) # precondition: 0 < cost; nominal cost = 1000
@@ -2929,10 +2929,9 @@ function inlining_pass(e::Expr, sv, linfo)
 
     if sv.inlining
         if isdefined(Main, :Base) &&
-            ((isdefined(Main.Base, :^) && is(f, Main.Base.:^)) ||
-             (isdefined(Main.Base, :.^) && is(f, Main.Base.:.^))) &&
-            length(e.args) == 3
-
+                ((isdefined(Main.Base, :^) && is(f, Main.Base.:^)) ||
+                 (isdefined(Main.Base, :.^) && is(f, Main.Base.:.^))) &&
+                length(e.args) == 3
             a2 = e.args[3]
             if isa(a2, Symbol) || isa(a2, Slot) || isa(a2, SSAValue)
                 ta2 = exprtype(a2, linfo)
@@ -3357,7 +3356,7 @@ function alloc_elim_pass!(linfo::LambdaInfo, sv::InferenceState)
                 for j=1:nv
                     tupelt = tup[j+1]
                     if !(isa(tupelt,Number) || isa(tupelt,AbstractString) ||
-                         isa(tupelt,QuoteNode) || isa(tupelt, SSAValue))
+                             isa(tupelt,QuoteNode) || isa(tupelt, SSAValue))
                         insert!(body, i+n_ins, tupelt)
                         n_ins += 1
                     end
@@ -3367,7 +3366,7 @@ function alloc_elim_pass!(linfo::LambdaInfo, sv::InferenceState)
                 for j=1:nv
                     tupelt = tup[j+1]
                     if (isa(tupelt,Number) || isa(tupelt,AbstractString) ||
-                        isa(tupelt,QuoteNode) || isa(tupelt, SSAValue))
+                            isa(tupelt,QuoteNode) || isa(tupelt, SSAValue))
                         vals[j] = tupelt
                     else
                         elty = exprtype(tupelt, linfo)
@@ -3426,7 +3425,7 @@ function replace_getfield!(linfo::LambdaInfo, e::Expr, tupname, vals, field_name
     for i = 1:length(e.args)
         a = e.args[i]
         if isa(a,Expr) && is_known_call(a, getfield, linfo) &&
-            symequal(a.args[2],tupname)
+                symequal(a.args[2],tupname)
             idx = if isa(a.args[3], Int)
                 a.args[3]
             else

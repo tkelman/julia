@@ -533,7 +533,7 @@ JL_DLLEXPORT int jl_is_cacheable_sig(
         // avoid specializing on an argument of type Tuple
         // unless matching a declared type of `::Type`
         if (jl_is_type_type(elt) && jl_is_tuple_type(jl_tparam0(elt)) &&
-            (!jl_subtype(decl_i, (jl_value_t*)jl_type_type, 0) || is_kind(decl_i))) { // Type{Tuple{...}}
+                (!jl_subtype(decl_i, (jl_value_t*)jl_type_type, 0) || is_kind(decl_i))) { // Type{Tuple{...}}
             if (elt != (jl_value_t*)jl_anytuple_type_type)
                 return 0;
             continue;
@@ -636,7 +636,7 @@ static jl_lambda_info_t *cache_method(jl_methtable_t *mt, union jl_typemap_t *ca
     // supertype of any other method signatures. so far we are conservative
     // and the types we find should be bigger.
     if (!definition->isstaged && jl_nparams(type) > mt->max_args
-        && jl_va_tuple_kind(decl) == JL_VARARG_UNBOUND) {
+            && jl_va_tuple_kind(decl) == JL_VARARG_UNBOUND) {
         size_t i, nspec = mt->max_args + 2;
         jl_svec_t *limited = jl_alloc_svec(nspec);
         temp = (jl_value_t*)limited;
@@ -1296,9 +1296,9 @@ jl_lambda_info_t *jl_compile_for_dispatch(jl_lambda_info_t *li)
         }
         else if (li->jlcall_api != 2) {
             if (li->code == jl_nothing ||
-                (!li->inferred && li->def != NULL && jl_symbol_name(li->def->name)[0] != '@')) {
-                    // don't bother with typeinf on macros or toplevel thunks
-                    jl_type_infer(li, 0);
+                    (!li->inferred && li->def != NULL && jl_symbol_name(li->def->name)[0] != '@')) {
+                // don't bother with typeinf on macros or toplevel thunks
+                jl_type_infer(li, 0);
             }
             if (li->functionObjectsDecls.functionObject == NULL && li->jlcall_api != 2) {
                 if (li->inInference || li->inCompile || li->code == jl_nothing) {
@@ -1639,8 +1639,8 @@ static int _compile_all_enq(jl_typemap_entry_t *ml, void *env)
     // method definition -- compile template field
     jl_method_t *m = ml->func.method;
     if (m->lambda_template->functionObjectsDecls.functionObject == NULL &&
-        m->lambda_template->jlcall_api != 2 &&
-        m->lambda_template->fptr == NULL) {
+            m->lambda_template->jlcall_api != 2 &&
+            m->lambda_template->fptr == NULL) {
         // found a lambda that still needs to be compiled
         jl_array_ptr_1d_push(found, (jl_value_t*)ml);
     }
@@ -1882,7 +1882,7 @@ JL_DLLEXPORT jl_value_t *jl_apply_generic(jl_value_t **args, uint32_t nargs)
     for (i = 0; i < 4; i++) {
         entry = call_cache[cache_idx[i]];
         if (entry && nargs == jl_svec_len(entry->sig->parameters) &&
-            sig_match_fast(args, jl_svec_data(entry->sig->parameters), 0, nargs)) {
+                sig_match_fast(args, jl_svec_data(entry->sig->parameters), 0, nargs)) {
             break;
         }
     }
@@ -2163,9 +2163,9 @@ static int ml_matches_visitor(jl_typemap_entry_t *ml, struct typemap_intersectio
             else
                 tv = jl_svecref(ml->tvars, i);
             if (jl_is_typevar(jl_svecref(closure->match.env, i)) &&
-                // if tvar is at the top level it will definitely be matched.
-                // see issue #5575
-                !tvar_exists_at_top_level(tv, ml->sig, 1)) {
+                    // if tvar is at the top level it will definitely be matched.
+                    // see issue #5575
+                    !tvar_exists_at_top_level(tv, ml->sig, 1)) {
                 matched_all_typevars = 0;
                 break;
             }
@@ -2175,7 +2175,7 @@ static int ml_matches_visitor(jl_typemap_entry_t *ml, struct typemap_intersectio
         // NOTE: jl_subtype check added in case the intersection is
         // over-approximated.
         if (matched_all_typevars && jl_types_equal(closure->match.ti, closure->match.type) &&
-            jl_subtype(closure->match.type, (jl_value_t*)ml->sig, 0)) {
+                jl_subtype(closure->match.type, (jl_value_t*)ml->sig, 0)) {
             done = 1; // terminate visiting method list
         }
         // here we have reached a definition that fully covers the arguments.

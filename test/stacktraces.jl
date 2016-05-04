@@ -99,19 +99,18 @@ end
 end
 
 let li = expand(quote let x = 1 end end).args[1]::LambdaInfo,
-    sf = StackFrame(:a, :b, 3, li, false, false, 0),
-    repr = string(sf)
+        sf = StackFrame(:a, :b, 3, li, false, false, 0),
+        repr = string(sf)
     @test repr == " in Toplevel LambdaInfo thunk at b:3"
 end
 let li = typeof(getfield).name.mt.cache.func::LambdaInfo,
-    sf = StackFrame(:a, :b, 3, li, false, false, 0),
-    repr = string(sf)
+        sf = StackFrame(:a, :b, 3, li, false, false, 0),
+        repr = string(sf)
     @test repr == " in getfield(...) at b:3"
 end
 
 let ctestptr = cglobal((:ctest, "libccalltest")),
-    ctest = StackTraces.lookup(ctestptr + 1)
-
+        ctest = StackTraces.lookup(ctestptr + 1)
     @test length(ctest) == 1
     @test ctest[1].func === :ctest
     @test isnull(ctest[1].linfo)
