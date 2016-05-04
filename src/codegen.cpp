@@ -3556,7 +3556,7 @@ static Function *gen_cfun_wrapper(jl_function_t *ff, jl_value_t *jlrettype, jl_t
         name = jl_symbol_name(lam->def->name);
         astrt = lam->rettype;
         if (astrt != (jl_value_t*)jl_bottom_type &&
-            jl_type_intersection(astrt, declrt) == jl_bottom_type) {
+                jl_type_intersection(astrt, declrt) == jl_bottom_type) {
             // Do not warn if the function does not return since it is
             // occasionally required by the C API (typically error callbacks)
             // and doesn't capture the majority of the case when a function
