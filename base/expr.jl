@@ -228,8 +228,8 @@ end
 function findmetaarg(metaargs, sym)
     for i = 1:length(metaargs)
         arg = metaargs[i]
-        if (isa(arg, Symbol) && (arg::Symbol)    == sym) ||
-           (isa(arg, Expr)   && (arg::Expr).head == sym)
+        if (isa(arg, Symbol) && (arg::Symbol) == sym) ||
+                (isa(arg, Expr) && (arg::Expr).head == sym)
             return i
         end
     end

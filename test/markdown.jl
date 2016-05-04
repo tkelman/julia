@@ -56,7 +56,7 @@ code_in_code = md"""
 @test plain(code_in_code) == "````\n```\n````\n"
 
 let text = "Foo ```bar` ``baz`` ```\n",
-    md = Markdown.parse(text)
+        md = Markdown.parse(text)
     @test text == Markdown.plain(md)
 end
 
@@ -69,22 +69,22 @@ end
 @test md"[^foo]: footnote" == MD([Footnote("foo", Any[Paragraph(Any["footnote"])])])
 
 let text =
-    """
-    A paragraph with some footnotes,[^1] and another.[^note]
+        """
+        A paragraph with some footnotes,[^1] and another.[^note]
 
-    [^1]: Footnote text for the first.
+        [^1]: Footnote text for the first.
 
-    [^note]: A longer footnote:
+        [^note]: A longer footnote:
 
-        Indented paragraphs are part of the footnote.
+            Indented paragraphs are part of the footnote.
 
-            some.code
+                some.code
 
-        And *another* paragraph.
+            And *another* paragraph.
 
-    This isn't part of the footnote.
-    """,
-    md = Markdown.parse(text)
+        This isn't part of the footnote.
+        """,
+        md = Markdown.parse(text)
     @test length(md.content) == 4
     @test isa(md.content[1], Markdown.Paragraph)
     @test isa(md.content[2], Markdown.Footnote)
@@ -155,12 +155,12 @@ let text =
 end
 
 let doc = md"""
-* one
-* two
+        * one
+        * two
 
-1. pirate
-2. ninja
-3. zombie"""
+        1. pirate
+        2. ninja
+        3. zombie"""
     @test isa(doc.content[1], Markdown.List)
     @test isa(doc.content[2], Markdown.List)
     @test doc.content[1].items[1][1].content[1] == "one"
@@ -179,7 +179,7 @@ let doc = Markdown.parse(
            * four
         ... another paragraph.
         """
-    )
+        )
     @test length(doc.content) === 3
     @test isa(doc.content[1], Markdown.Paragraph)
     @test isa(doc.content[2], Markdown.List)
@@ -233,7 +233,7 @@ let doc = Markdown.parse(
         1. a
         3. b
         """
-    )
+        )
     @test contains(sprint(term, doc), "1. ")
     @test contains(sprint(term, doc), "2. ")
     @test !contains(sprint(term, doc), "3. ")
@@ -298,84 +298,84 @@ Some **bolded**
 @test latex(book) == "\\section{Title}\nSome discussion\n\n\\begin{quote}\nA quote\n\n\\end{quote}\n\\subsection{Section \\emph{important}}\nSome \\textbf{bolded}\n\n\\begin{itemize}\n\\item list1\n\n\n\\item list2\n\n\\end{itemize}\n"
 # mime output
 let out =
-    """
-    # Title
+        """
+        # Title
 
-    Some discussion
+        Some discussion
 
-    > A quote
+        > A quote
 
 
-    ## Section *important*
+        ## Section *important*
 
-    Some **bolded**
+        Some **bolded**
 
-      * list1
-      * list2
-    """
+          * list1
+          * list2
+        """
     @test sprint(show, "text/plain", book) == out
     @test sprint(show, "text/markdown", book) == out
 end
 let out =
-    """
-    <div class="markdown"><h1>Title</h1>
-    <p>Some discussion</p>
-    <blockquote>
-    <p>A quote</p>
-    </blockquote>
-    <h2>Section <em>important</em></h2>
-    <p>Some <strong>bolded</strong></p>
-    <ul>
-    <li><p>list1</p>
-    </li>
-    <li><p>list2</p>
-    </li>
-    </ul>
-    </div>"""
+        """
+        <div class="markdown"><h1>Title</h1>
+        <p>Some discussion</p>
+        <blockquote>
+        <p>A quote</p>
+        </blockquote>
+        <h2>Section <em>important</em></h2>
+        <p>Some <strong>bolded</strong></p>
+        <ul>
+        <li><p>list1</p>
+        </li>
+        <li><p>list2</p>
+        </li>
+        </ul>
+        </div>"""
     @test sprint(show, "text/html", book) == out
 end
 let out =
-    """
-    \\section{Title}
-    Some discussion
+        """
+        \\section{Title}
+        Some discussion
 
-    \\begin{quote}
-    A quote
+        \\begin{quote}
+        A quote
 
-    \\end{quote}
-    \\subsection{Section \\emph{important}}
-    Some \\textbf{bolded}
+        \\end{quote}
+        \\subsection{Section \\emph{important}}
+        Some \\textbf{bolded}
 
-    \\begin{itemize}
-    \\item list1
+        \\begin{itemize}
+        \\item list1
 
 
-    \\item list2
+        \\item list2
 
-    \\end{itemize}
-    """
+        \\end{itemize}
+        """
     @test sprint(show, "text/latex", book) == out
 end
 let out =
-    """
-    Title
-    *****
+        """
+        Title
+        *****
 
 
-    Some discussion
+        Some discussion
 
-        A quote
-
-
-    Section *important*
-    ===================
+            A quote
 
 
-    Some **bolded**
+        Section *important*
+        ===================
 
-    * list1
-    * list2
-    """
+
+        Some **bolded**
+
+        * list1
+        * list2
+        """
     @test sprint(show, "text/rst", book) == out
 end
 
@@ -457,96 +457,95 @@ no error
 """ == MD([Paragraph(Any["no|table no error"])])
 
 let t = """a   |   b
-    :-- | --:
-    1   |   2
-    """
+        :-- | --:
+        1   |   2
+        """
     @test Markdown.parse(t) == MD(Table(Any[Any["a", "b"], Any["1", "2"]], [:l, :r]))
 end
 
 let text =
-    """
-    | a   |   b |
-    |:--- | ---:|
-    | 1   |   2 |
-    """,
-    table = Markdown.parse(text)
+        """
+        | a   |   b |
+        |:--- | ---:|
+        | 1   |   2 |
+        """,
+        table = Markdown.parse(text)
     @test text == Markdown.plain(table)
 end
 let text =
-    """
-    | Markdown | Table |  Test |
-    |:-------- |:-----:| -----:|
-    | foo      | `bar` | *baz* |
-    | `bar`    |  baz  | *foo* |
-    """,
-    table = Markdown.parse(text)
+        """
+        | Markdown | Table |  Test |
+        |:-------- |:-----:| -----:|
+        | foo      | `bar` | *baz* |
+        | `bar`    |  baz  | *foo* |
+        """,
+        table = Markdown.parse(text)
     @test text == Markdown.plain(table)
 end
 let text =
-    """
-    | a        |   b |
-    |:-------- | ---:|
-    | `x \\| y` |   2 |
-    """,
-    table = Markdown.parse(text)
+        """
+        | a        |   b |
+        |:-------- | ---:|
+        | `x \\| y` |   2 |
+        """,
+        table = Markdown.parse(text)
     @test text == Markdown.plain(table)
 end
 
 # LaTeX extension
 let in_dollars =
-    """
-    We have \$x^2 < x\$ whenever:
+        """
+        We have \$x^2 < x\$ whenever:
 
-    \$|x| < 1\$
+        \$|x| < 1\$
 
-    etc.
-    """,
-    in_backticks =
-    """
-    We have ``x^2 < x`` whenever:
+        etc.
+        """,
+        in_backticks =
+        """
+        We have ``x^2 < x`` whenever:
 
-    ```math
-    |x| < 1
-    ```
-
-    etc.
-    """,
-    out_plain =
-    """
-    We have \$x^2 < x\$ whenever:
-
-    \$\$
-    |x| < 1
-    \$\$
-
-    etc.
-    """,
-    out_rst =
-    """
-    We have :math:`x^2 < x` whenever:
-
-    .. math::
-
+        ```math
         |x| < 1
+        ```
 
-    etc.
-    """,
-    out_latex =
-    """
-    We have \$x^2 < x\$ whenever:
+        etc.
+        """,
+        out_plain =
+        """
+        We have \$x^2 < x\$ whenever:
 
-    \$\$|x| < 1\$\$
-    etc.
+        \$\$
+        |x| < 1
+        \$\$
 
-    """,
-    dollars   = Markdown.parse(in_dollars),
-    backticks = Markdown.parse(in_backticks),
-    latex_doc = MD(
-        Any[Paragraph(Any["We have ", LaTeX("x^2 < x"), " whenever:"]),
-            LaTeX("|x| < 1"),
-            Paragraph(Any["etc."])
-    ])
+        etc.
+        """,
+        out_rst =
+        """
+        We have :math:`x^2 < x` whenever:
 
+        .. math::
+
+            |x| < 1
+
+        etc.
+        """,
+        out_latex =
+        """
+        We have \$x^2 < x\$ whenever:
+
+        \$\$|x| < 1\$\$
+        etc.
+
+        """,
+        dollars   = Markdown.parse(in_dollars),
+        backticks = Markdown.parse(in_backticks),
+        latex_doc = MD(
+            Any[Paragraph(Any["We have ", LaTeX("x^2 < x"), " whenever:"]),
+                LaTeX("|x| < 1"),
+                Paragraph(Any["etc."])
+        ])
     @test out_plain == Markdown.plain(dollars)
     @test out_plain == Markdown.plain(backticks)
 
@@ -562,17 +561,17 @@ end
 
 # Nested backticks for inline code and math.
 let t_1 = "`code` ``math`` ```code``` ````math```` `````code`````",
-    t_2 = "`` `math` `` ``` `code` ``code`` ``` ```` `math` ``math`` ```math``` ````",
-    t_3 = "`` ` `` ``` `` ` `` ` ` ```",
-    t_4 = """`code
-    over several
-    lines` ``math
-    over several
-    lines`` ``math with
-    ` some extra ` ` backticks`
-    ``""",
-    t_5 = "``code at end of string`",
-    t_6 = "```math at end of string``"
+        t_2 = "`` `math` `` ``` `code` ``code`` ``` ```` `math` ``math`` ```math``` ````",
+        t_3 = "`` ` `` ``` `` ` `` ` ` ```",
+        t_4 = """`code
+        over several
+        lines` ``math
+        over several
+        lines`` ``math with
+        ` some extra ` ` backticks`
+        ``""",
+        t_5 = "``code at end of string`",
+        t_6 = "```math at end of string``"
     @test Markdown.parse(t_1) == MD(Paragraph([
         Code("code"),
         " ",
@@ -628,7 +627,7 @@ let t_1 =
 
         !!!
         """,
-    t_2 =
+        t_2 =
         """
         !!! note
             foo bar baz
@@ -650,11 +649,10 @@ let t_1 =
 
             # baz
         """,
-    m_1 = Markdown.parse(t_1),
-    m_2 = Markdown.parse(t_2)
+        m_1 = Markdown.parse(t_1),
+        m_2 = Markdown.parse(t_2)
 
-    # Content Tests.
-
+    # Content Tests
     @test isa(m_1.content[2], Markdown.Admonition)
     @test m_1.content[2].category == "note"
     @test m_1.content[2].title == "Note"
@@ -692,7 +690,7 @@ let t_1 =
 
     # Rendering Tests.
     let out = Markdown.plain(m_1),
-        expected =
+            expected =
             """
             # Foo
 
@@ -709,7 +707,7 @@ let t_1 =
         @test out == expected
     end
     let out = Markdown.rst(m_1),
-        expected =
+            expected =
             """
             Foo
             ***
@@ -728,7 +726,7 @@ let t_1 =
         @test out == expected
     end
     let out = Markdown.latex(m_1),
-        expected =
+            expected =
             """
             \\section{Foo}
             \\begin{quote}
@@ -754,7 +752,7 @@ let t_1 =
         @test out == expected
     end
     let out = Markdown.html(m_1),
-        expected =
+            expected =
             """
             <h1>Foo</h1>
             <div class="admonition note"><p class="admonition-title">Note</p></div>
@@ -767,7 +765,7 @@ let t_1 =
     end
 
     let out = Markdown.plain(m_2),
-        expected =
+            expected =
             """
             !!! note
                 foo bar baz
@@ -796,7 +794,7 @@ let t_1 =
         @test out == expected
     end
     let out = Markdown.rst(m_2),
-        expected =
+            expected =
             """
             .. note::
                foo bar baz
@@ -856,10 +854,8 @@ let text =
         2. bar
         3. baz
         """,
-    md = Markdown.parse(text)
-
-    # Content and structure tests.
-
+        md = Markdown.parse(text)
+    # Content and structure tests
     @test length(md.content) == 6
     @test length(md.content[1].items) == 1
     @test length(md.content[1].items[1]) == 3

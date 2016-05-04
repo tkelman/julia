@@ -268,22 +268,22 @@ end
 @test docstrings_equal(@doc(DocsTest.K), doc"K")
 
 let d1 = @doc(DocsTest.t(::AbstractString)),
-    d2 = doc"t-1"
+        d2 = doc"t-1"
     @test docstrings_equal(d1,d2)
 end
 
 let d1 = @doc(DocsTest.t(::AbstractString)),
-    d2 = doc"t-1"
+        d2 = doc"t-1"
     @test docstrings_equal(d1,d2)
 end
 
 let d1 = @doc(DocsTest.t(::Int, ::Any)),
-    d2 = doc"t-2"
+        d2 = doc"t-2"
     @test docstrings_equal(d1,d2)
 end
 
 let d1 = @doc(DocsTest.t{S <: Integer}(::S)),
-    d2 = doc"t-3"
+        d2 = doc"t-3"
     @test docstrings_equal(d1,d2)
 end
 
@@ -293,7 +293,7 @@ let fields = meta(DocsTest)[@var(DocsTest.FieldDocs)].docs[Union{}].data[:fields
 end
 
 let a = @doc(DocsTest.multidoc),
-    b = @doc(DocsTest.multidoc!)
+        b = @doc(DocsTest.multidoc!)
     @test docstrings_equal(a, b)
 end
 
@@ -454,9 +454,9 @@ end
 end
 
 let T = meta(DocVars)[@var(DocVars.T)],
-    S = meta(DocVars)[@var(DocVars.S)],
-    Tname = Markdown.parse("```\n$(curmod_prefix)DocVars.T\n```"),
-    Sname = Markdown.parse("```\n$(curmod_prefix)DocVars.S\n```")
+        S = meta(DocVars)[@var(DocVars.S)],
+        Tname = Markdown.parse("```\n$(curmod_prefix)DocVars.T\n```"),
+        Sname = Markdown.parse("```\n$(curmod_prefix)DocVars.S\n```")
     # Splicing the expression directly doesn't work
     @test docstrings_equal(T.docs[Union{}],
         doc"""
@@ -587,8 +587,8 @@ read(x) = x
 end
 
 let md = Base.Docs.meta(I11798)[@var(I11798.read)],
-    d1 = md.docs[md.order[1]],
-    d2 = doc"read"
+        d1 = md.docs[md.order[1]],
+        d2 = doc"read"
     @test docstrings_equal(d1,d2)
 end
 
@@ -895,19 +895,19 @@ end
 # Docs.helpmode tests: we test whether the correct expressions are being generated here,
 # rather than complete integration with Julia's REPL mode system.
 for (line, expr) in Pair[
-    "sin"          => :sin,
-    "Base.sin"     => :(Base.sin),
-    "@time(x)"     => :(@time(x)),
-    "@time"        => :(:@time),
-    ":@time"       => :(:@time),
-    "@time()"      => :(@time),
-    "Base.@time()" => :(Base.@time),
-    "ccall"        => :ccall, # keyword
-    "while       " => :while, # keyword, trailing spaces should be stripped.
-    "0"            => 0,
-    "\"...\""      => "...",
-    "r\"...\""     => :(r"..."),
-    ]
+        "sin"          => :sin,
+        "Base.sin"     => :(Base.sin),
+        "@time(x)"     => :(@time(x)),
+        "@time"        => :(:@time),
+        ":@time"       => :(:@time),
+        "@time()"      => :(@time),
+        "Base.@time()" => :(Base.@time),
+        "ccall"        => :ccall, # keyword
+        "while       " => :while, # keyword, trailing spaces should be stripped.
+        "0"            => 0,
+        "\"...\""      => "...",
+        "r\"...\""     => :(r"..."),
+        ]
     @test Docs.helpmode(line) == :(Base.Docs.@repl($STDOUT, $expr))
     buf = IOBuffer()
     @test eval(Base, Docs.helpmode(buf, line)) isa Union{Base.Markdown.MD,Void}

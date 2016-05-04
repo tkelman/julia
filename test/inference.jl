@@ -332,9 +332,8 @@ end
 @test f16530a(:d) == Vector
 
 let T1 = Tuple{Int, Float64},
-    T2 = Tuple{Int, Float32},
-    T = Tuple{T1, T2}
-
+        T2 = Tuple{Int, Float32},
+        T = Tuple{T1, T2}
     global f18037
     f18037() = fieldtype(T, 1)
     f18037(i) = fieldtype(T, i)

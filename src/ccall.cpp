@@ -1544,8 +1544,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
 
     // some special functions
     if (fptr == (void(*)(void))&jl_array_ptr ||
-        ((f_lib==NULL || (intptr_t)f_lib==2)
-         && f_name && !strcmp(f_name,"jl_array_ptr"))) {
+            ((f_lib==NULL || (intptr_t)f_lib==2) &&
+             f_name && !strcmp(f_name,"jl_array_ptr"))) {
         assert(lrt->isPointerTy());
         assert(!isVa && !llvmcall);
         assert(nargt==1);
@@ -1557,8 +1557,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
                                         retboxed, rt, unionall, static_rt, ctx);
     }
     if (fptr == (void(*)(void))&jl_value_ptr ||
-        ((f_lib==NULL || (intptr_t)f_lib==2)
-         && f_name && !strcmp(f_name,"jl_value_ptr"))) {
+            ((f_lib==NULL || (intptr_t)f_lib==2) &&
+             f_name && !strcmp(f_name,"jl_value_ptr"))) {
         assert(lrt->isPointerTy());
         assert(!isVa && !llvmcall);
         assert(nargt==1);
@@ -1603,8 +1603,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
         return ghostValue(jl_void_type);
     }
     if (fptr == &jl_gc_safepoint ||
-        ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
-         strcmp(f_name, "jl_gc_safepoint") == 0)) {
+            ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
+             strcmp(f_name, "jl_gc_safepoint") == 0)) {
         assert(lrt == T_void);
         assert(!isVa && !llvmcall);
         assert(nargt == 0);
@@ -1624,8 +1624,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
     static const auto ptls_getter = &jl_get_ptls_states;
 #endif
     if (fptr == (void(*)(void))(uintptr_t)ptls_getter ||
-        ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
-         strcmp(f_name, "jl_get_ptls_states") == 0)) {
+            ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
+             strcmp(f_name, "jl_get_ptls_states") == 0)) {
         assert(lrt == T_pint8);
         assert(!isVa && !llvmcall);
         assert(nargt == 0);
@@ -1635,8 +1635,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
             retboxed, rt, unionall, static_rt, ctx);
     }
     if (fptr == &jl_sigatomic_begin ||
-        ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
-         strcmp(f_name, "jl_sigatomic_begin") == 0)) {
+            ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
+             strcmp(f_name, "jl_sigatomic_begin") == 0)) {
         assert(lrt == T_void);
         assert(!isVa && !llvmcall);
         assert(nargt == 0);
@@ -1651,8 +1651,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
         return ghostValue(jl_void_type);
     }
     if (fptr == &jl_sigatomic_end ||
-        ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
-         strcmp(f_name, "jl_sigatomic_end") == 0)) {
+            ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
+             strcmp(f_name, "jl_sigatomic_end") == 0)) {
         assert(lrt == T_void);
         assert(!isVa && !llvmcall);
         assert(nargt == 0);
@@ -1682,8 +1682,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
         return ghostValue(jl_void_type);
     }
     if (fptr == (void(*)(void))&jl_is_leaf_type ||
-        ((f_lib==NULL || (intptr_t)f_lib==2)
-         && f_name && !strcmp(f_name, "jl_is_leaf_type"))) {
+            ((f_lib==NULL || (intptr_t)f_lib==2) &&
+             f_name && !strcmp(f_name, "jl_is_leaf_type"))) {
         assert(nargt == 1);
         assert(!isVa && !llvmcall);
         jl_value_t *arg = args[4];
@@ -1696,8 +1696,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
         }
     }
     if (fptr == (void(*)(void))&jl_function_ptr ||
-        ((f_lib==NULL || (intptr_t)f_lib==2)
-         && f_name && !strcmp(f_name, "jl_function_ptr"))) {
+            ((f_lib==NULL || (intptr_t)f_lib==2) &&
+             f_name && !strcmp(f_name, "jl_function_ptr"))) {
         assert(nargt == 3);
         assert(!isVa && !llvmcall);
         jl_value_t *f = static_eval(args[4], ctx, false, false);

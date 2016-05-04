@@ -106,14 +106,14 @@ extern int inside_typedef;
 static int equiv_type(jl_datatype_t *dta, jl_datatype_t *dtb)
 {
     if (!(jl_typeof(dta) == jl_typeof(dtb) &&
-          dta->name->name == dtb->name->name &&
-          dta->abstract == dtb->abstract &&
-          dta->mutabl == dtb->mutabl &&
-          dta->size == dtb->size &&
-          dta->ninitialized == dtb->ninitialized &&
-          jl_egal((jl_value_t*)dta->name->names, (jl_value_t*)dtb->name->names) &&
-          jl_nparams(dta) == jl_nparams(dtb) &&
-          jl_field_count(dta) == jl_field_count(dtb)))
+            dta->name->name == dtb->name->name &&
+            dta->abstract == dtb->abstract &&
+            dta->mutabl == dtb->mutabl &&
+            dta->size == dtb->size &&
+            dta->ninitialized == dtb->ninitialized &&
+            jl_egal((jl_value_t*)dta->name->names, (jl_value_t*)dtb->name->names) &&
+            jl_nparams(dta) == jl_nparams(dtb) &&
+            jl_field_count(dta) == jl_field_count(dtb)))
         return 0;
     jl_value_t *a=NULL, *b=NULL;
     int ok = 1;
@@ -137,7 +137,7 @@ static int equiv_type(jl_datatype_t *dta, jl_datatype_t *dtb)
         jl_unionall_t *ua = (jl_unionall_t*)a;
         jl_unionall_t *ub = (jl_unionall_t*)b;
         if (!jl_egal(ua->var->lb, ub->var->lb) || !jl_egal(ua->var->ub, ub->var->ub) ||
-            ua->var->name != ub->var->name)
+                ua->var->name != ub->var->name)
             goto no;
         a = jl_instantiate_unionall(ua, (jl_value_t*)ub->var);
         b = ub->body;
@@ -175,11 +175,11 @@ void jl_reset_instantiate_inner_types(jl_datatype_t *t);
 void jl_set_datatype_super(jl_datatype_t *tt, jl_value_t *super)
 {
     if (!jl_is_datatype(super) || !jl_is_abstracttype(super) ||
-        tt->name == ((jl_datatype_t*)super)->name ||
-        jl_subtype(super,(jl_value_t*)jl_vararg_type) ||
-        jl_is_tuple_type(super) ||
-        jl_subtype(super,(jl_value_t*)jl_type_type) ||
-        super == (jl_value_t*)jl_builtin_type) {
+            tt->name == ((jl_datatype_t*)super)->name ||
+            jl_subtype(super,(jl_value_t*)jl_vararg_type) ||
+            jl_is_tuple_type(super) ||
+            jl_subtype(super,(jl_value_t*)jl_type_type) ||
+            super == (jl_value_t*)jl_builtin_type) {
         jl_errorf("invalid subtyping in definition of %s",
                   jl_symbol_name(tt->name->name));
     }

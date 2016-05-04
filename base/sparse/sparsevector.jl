@@ -1735,10 +1735,9 @@ for isunittri in (true, false), islowertri in (true, false)
 
     # build out-of-place left-division operations
     for (istrans, func, ipfunc) in (
-        (false, :(\),         :(A_ldiv_B!)),
-        (true,  :(At_ldiv_B), :(At_ldiv_B!)),
-        (true,  :(Ac_ldiv_B), :(Ac_ldiv_B!)) )
-
+            (false, :(\),         :(A_ldiv_B!)),
+            (true,  :(At_ldiv_B), :(At_ldiv_B!)),
+            (true,  :(Ac_ldiv_B), :(Ac_ldiv_B!)) )
         # broad method where elements are Numbers
         @eval function ($func){TA<:Number,Tb<:Number}(A::$tritype{TA,<:AbstractMatrix}, b::SparseVector{Tb})
             TAb = $(isunittri ?
@@ -1774,10 +1773,9 @@ for isunittri in (true, false), islowertri in (true, false)
 
     # build in-place left-division operations
     for (istrans, func) in (
-        (false, :(A_ldiv_B!)),
-        (true,  :(At_ldiv_B!)),
-        (true,  :(Ac_ldiv_B!)) )
-
+            (false, :(A_ldiv_B!)),
+            (true,  :(At_ldiv_B!)),
+            (true,  :(Ac_ldiv_B!)) )
         # the generic in-place left-division methods handle these cases, but
         # we can achieve greater efficiency where the triangular matrix provides
         # good view support. hence the StridedMatrix restriction.

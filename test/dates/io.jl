@@ -31,9 +31,8 @@
 
 # Allow parsing of strings which are not representable as a TimeType
 let str = "02/15/1996 24:00", df = Dates.DateFormat("mm/dd/yyyy HH:MM")
-    parsed = Any[
-        Dates.Month(2), Dates.Day(15), Dates.Year(1996), Dates.Hour(24), Dates.Minute(0)
-    ]
+    parsed = Any[Dates.Month(2), Dates.Day(15), Dates.Year(1996),
+        Dates.Hour(24), Dates.Minute(0)]
     @test Dates.parse_components(str, df) == parsed
     @test_throws ArgumentError Dates.parse(DateTime, str, df)
 end
@@ -387,10 +386,8 @@ let
 
     str = "2015-07-24T05:38:19.591Z"
     dt = Dates.DateTime(2015, 7, 24, 5, 38, 19, 591)
-    parsed = Any[
-        Dates.Year(2015), Dates.Month(7), Dates.Day(24),
-        Dates.Hour(5), Dates.Minute(38), Dates.Second(19), Dates.Millisecond(591)
-    ]
+    parsed = Any[Dates.Year(2015), Dates.Month(7), Dates.Day(24),
+        Dates.Hour(5), Dates.Minute(38), Dates.Second(19), Dates.Millisecond(591)]
 
     format = "yyyy-mm-ddTHH:MM:SS.sssZ"
     escaped_format = "yyyy-mm-dd\\THH:MM:SS.sss\\Z"

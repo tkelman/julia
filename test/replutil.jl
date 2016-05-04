@@ -318,9 +318,8 @@ primitive type EightBitType 8 end
 primitive type EightBitTypeT{T} 8 end
 struct FunctionLike <: Function; end
 let err_str,
-    i = reinterpret(EightBitType, 0x54),
-    j = reinterpret(EightBitTypeT{Int32}, 0x54)
-
+        i = reinterpret(EightBitType, 0x54),
+        j = reinterpret(EightBitTypeT{Int32}, 0x54)
     err_str = @except_str Bool() MethodError
     @test contains(err_str, "MethodError: no method matching Bool()")
     err_str = @except_str :a() MethodError
@@ -358,11 +357,10 @@ EightBitTypeT() = throw(ErrorException("5"))
 
 
 let err_str,
-    i = reinterpret(EightBitType, 0x54),
-    j = reinterpret(EightBitTypeT{Int32}, 0x54),
-    sp = Base.source_path()
-    sn = basename(sp)
-
+        i = reinterpret(EightBitType, 0x54),
+        j = reinterpret(EightBitTypeT{Int32}, 0x54),
+        sp = Base.source_path()
+        sn = basename(sp)
     @test sprint(show, which(Symbol, Tuple{})) == "Symbol() in $curmod_str at $sp:$(method_defs_lineno + 0)"
     @test sprint(show, which(:a, Tuple{})) == "(::Symbol)() in $curmod_str at $sp:$(method_defs_lineno + 1)"
     @test sprint(show, which(EightBitType, Tuple{})) == "$(curmod_prefix)EightBitType() in $curmod_str at $sp:$(method_defs_lineno + 2)"

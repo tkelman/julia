@@ -79,7 +79,7 @@ void LowerPTLS::runOnFunction(LLVMContext &ctx, Module &M, Function *F,
 {
     CallInst *ptlsStates = NULL;
     for (auto I = F->getEntryBlock().begin(), E = F->getEntryBlock().end();
-         I != E; ++I) {
+            I != E; ++I) {
         if (CallInst *callInst = dyn_cast<CallInst>(&*I)) {
             if (callInst->getCalledValue() == ptls_getter) {
                 ptlsStates = callInst;

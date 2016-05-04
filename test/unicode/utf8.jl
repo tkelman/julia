@@ -28,14 +28,14 @@ end
     @test reverse("abc") == "cba"
     @test reverse("xyz\uff\u800\uffff\U10ffff") == "\U10ffff\uffff\u800\uffzyx"
     for str in [
-        b"xyz\xc1",
-        b"xyz\xd0",
-        b"xyz\xe0",
-        b"xyz\xed\x80",
-        b"xyz\xf0",
-        b"xyz\xf0\x80",
-        b"xyz\xf0\x80\x80"
-    ]
+            b"xyz\xc1",
+            b"xyz\xd0",
+            b"xyz\xe0",
+            b"xyz\xed\x80",
+            b"xyz\xf0",
+            b"xyz\xf0\x80",
+            b"xyz\xf0\x80\x80"
+            ]
         @test_throws UnicodeError reverse(String(str))
     end
 end

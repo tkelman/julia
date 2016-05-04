@@ -283,7 +283,7 @@ end
 
 import Base.LinAlg: fillslots!, UnitLowerTriangular
 @testset "fill! and fillslots!" begin
-    let #fill!
+    let # fill!
         let # fillslots!
             A = Tridiagonal(randn(2), randn(3), randn(2))
             @test fillslots!(A, 3) == Tridiagonal([3, 3.], [3, 3, 3.], [3, 3.])
@@ -294,16 +294,15 @@ import Base.LinAlg: fillslots!, UnitLowerTriangular
             Ult = UnitLowerTriangular(randn(3,3))
             @test fillslots!(Ult, 3) == UnitLowerTriangular([1 0 0; 3 1 0; 3 3 1])
         end
-        let # fill!(exotic, 0)
-            exotic_arrays = Any[Tridiagonal(randn(3), randn(4), randn(3)),
-            Bidiagonal(randn(3), randn(2), rand(Bool)),
-            SymTridiagonal(randn(3), randn(2)),
-            sparse(randn(3,4)),
-            Diagonal(randn(5)),
-            sparse(rand(3)),
-            LowerTriangular(randn(3,3)),
-            UpperTriangular(randn(3,3))
-            ]
+        # fill!(exotic, 0)
+        let exotic_arrays = Any[Tridiagonal(randn(3), randn(4), randn(3)),
+                Bidiagonal(randn(3), randn(2), rand(Bool)),
+                SymTridiagonal(randn(3), randn(2)),
+                sparse(randn(3,4)),
+                Diagonal(randn(5)),
+                sparse(rand(3)),
+                LowerTriangular(randn(3,3)),
+                UpperTriangular(randn(3,3))]
             for A in exotic_arrays
                 fill!(A, 0)
                 for a in A

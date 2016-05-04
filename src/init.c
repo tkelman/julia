@@ -610,7 +610,7 @@ void _julia_init(JL_IMAGE_SEARCH rel)
     // libuv stdio cleanup depends on jl_init_tasks() because JL_TRY is used in jl_atexit_hook()
 
     if ((jl_options.outputo || jl_options.outputbc) &&
-        (jl_options.code_coverage || jl_options.malloc_log)) {
+            (jl_options.code_coverage || jl_options.malloc_log)) {
         jl_error("cannot generate code-coverage or track allocation information while generating a .o or .bc output file");
     }
 

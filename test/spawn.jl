@@ -120,7 +120,7 @@ end
 @test (withenv("TEST"=>"Hello World") do
        readstring(`$shcmd -c "echo \$TEST"`); end) == "Hello World\n"
 let pathA = readchomp(setenv(`$shcmd -c "pwd -P"`;dir="..")),
-    pathB = readchomp(setenv(`$shcmd -c "cd .. && pwd -P"`))
+        pathB = readchomp(setenv(`$shcmd -c "cd .. && pwd -P"`))
     if is_windows()
         # on windows, sh returns posix-style paths that are not valid according to ispath
         @test pathA == pathB
@@ -221,9 +221,8 @@ end
 
 @testset "redirect_*" begin
     let OLD_STDOUT = STDOUT,
-        fname = tempname(),
-        f = open(fname,"w")
-
+            fname = tempname(),
+            f = open(fname,"w")
         redirect_stdout(f)
         println("Hello World")
         redirect_stdout(OLD_STDOUT)

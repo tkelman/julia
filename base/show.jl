@@ -606,7 +606,7 @@ function show_unquoted(io::IO, ex::Slot, ::Int, ::Int)
     end
     slotnames = get(io, :SOURCE_SLOTNAMES, false)
     if (isa(slotnames, Vector{String}) &&
-        slotid <= length(slotnames::Vector{String}))
+            slotid <= length(slotnames::Vector{String}))
         print(io, (slotnames::Vector{String})[slotid])
     else
         print(io, "_", slotid)
@@ -741,7 +741,7 @@ function show_unquoted(io::IO, ex::Expr, indent::Int, prec::Int)
         func_args = args[2:end]
 
         if (in(ex.args[1], (GlobalRef(Base, :bitcast), :throw)) ||
-            ismodulecall(ex))
+                ismodulecall(ex))
             show_type = false
         end
         if show_type
@@ -749,8 +749,8 @@ function show_unquoted(io::IO, ex::Expr, indent::Int, prec::Int)
         end
 
         # scalar multiplication (i.e. "100x")
-        if (func === :* &&
-            length(func_args)==2 && isa(func_args[1], Real) && isa(func_args[2], Symbol))
+        if (func === :* && length(func_args) == 2 &&
+                isa(func_args[1], Real) && isa(func_args[2], Symbol))
             if func_prec <= prec
                 show_enclosed_list(io, '(', func_args, "", ')', indent, func_prec)
             else

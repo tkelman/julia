@@ -302,7 +302,7 @@ function get_type(sym::Expr, fn)
         # is inexpensive and it is also performed in the complete_symbol function.
         a1 = sym.args[1]
         if isa(a1,GlobalRef) && isconst(a1.mod,a1.name) && isdefined(a1.mod,a1.name) &&
-            eval(a1) === Core.getfield
+                eval(a1) === Core.getfield
             val, found = get_value_getfield(sym, Main)
             return found ? Base.typesof(val).parameters[1] : Any, found
         end
@@ -459,9 +459,9 @@ function completions(string, pos)
         r = startpos:pos
         paths, r, success = complete_path(replace(string[r], r"\\ ", " "), pos)
         if inc_tag == :string &&
-           length(paths) == 1 &&                              # Only close if there's a single choice,
-           !isdir(expanduser(replace(string[startpos:start(r)-1] * paths[1], r"\\ ", " "))) &&  # except if it's a directory
-           (length(string) <= pos || string[pos+1] != '"')    # or there's already a " at the cursor.
+               length(paths) == 1 &&                              # Only close if there's a single choice,
+               !isdir(expanduser(replace(string[startpos:start(r)-1] * paths[1], r"\\ ", " "))) &&  # except if it's a directory
+               (length(string) <= pos || string[pos+1] != '"')    # or there's already a " at the cursor.
             paths[1] *= "\""
         end
         #Latex symbols can be completed for strings
@@ -479,7 +479,7 @@ function completions(string, pos)
         ex = Base.syntax_deprecation_warnings(false) do
             parse(partial[frange] * ")", raise=false)
         end
-        if isa(ex, Expr) && ex.head==:call
+        if isa(ex, Expr) && ex.head == :call
             return complete_methods(ex), start(frange):method_name_end, false
         end
     elseif inc_tag == :comment

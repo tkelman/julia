@@ -953,17 +953,17 @@ convert(::Type{Sparse}, A::Symmetric{Float64,SparseMatrixCSC{Float64,SuiteSparse
 convert{Tv<:VTypes}(::Type{Sparse}, A::Hermitian{Tv,SparseMatrixCSC{Tv,SuiteSparse_long}}) =
     Sparse(A.data, A.uplo == 'L' ? -1 : 1)
 function convert{Ti<:ITypes}(::Type{Sparse},
-    A::Union{SparseMatrixCSC{BigFloat,Ti},
-             Symmetric{BigFloat,SparseMatrixCSC{BigFloat,Ti}},
-             Hermitian{Complex{BigFloat},SparseMatrixCSC{Complex{BigFloat},Ti}}},
-    args...)
+        A::Union{SparseMatrixCSC{BigFloat,Ti},
+                 Symmetric{BigFloat,SparseMatrixCSC{BigFloat,Ti}},
+                 Hermitian{Complex{BigFloat},SparseMatrixCSC{Complex{BigFloat},Ti}}},
+        args...)
     throw(MethodError(convert, (Sparse, A)))
 end
 function convert{T,Ti<:ITypes}(::Type{Sparse},
-    A::Union{SparseMatrixCSC{T,Ti},
-             Symmetric{T,SparseMatrixCSC{T,Ti}},
-             Hermitian{T,SparseMatrixCSC{T,Ti}}},
-    args...)
+        A::Union{SparseMatrixCSC{T,Ti},
+                 Symmetric{T,SparseMatrixCSC{T,Ti}},
+                 Hermitian{T,SparseMatrixCSC{T,Ti}}},
+        args...)
     return Sparse(convert(AbstractMatrix{promote_type(Float64, T)}, A), args...)
 end
 
@@ -1325,9 +1325,8 @@ Ac_mul_B(A::Sparse, B::VecOrMat) =  Ac_mul_B(A, Dense(B))
 
 ## Compute that symbolic factorization only
 function fact_(A::Sparse{<:VTypes}, cm::Array{UInt8};
-    perm::AbstractVector{SuiteSparse_long}=SuiteSparse_long[],
-    postorder::Bool=true, userperm_only::Bool=true)
-
+        perm::AbstractVector{SuiteSparse_long}=SuiteSparse_long[],
+        postorder::Bool=true, userperm_only::Bool=true)
     sA = unsafe_load(get(A.p))
     sA.stype == 0 && throw(ArgumentError("sparse matrix is not symmetric/Hermitian"))
 
@@ -1382,12 +1381,11 @@ cholfact!{T<:Real}(F::Factor, A::Union{SparseMatrixCSC{T},
         Symmetric{T,SparseMatrixCSC{T,SuiteSparse_long}},
         Hermitian{Complex{T},SparseMatrixCSC{Complex{T},SuiteSparse_long}},
         Hermitian{T,SparseMatrixCSC{T,SuiteSparse_long}}};
-    shift = 0.0) =
+        shift = 0.0) =
     cholfact!(F, Sparse(A); shift = shift)
 
 function cholfact(A::Sparse; shift::Real=0.0,
-    perm::AbstractVector{SuiteSparse_long}=SuiteSparse_long[])
-
+        perm::AbstractVector{SuiteSparse_long}=SuiteSparse_long[])
     cm = defaults(common())
     set_print_level(cm, 0)
 
@@ -1470,16 +1468,15 @@ See also [`ldltfact`](@ref).
     as appropriate.
 """
 ldltfact!{T<:Real}(F::Factor, A::Union{SparseMatrixCSC{T},
-    SparseMatrixCSC{Complex{T}},
-    Symmetric{T,SparseMatrixCSC{T,SuiteSparse_long}},
-    Hermitian{Complex{T},SparseMatrixCSC{Complex{T},SuiteSparse_long}},
-    Hermitian{T,SparseMatrixCSC{T,SuiteSparse_long}}};
-    shift = 0.0) =
+        SparseMatrixCSC{Complex{T}},
+        Symmetric{T,SparseMatrixCSC{T,SuiteSparse_long}},
+        Hermitian{Complex{T},SparseMatrixCSC{Complex{T},SuiteSparse_long}},
+        Hermitian{T,SparseMatrixCSC{T,SuiteSparse_long}}};
+        shift = 0.0) =
     ldltfact!(F, Sparse(A), shift = shift)
 
 function ldltfact(A::Sparse; shift::Real=0.0,
-    perm::AbstractVector{SuiteSparse_long}=SuiteSparse_long[])
-
+        perm::AbstractVector{SuiteSparse_long}=SuiteSparse_long[])
     cm = defaults(common())
     set_print_level(cm, 0)
 

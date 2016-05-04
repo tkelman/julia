@@ -311,8 +311,7 @@ end
 mutable struct Alpha end
 Base.show(io::IO, ::Alpha) = print(io,"α")
 let sbuff = IOBuffer(),
-    io = Base.IOContext(Base.IOContext(sbuff, :limit => true), :displaysize => (10, 20))
-
+        io = Base.IOContext(Base.IOContext(sbuff, :limit => true), :displaysize => (10, 20))
     Base.show(io, MIME("text/plain"), Dict(Alpha()=>1))
     @test !contains(String(sbuff), "…")
     @test endswith(String(sbuff), "α => 1")

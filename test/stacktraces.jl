@@ -99,9 +99,8 @@ end
 end
 
 let src = expand(quote let x = 1 end end).args[1]::CodeInfo,
-    li = ccall(:jl_new_method_instance_uninit, Ref{Core.MethodInstance}, ()),
-    sf
-
+        li = ccall(:jl_new_method_instance_uninit, Ref{Core.MethodInstance}, ()),
+        sf
     li.inferred = src
     li.specTypes = Tuple{}
     sf = StackFrame(:a, :b, 3, li, false, false, 0)
@@ -109,14 +108,13 @@ let src = expand(quote let x = 1 end end).args[1]::CodeInfo,
     @test repr == "Toplevel MethodInstance thunk at b:3"
 end
 let li = typeof(getfield).name.mt.cache.func::Core.MethodInstance,
-    sf = StackFrame(:a, :b, 3, li, false, false, 0),
-    repr = string(sf)
+        sf = StackFrame(:a, :b, 3, li, false, false, 0),
+        repr = string(sf)
     @test repr == "getfield(...) at b:3"
 end
 
 let ctestptr = cglobal((:ctest, "libccalltest")),
-    ctest = StackTraces.lookup(ctestptr + 1)
-
+        ctest = StackTraces.lookup(ctestptr + 1)
     @test length(ctest) == 1
     @test ctest[1].func === :ctest
     @test isnull(ctest[1].linfo)

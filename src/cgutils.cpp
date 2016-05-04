@@ -125,9 +125,9 @@ static DIType julia_type_to_di(jl_value_t *jt, DIBuilder *dbuilder, bool isboxed
         return jl_pvalue_dillvmt;
     // always return the boxed representation for types with hidden content
     if (jl_is_abstracttype(jt) || !jl_is_datatype(jt) || jl_is_array_type(jt) ||
-        jt == (jl_value_t*)jl_sym_type || jt == (jl_value_t*)jl_module_type ||
-        jt == (jl_value_t*)jl_simplevector_type || jt == (jl_value_t*)jl_datatype_type ||
-        jt == (jl_value_t*)jl_method_instance_type)
+            jt == (jl_value_t*)jl_sym_type || jt == (jl_value_t*)jl_module_type ||
+            jt == (jl_value_t*)jl_simplevector_type || jt == (jl_value_t*)jl_datatype_type ||
+            jt == (jl_value_t*)jl_method_instance_type)
         return jl_pvalue_dillvmt;
     if (jl_is_unionall(jt) || jl_is_typevar(jt))
         return jl_pvalue_dillvmt;
@@ -343,7 +343,7 @@ static Value *literal_pointer_val(jl_binding_t *p)
 static Value *emit_bitcast(Value *v, Type *jl_value)
 {
     if (isa<PointerType>(jl_value) &&
-        v->getType()->getPointerAddressSpace() != jl_value->getPointerAddressSpace()) {
+            v->getType()->getPointerAddressSpace() != jl_value->getPointerAddressSpace()) {
         // Cast to the proper address space
         Type *jl_value_addr =
                 PointerType::get(cast<PointerType>(jl_value)->getElementType(),
@@ -2164,8 +2164,8 @@ static jl_cgval_t emit_new_struct(jl_value_t *ty, size_t nargs, jl_value_t **arg
             // or instead initialize the stack buffer with stores
             bool init_as_value = false;
             if (lt->isVectorTy() ||
-                jl_is_vecelement_type(ty) ||
-                type_is_ghost(lt)) // maybe also check the size ?
+                    jl_is_vecelement_type(ty) ||
+                    type_is_ghost(lt)) // maybe also check the size ?
                 init_as_value = true;
 
             size_t na = nargs-1 < nf ? nargs-1 : nf;

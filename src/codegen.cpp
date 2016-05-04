@@ -1118,7 +1118,7 @@ jl_llvm_functions_t jl_compile_linfo(jl_method_instance_t **pli, jl_code_info_t 
     jl_llvm_functions_t decls = {};
 
     if (params != &jl_default_cgparams /* fast path */ &&
-        !compare_cgparams(params, &jl_default_cgparams) && params->cached)
+            !compare_cgparams(params, &jl_default_cgparams) && params->cached)
         jl_error("functions compiled with custom codegen params mustn't be cached");
 
     // Fast path for the already-compiled case
@@ -1127,7 +1127,7 @@ jl_llvm_functions_t jl_compile_linfo(jl_method_instance_t **pli, jl_code_info_t 
         bool already_compiled = params->cached && decls.functionObject != NULL;
         if (!src) {
             if ((already_compiled || li->jlcall_api == 2) &&
-                (li->min_world <= world && li->max_world >= world)) {
+                    (li->min_world <= world && li->max_world >= world)) {
                 return decls;
             }
         } else if (already_compiled) {
@@ -2258,9 +2258,9 @@ static void simple_escape_analysis(jl_value_t *expr, bool esc, jl_codectx_t *ctx
                     }
                     else {
                         if ((fv==jl_builtin_getfield && alen==3 &&
-                             expr_type(jl_exprarg(e,2),ctx) == (jl_value_t*)jl_long_type) ||
-                            fv==jl_builtin_nfields ||
-                            (fv==jl_builtin__apply && alen==3)) {
+                                 expr_type(jl_exprarg(e,2),ctx) == (jl_value_t*)jl_long_type) ||
+                                fv==jl_builtin_nfields ||
+                                (fv==jl_builtin__apply && alen==3)) {
                             esc = false;
                         }
                     }
@@ -2408,7 +2408,7 @@ static jl_cgval_t emit_getfield(jl_value_t *expr, jl_sym_t *name, jl_codectx_t *
     if (jl_is_type_type((jl_value_t*)sty) && jl_is_leaf_type(jl_tparam0(sty)))
         sty = (jl_datatype_t*)jl_typeof(jl_tparam0(sty));
     if (jl_is_structtype(sty) && sty != jl_module_type && sty->uid != 0 &&
-        jl_is_leaf_type((jl_value_t*)sty)) {
+            jl_is_leaf_type((jl_value_t*)sty)) {
         unsigned idx = jl_field_index(sty, name, 0);
         if (idx != (unsigned)-1) {
             jl_cgval_t strct = emit_expr(expr, ctx);
@@ -2567,10 +2567,10 @@ static Value *emit_f_is(const jl_cgval_t &arg1, const jl_cgval_t &arg2, jl_codec
     if (jl_is_mutable_datatype(rt1) || jl_is_mutable_datatype(rt2)) // excludes abstract types
         ptr_comparable = 1;
     if (jl_subtype(rt1, (jl_value_t*)jl_type_type) ||
-        jl_subtype(rt2, (jl_value_t*)jl_type_type)) // need to use typeseq for datatypes
+            jl_subtype(rt2, (jl_value_t*)jl_type_type)) // need to use typeseq for datatypes
         ptr_comparable = 0;
     if ((jl_is_type_type(rt1) && jl_is_leaf_type(jl_tparam0(rt1))) ||
-        (jl_is_type_type(rt2) && jl_is_leaf_type(jl_tparam0(rt2)))) // can compare leaf types by pointer
+            (jl_is_type_type(rt2) && jl_is_leaf_type(jl_tparam0(rt2)))) // can compare leaf types by pointer
         ptr_comparable = 1;
     if (ptr_comparable) {
         Value *varg1 = arg1.constant ? literal_pointer_val(arg1.constant) : arg1.V;
@@ -2688,7 +2688,7 @@ static bool emit_builtin_call(jl_cgval_t *ret, jl_value_t *f, jl_value_t **args,
         rt1 = expr_type(args[1], ctx);
         rt2 = expr_type(args[2], ctx);
         if (jl_is_type_type(rt1) && !jl_has_free_typevars(rt1) &&
-            jl_is_type_type(rt2) && !jl_has_free_typevars(rt2)) {
+                jl_is_type_type(rt2) && !jl_has_free_typevars(rt2)) {
             int issub = jl_subtype(jl_tparam0(rt1), jl_tparam0(rt2));
             emit_expr(args[1], ctx);
             emit_expr(args[2], ctx);
@@ -3059,13 +3059,13 @@ static bool emit_builtin_call(jl_cgval_t *ret, jl_value_t *f, jl_value_t **args,
             sty = jl_tparam0(sty);
         }
         if (jl_is_datatype(sty) && sty != (jl_value_t*)jl_symbol_type &&
-            ((jl_datatype_t*)sty)->name != jl_array_typename &&
-            sty != (jl_value_t*)jl_simplevector_type && sty != (jl_value_t*)jl_string_type &&
-            // exclude DataType, since each DataType has its own size, not sizeof(DataType).
-            // this is issue #8798
-            sty != (jl_value_t*)jl_datatype_type) {
+                ((jl_datatype_t*)sty)->name != jl_array_typename &&
+                sty != (jl_value_t*)jl_simplevector_type && sty != (jl_value_t*)jl_string_type &&
+                // exclude DataType, since each DataType has its own size, not sizeof(DataType).
+                // this is issue #8798
+                sty != (jl_value_t*)jl_datatype_type) {
             if (jl_is_leaf_type(sty) ||
-                (((jl_datatype_t*)sty)->name->names == jl_emptysvec && jl_datatype_size(sty) > 0)) {
+                    (((jl_datatype_t*)sty)->name->names == jl_emptysvec && jl_datatype_size(sty) > 0)) {
                 *ret = mark_julia_type(ConstantInt::get(T_size, jl_datatype_size(sty)), false, jl_long_type, ctx);
                 JL_GC_POP();
                 return true;
@@ -3101,7 +3101,7 @@ static bool emit_builtin_call(jl_cgval_t *ret, jl_value_t *f, jl_value_t **args,
     else if (f == jl_builtin_isdefined && nargs == 2) {
         jl_datatype_t *stt = (jl_datatype_t*)expr_type(args[1], ctx);
         if (!jl_is_leaf_type((jl_value_t*)stt) || jl_is_array_type(stt) ||
-            stt == jl_module_type) {
+                stt == jl_module_type) {
             JL_GC_POP();
             return false;
         }
@@ -4257,7 +4257,7 @@ static Function *gen_cfun_wrapper(jl_function_t *ff, jl_value_t *jlrettype, jl_t
         if (lam) {
             astrt = lam->rettype;
             if (astrt != (jl_value_t*)jl_bottom_type &&
-                jl_type_intersection(astrt, declrt) == jl_bottom_type) {
+                    jl_type_intersection(astrt, declrt) == jl_bottom_type) {
                 // Do not warn if the function does not return since it is
                 // occasionally required by the C API (typically error callbacks)
                 // and doesn't capture the majority of the case when a function
@@ -5965,7 +5965,7 @@ static std::unique_ptr<Module> emit_function(
             builder.SetCurrentDebugLocation(props.loc);
         // Disable coverage for pop_loc, it doesn't start a new expression
         if (props.loc_changed && do_coverage(props.in_user_code) &&
-            !props.is_poploc) {
+                !props.is_poploc) {
             coverageVisitLine(props.file, props.line);
         }
         ctx.is_inbounds = props.is_inbounds;
@@ -6985,7 +6985,7 @@ static inline std::string getNativeTarget()
                 return "armv7-m";
             }
             if (strcmp(name.machine, "armv8l") == 0 ||
-                strcmp(name.machine, "aarch64") == 0) {
+                    strcmp(name.machine, "aarch64") == 0) {
                 return "armv8";
             }
         }

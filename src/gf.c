@@ -249,9 +249,9 @@ jl_code_info_t *jl_type_infer(jl_method_instance_t **pli, size_t world, int forc
     size_t last_age = jl_get_ptls_states()->world_age;
     inInference = 1;
     if (force ||
-        (last_age != jl_typeinf_world &&
-         mod != jl_gf_mtable(jl_typeinf_func)->module &&
-         (mod != jl_core_module || !lastIn))) { // avoid any potential recursion in calling jl_typeinf_func on itself
+            (last_age != jl_typeinf_world &&
+             mod != jl_gf_mtable(jl_typeinf_func)->module &&
+             (mod != jl_core_module || !lastIn))) { // avoid any potential recursion in calling jl_typeinf_func on itself
         assert(li->inInference == 0 && "unexpectedly asked to infer a method that is already being inferred");
         jl_value_t **fargs;
         JL_GC_PUSHARGS(fargs, 3);
@@ -728,7 +728,7 @@ JL_DLLEXPORT int jl_is_cacheable_sig(
         // avoid specializing on an argument of type Tuple
         // unless matching a declared type of `::Type`
         if (jl_is_type_type(elt) && jl_is_tuple_type(jl_tparam0(elt)) &&
-            (!jl_subtype(decl_i, (jl_value_t*)jl_type_type) || jl_is_kind(decl_i))) { // Type{Tuple{...}}
+                (!jl_subtype(decl_i, (jl_value_t*)jl_type_type) || jl_is_kind(decl_i))) { // Type{Tuple{...}}
             if (!jl_types_equal(elt, (jl_value_t*)jl_anytuple_type_type))
                 return 0;
             continue;
@@ -841,7 +841,7 @@ static jl_method_instance_t *cache_method(jl_methtable_t *mt, union jl_typemap_t
     // supertype of any other method signatures. so far we are conservative
     // and the types we find should be bigger.
     if (!definition->isstaged && jl_nparams(type) > mt->max_args
-        && jl_va_tuple_kind((jl_datatype_t*)decl) == JL_VARARG_UNBOUND) {
+            && jl_va_tuple_kind((jl_datatype_t*)decl) == JL_VARARG_UNBOUND) {
         size_t i, nspec = mt->max_args + 2;
         jl_svec_t *limited = jl_alloc_svec(nspec);
         temp = (jl_value_t*)limited;
@@ -2157,8 +2157,8 @@ STATIC_INLINE jl_method_instance_t *jl_lookup_generic_(jl_value_t **args, uint32
     for (i = 0; i < 4; i++) {
         entry = call_cache[cache_idx[i]];
         if (entry && nargs == jl_svec_len(entry->sig->parameters) &&
-            sig_match_fast(args, jl_svec_data(entry->sig->parameters), 0, nargs) &&
-            world >= entry->min_world && world <= entry->max_world) {
+                sig_match_fast(args, jl_svec_data(entry->sig->parameters), 0, nargs) &&
+                world >= entry->min_world && world <= entry->max_world) {
             break;
         }
     }
@@ -2326,7 +2326,7 @@ static int tupletype_has_datatype(jl_tupletype_t *tt, tupletype_stack_t *stack)
         if (jl_is_tuple_type(ti)) {
             jl_tupletype_t *tt1 = (jl_tupletype_t*)ti;
             if (!tupletype_on_stack(tt1, stack) &&
-                tupletype_has_datatype(tt1, stack)) {
+                    tupletype_has_datatype(tt1, stack)) {
                 return 1;
             }
         }
@@ -2484,9 +2484,9 @@ static int matched_all_tvars(jl_value_t *sig, jl_value_t **env, int envsz)
     for (i = 0; i < envsz; i++) {
         assert(jl_is_unionall(temp));
         if (jl_is_typevar(env[i]) &&
-            // if tvar is at the top level it will definitely be matched.
-            // see issue #5575
-            !tvar_exists_at_top_level(((jl_unionall_t*)temp)->var, sig)) {
+                // if tvar is at the top level it will definitely be matched.
+                // see issue #5575
+                !tvar_exists_at_top_level(((jl_unionall_t*)temp)->var, sig)) {
             return 0;
         }
         temp = ((jl_unionall_t*)temp)->body;

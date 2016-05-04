@@ -48,8 +48,8 @@ end
 
 # zip eachline (issue #7369)
 let zeb = IOBuffer("1\n2\n3\n4\n5\n"),
-    letters = ['a', 'b', 'c', 'd', 'e'],
-    res     = []
+        letters = ['a', 'b', 'c', 'd', 'e'],
+        res     = []
     for (number, letter) in zip(eachline(zeb), letters)
         push!(res, (parse(Int,strip(number)), letter))
     end

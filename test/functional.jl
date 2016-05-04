@@ -127,7 +127,7 @@ let gen = (x for x in 1:10 if x % 2 == 0), gen2 = Iterators.filter(x->x % 2 == 0
 end
 
 let gen = ((x,y) for x in 1:10, y in 1:10 if x % 2 == 0 && y % 2 == 0),
-    gen2 = Iterators.filter(x->x[1] % 2 == 0 && x[2] % 2 == 0, (x,y) for x in 1:10, y in 1:10)
+        gen2 = Iterators.filter(x->x[1] % 2 == 0 && x[2] % 2 == 0, (x,y) for x in 1:10, y in 1:10)
     @test collect(gen) == collect(gen2)
 end
 

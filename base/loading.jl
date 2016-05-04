@@ -312,9 +312,9 @@ using `__precompile__()`. Failure to do so can result in a runtime error when lo
 """
 function __precompile__(isprecompilable::Bool=true)
     if (myid() == 1 &&
-        JLOptions().use_compilecache != 0 &&
-        isprecompilable != (0 != ccall(:jl_generating_output, Cint, ())) &&
-        !(isprecompilable && toplevel_load::Bool))
+            JLOptions().use_compilecache != 0 &&
+            isprecompilable != (0 != ccall(:jl_generating_output, Cint, ())) &&
+            !(isprecompilable && toplevel_load::Bool))
         throw(PrecompilableError(isprecompilable))
     end
 end

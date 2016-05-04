@@ -1978,7 +1978,7 @@ static jl_value_t *jl_deserialize_value_(jl_serializer_state *s, jl_value_t *vta
 {
     int usetable = (s->mode != MODE_AST);
     if (vtag == (jl_value_t*)jl_simplevector_type ||
-        vtag == (jl_value_t*)LongSvec_tag) {
+            vtag == (jl_value_t*)LongSvec_tag) {
         return jl_deserialize_value_svec(s, vtag);
     }
     else if (vtag == (jl_value_t*)CommonSym_tag) {

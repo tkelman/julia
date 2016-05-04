@@ -510,7 +510,7 @@ void JuliaGCAllocator::collapseRedundantRoots()
             }
 
             if ((theLoad != NULL && variable_slot) ||
-                (theLoad == NULL && theStore != NULL)) {
+                    (theLoad == NULL && theStore != NULL)) {
                 Value *theValue = theLoad ? theLoad : theStore->getValueOperand();
                 if (theValue->hasNUses(theLoad ? 1 : 2)) { // only uses are theStore and theLoad and theOther
                     // check if this value is only used for a store to another gcroot
@@ -1215,7 +1215,7 @@ void LowerGCFrame::runOnFunction(Module *M, Function &F, Function *ptls_getter,
 {
     CallInst *ptlsStates = nullptr;
     for (auto I = F.getEntryBlock().begin(), E = F.getEntryBlock().end();
-         ptls_getter && I != E; ++I) {
+            ptls_getter && I != E; ++I) {
         if (CallInst *callInst = dyn_cast<CallInst>(&*I)) {
             if (callInst->getCalledValue() == ptls_getter) {
                 ptlsStates = callInst;

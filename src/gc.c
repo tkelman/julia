@@ -1925,10 +1925,10 @@ static int _jl_gc_collect(jl_ptls_t ptls, int full)
     int sweep_full;
     int recollect = 0;
     if ((full || large_frontier ||
-         ((not_freed_enough || promoted_bytes >= gc_num.interval) &&
-          (promoted_bytes >= default_collect_interval || prev_sweep_full)) ||
-         gc_check_heap_size(live_sz_ub, live_sz_est)) &&
-        gc_num.pause > 1) {
+             ((not_freed_enough || promoted_bytes >= gc_num.interval) &&
+              (promoted_bytes >= default_collect_interval || prev_sweep_full)) ||
+             gc_check_heap_size(live_sz_ub, live_sz_est)) &&
+            gc_num.pause > 1) {
         gc_update_heap_size(live_sz_ub, live_sz_est);
         recollect = full;
         if (large_frontier)

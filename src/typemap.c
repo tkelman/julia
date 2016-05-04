@@ -124,7 +124,7 @@ static inline int sig_match_simple(jl_value_t **args, size_t n, jl_value_t **sig
         jl_value_t *decl = sig[i];
         jl_value_t *a = args[i];
         if (decl == (jl_value_t*)jl_any_type || decl == jl_ANY_flag ||
-            ((jl_value_t*)jl_typeof(a) == decl)) {
+                ((jl_value_t*)jl_typeof(a) == decl)) {
             /*
               we are only matching concrete types here, and those types are
               hash-consed, so pointer comparison should work.
@@ -138,7 +138,7 @@ static inline int sig_match_simple(jl_value_t **args, size_t n, jl_value_t **sig
                 // in the case of Type{_}, the types don't have to match exactly.
                 // this is cached as `Type{T} where T`.
                 if (((jl_tvar_t*)tp0)->ub != (jl_value_t*)jl_any_type &&
-                    !jl_subtype(a, ((jl_tvar_t*)tp0)->ub))
+                        !jl_subtype(a, ((jl_tvar_t*)tp0)->ub))
                     return 0;
             }
             else {
@@ -436,9 +436,9 @@ static int jl_typemap_intersection_array_visitor(struct jl_ordereddict_t *a, jl_
         }
         // `t` is a leaftype, so intersection test becomes subtype
         if (ty == (jl_value_t*)jl_any_type || // easy case: Any always matches
-            (tparam
-             ? (jl_typeof(t) == ty || jl_isa(t, ty)) // (Type{t} <: ty), where is_leaf_type(t) => isa(t, ty)
-             : (t == ty || jl_subtype(t, ty)))) {
+                (tparam
+                 ? (jl_typeof(t) == ty || jl_isa(t, ty)) // (Type{t} <: ty), where is_leaf_type(t) => isa(t, ty)
+                 : (t == ty || jl_subtype(t, ty)))) {
             if (!jl_typemap_intersection_visitor(ml, offs + 1, closure))
                 return 0;
         }
@@ -516,7 +516,8 @@ int jl_typemap_intersection_visitor(union jl_typemap_t map, int offs,
                     // else an array scan is required to check subtypes
                     // first, fast-path: optimized pre-intersection test to see if `ty` could intersect with any Type
                     if (typetype || jl_type_intersection((jl_value_t*)jl_type_type, ty) != jl_bottom_type)
-                        if (!jl_typemap_intersection_array_visitor(&cache->targ, ty, 1, offs, closure)) return 0;
+                        if (!jl_typemap_intersection_array_visitor(&cache->targ, ty, 1, offs, closure))
+                            return 0;
                 }
             }
             if (cache->arg1.values != (void*)jl_nothing) {
@@ -744,7 +745,7 @@ jl_typemap_entry_t *jl_typemap_entry_assoc_exact(jl_typemap_entry_t *ml, jl_valu
                 }
                 else if (n == 3) {
                     if (jl_typeof(args[1]) == jl_tparam(ml->sig, 1) &&
-                        jl_typeof(args[2]) == jl_tparam(ml->sig, 2))
+                            jl_typeof(args[2]) == jl_tparam(ml->sig, 2))
                         return ml;
                 }
                 else {
@@ -1039,7 +1040,7 @@ static int has_unions(jl_value_t *type)
     for (i = 0; i < jl_nparams(type); i++) {
         jl_value_t *t = jl_tparam(type, i);
         if (jl_is_uniontype(t) ||
-            (jl_is_vararg_type(t) && jl_is_uniontype(jl_unwrap_vararg(t))))
+                (jl_is_vararg_type(t) && jl_is_uniontype(jl_unwrap_vararg(t))))
             return 1;
     }
     return 0;
@@ -1057,7 +1058,7 @@ static void jl_typemap_list_insert_sorted(jl_typemap_entry_t **pml, jl_value_t *
         if (!l->isleafsig) { // quickly ignore all of the leafsig entries (these were handled by caller)
             if (jl_type_morespecific((jl_value_t*)newrec->sig, (jl_value_t*)l->sig)) {
                 if (l->simplesig == (void*)jl_nothing ||
-                    newrec->simplesig != (void*)jl_nothing || !jl_types_equal((jl_value_t*)l->sig, (jl_value_t*)newrec->sig)) {
+                        newrec->simplesig != (void*)jl_nothing || !jl_types_equal((jl_value_t*)l->sig, (jl_value_t*)newrec->sig)) {
                     // might need to insert multiple entries for a lookup differing only by their simplesig
                     // when simplesig contains a kind
                     // TODO: make this test more correct or figure out a better way to compute this

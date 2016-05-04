@@ -5428,8 +5428,7 @@ for (ormhr, elty) in
         # .. Array Arguments ..
         # DOUBLE PRECISION   a( lda, * ), c( ldc, * ), tau( * ), work( * )
         function ormhr!(side::Char, trans::Char, ilo::Integer, ihi::Integer, A::StridedMatrix{$elty},
-            tau::StridedVector{$elty}, C::StridedVecOrMat{$elty})
-
+                tau::StridedVector{$elty}, C::StridedVecOrMat{$elty})
             chkstride1(A, tau)
             n = checksquare(A)
             mC, nC = size(C, 1), size(C, 2)

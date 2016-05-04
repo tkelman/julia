@@ -64,9 +64,9 @@ const ENGLISH = DateLocale(
 const LOCALES = Dict{String, DateLocale}("english" => ENGLISH)
 
 for (fn, field) in zip(
-    [:dayname_to_value, :dayabbr_to_value, :monthname_to_value, :monthabbr_to_value],
-    [:day_of_week_value, :day_of_week_abbr_value, :month_value, :month_abbr_value],
-)
+        [:dayname_to_value, :dayabbr_to_value, :monthname_to_value, :monthabbr_to_value],
+        [:day_of_week_value, :day_of_week_abbr_value, :month_value, :month_abbr_value],
+        )
     @eval @inline function $fn(word::AbstractString, locale::DateLocale)
         # Maximize performance by attempting to avoid the use of `lowercase` and trying
         # a case-sensitive lookup first

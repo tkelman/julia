@@ -424,20 +424,20 @@ end
 setprecision(53) do
     for f in (:sin,:cos,:tan,:sec,:csc,:cot,:acos,:asin,:atan,
             :cosh,:sinh,:tanh,:sech,:csch,:coth,:asinh),
-        j in (-1., -0.5, -0.25, .25, .5, 1.)
+            j in (-1., -0.5, -0.25, .25, .5, 1.)
         @eval begin
             @test ($f)(BigFloat($j)) ≈ ($f)($j)
         end
     end
     for f in (:acos,:asin,:acosh,:atanh),
-        j in (-2, -1.5)
+            j in (-2, -1.5)
         @eval begin
             @test_throws DomainError ($f)(BigFloat($j))
         end
     end
     for f in (:sin,:cos,:tan,:sec,:csc,:cot,:cosh,:sinh,:tanh,
               :sech,:csch,:coth,:acosh,:asinh),
-        j in (1., 1.5, 1.9)
+            j in (1., 1.5, 1.9)
         @eval begin
             @test ($f)(BigFloat($j)) ≈ ($f)($j)
         end
@@ -863,13 +863,11 @@ end
 # test constructors and `big` with additional precision and rounding mode:
 for prec in (10, 100, 1000)
     for val in ("3.1", pi, "-1.3", 3.1)
-        let
-            a = BigFloat(val)
-            b = BigFloat(val, prec)
-            c = BigFloat(val, RoundUp)
-            d = BigFloat(val, prec, RoundDown)
-            e = BigFloat(val, prec, RoundUp)
-
+        let a = BigFloat(val),
+                b = BigFloat(val, prec),
+                c = BigFloat(val, RoundUp),
+                d = BigFloat(val, prec, RoundDown),
+                e = BigFloat(val, prec, RoundUp)
             @test precision(a) == precision(BigFloat)
             @test precision(b) == prec
             @test precision(c) == precision(BigFloat)

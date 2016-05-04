@@ -470,6 +470,5 @@ Foo Tests     |    2     2      4
 
 # 20489
 msg = split(readstring(pipeline(ignorestatus(`$(Base.julia_cmd()) --startup-file=no --color=no -e '
-Test.print_test_results(Test.DefaultTestSet(""))'`), stderr=DevNull)), "\n")[1]
-
+    Test.print_test_results(Test.DefaultTestSet(""))'`), stderr=DevNull)), "\n")[1]
 @test msg == rstrip(msg)

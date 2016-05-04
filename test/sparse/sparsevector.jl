@@ -790,7 +790,7 @@ let x = sprand(16, 0.5), x2 = sprand(16, 0.4)
 end
 
 let x = complex.(sprand(32, 0.6), sprand(32, 0.6)),
-    y = complex.(sprand(32, 0.6), sprand(32, 0.6))
+        y = complex.(sprand(32, 0.6), sprand(32, 0.6))
     xf = Array(x)::Vector{Complex128}
     yf = Array(y)::Vector{Complex128}
     @test dot(x, x) ≈ dot(xf, xf)
@@ -859,8 +859,8 @@ let A = sprandn(16, 9, 0.5), x = sprand(16, 0.7)
 end
 
 let A = complex.(sprandn(7, 8, 0.5), sprandn(7, 8, 0.5)),
-    x = complex.(sprandn(8, 0.6), sprandn(8, 0.6)),
-    x2 = complex.(sprandn(7, 0.75), sprandn(7, 0.75))
+        x = complex.(sprandn(8, 0.6), sprandn(8, 0.6)),
+        x2 = complex.(sprandn(7, 0.75), sprandn(7, 0.75))
     Af = Array(A)
     xf = Array(x)
     x2f = Array(x2)
@@ -889,8 +889,8 @@ let A = sprandn(9, 16, 0.5), x = sprand(16, 0.7), x2 = sprand(9, 0.7)
 end
 
 let A = complex.(sprandn(7, 8, 0.5), sprandn(7, 8, 0.5)),
-    x = complex.(sprandn(8, 0.6), sprandn(8, 0.6)),
-    x2 = complex.(sprandn(7, 0.75), sprandn(7, 0.75))
+        x = complex.(sprandn(8, 0.6), sprandn(8, 0.6)),
+        x2 = complex.(sprandn(7, 0.75), sprandn(7, 0.75))
     Af = Array(A)
     xf = Array(x)
     x2f = Array(x2)

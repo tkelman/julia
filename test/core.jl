@@ -4177,8 +4177,7 @@ end
 
 # issue #12096
 let a = Val{Val{TypeVar(:_, Int)}},
-    b = Val{Val{x} where x<:Int}
-
+        b = Val{Val{x} where x<:Int}
     @test !isdefined(a, :instance)
     @test  isdefined(b, :instance)
     @test isleaftype(b)

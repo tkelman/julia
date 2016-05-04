@@ -347,9 +347,9 @@ JL_DLLEXPORT jl_value_t *jl_type_union(jl_value_t **ts, size_t n)
         for(j=0; j < nt; j++) {
             if (j != i && temp[i] && temp[j]) {
                 if (temp[i] == temp[j] || temp[i] == jl_bottom_type ||
-                    temp[j] == (jl_value_t*)jl_any_type ||
-                    (!has_free && !jl_has_free_typevars(temp[j]) &&
-                     jl_subtype(temp[i], temp[j]))) {
+                        temp[j] == (jl_value_t*)jl_any_type ||
+                        (!has_free && !jl_has_free_typevars(temp[j]) &&
+                         jl_subtype(temp[i], temp[j]))) {
                     temp[i] = NULL;
                 }
             }
@@ -438,8 +438,8 @@ static int is_typekey_ordered(jl_value_t **key, size_t n)
         if (jl_is_typevar(k))
             return 0;
         if (jl_is_type(k) && k != jl_bottom_type && !wrapper_id(k) &&
-            !(jl_is_datatype(k) && (((jl_datatype_t*)k)->uid ||
-                                    (!jl_has_free_typevars(k) && !contains_unions(k)))))
+                !(jl_is_datatype(k) && (((jl_datatype_t*)k)->uid ||
+                                        (!jl_has_free_typevars(k) && !contains_unions(k)))))
             return 0;
     }
     return 1;
@@ -812,8 +812,8 @@ static jl_value_t *lookup_type_stack(jl_typestack_t *stack, jl_datatype_t *tt, s
     jl_typename_t *tn = tt->name;
     while (stack != NULL) {
         if (stack->tt->name == tn &&
-            ntp == jl_svec_len(stack->tt->parameters) &&
-            typekey_eq(stack->tt, iparams, ntp)) {
+                ntp == jl_svec_len(stack->tt->parameters) &&
+                typekey_eq(stack->tt, iparams, ntp)) {
             return (jl_value_t*)stack->tt;
         }
         stack = stack->prev;
@@ -957,7 +957,7 @@ static jl_value_t *inst_datatype(jl_datatype_t *dt, jl_svec_t *p, jl_value_t **i
             // normalize types equal to wrappers
             jl_value_t *tw = extract_wrapper(pi);
             if (tw && tw != pi && (tn != jl_type_typename || jl_typeof(pi) == jl_typeof(tw)) &&
-                jl_types_equal(pi, tw)) {
+                    jl_types_equal(pi, tw)) {
                 iparams[i] = tw;
                 if (p) jl_gc_wb(p, tw);
             }
@@ -999,9 +999,9 @@ static jl_value_t *inst_datatype(jl_datatype_t *dt, jl_svec_t *p, jl_value_t **i
         jl_value_t *va0 = jl_tparam0(va), *va1 = jl_tparam1(va);
         // return same `Tuple` object for types equal to it
         if (ntp == 1 &&
-            (last == (jl_value_t*)jl_vararg_type ||  // Tuple{Vararg} == Tuple
-             (va0 == (jl_value_t*)jl_any_type &&
-              jl_is_unionall(last) && va1 == (jl_value_t*)((jl_unionall_t*)last)->var))) {
+                (last == (jl_value_t*)jl_vararg_type ||  // Tuple{Vararg} == Tuple
+                 (va0 == (jl_value_t*)jl_any_type &&
+                  jl_is_unionall(last) && va1 == (jl_value_t*)((jl_unionall_t*)last)->var))) {
             if (cacheable) JL_UNLOCK(&typecache_lock); // Might GC
             JL_GC_POP();
             return (jl_value_t*)jl_anytuple_type;

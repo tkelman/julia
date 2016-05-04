@@ -276,7 +276,7 @@ let atomic_types = [Int8, Int16, Int32, Int64, Int128,
     # And we don't support them yet on power, because they are lowered
     # to `__sync_lock_test_and_set_16`.
     if Sys.ARCH === :i686 || startswith(string(Sys.ARCH), "arm") ||
-       Sys.ARCH === :powerpc64le || Sys.ARCH === :ppc64le
+            Sys.ARCH === :powerpc64le || Sys.ARCH === :ppc64le
         filter!(T -> sizeof(T)<=8, atomic_types)
     end
     for T in atomic_types

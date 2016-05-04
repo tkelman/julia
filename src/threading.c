@@ -458,7 +458,7 @@ static inline ssize_t jl_check_tls_bound(void *tp, void *ptls, size_t tls_size)
 {
     ssize_t offset = (char*)ptls - (char*)tp;
     if (offset < JL_ELF_TLS_INIT_SIZE ||
-        (size_t)offset + sizeof(jl_tls_states_t) > tls_size)
+            (size_t)offset + sizeof(jl_tls_states_t) > tls_size)
         return -1;
     return offset;
 }

@@ -648,8 +648,8 @@ static int subtype_tuple(jl_datatype_t *xd, jl_datatype_t *yd, jl_stenv_t *e, in
             }
         }
         if (xi == lastx &&
-            ((yi == lasty && !jl_has_free_typevars(xi) && !jl_has_free_typevars(yi)) ||
-             (yi == lasty && !vx && vy && jl_is_leaf_type(xi)))) {
+                ((yi == lasty && !jl_has_free_typevars(xi) && !jl_has_free_typevars(yi)) ||
+                 (yi == lasty && !vx && vy && jl_is_leaf_type(xi)))) {
             // fast path for repeated elements
         }
         else if (e->Runions.depth == 0 && e->Lunions.depth == 0 && !jl_has_free_typevars(xi) && !jl_has_free_typevars(yi)) {
@@ -1352,7 +1352,7 @@ static jl_value_t *intersect_unionall_(jl_value_t *t, jl_unionall_t *u, jl_stenv
     // TODO: might need to look inside types in btemp->lb and btemp->ub
     while (btemp != NULL) {
         if (btemp->var == u->var || btemp->lb == (jl_value_t*)u->var ||
-            btemp->ub == (jl_value_t*)u->var) {
+                btemp->ub == (jl_value_t*)u->var) {
             u = rename_unionall(u);
             break;
         }
@@ -1518,7 +1518,7 @@ static jl_value_t *intersect_tuple(jl_datatype_t *xd, jl_datatype_t *yd, jl_sten
             if (vx && vy) {
                 int len = i > j ? i : j;
                 if ((xb && jl_is_long(xb->lb) && lx-1+jl_unbox_long(xb->lb) != len) ||
-                    (yb && jl_is_long(yb->lb) && ly-1+jl_unbox_long(yb->lb) != len)) {
+                        (yb && jl_is_long(yb->lb) && ly-1+jl_unbox_long(yb->lb) != len)) {
                     res = jl_bottom_type;
                 }
                 else if (param == 2 && jl_is_unionall(xi) != jl_is_unionall(yi)) {
@@ -1785,7 +1785,7 @@ static jl_value_t *intersect(jl_value_t *x, jl_value_t *y, jl_stenv_t *e, int pa
                 if (jl_is_unionall(ua->body)) {
                     jl_unionall_t *ub = (jl_unionall_t*)ua->body;
                     if (jl_has_typevar(ub->var->ub, ua->var) ||
-                        jl_has_typevar(ub->var->lb, ua->var)) {
+                            jl_has_typevar(ub->var->lb, ua->var)) {
                         restore_env(e, NULL, &se); // restore counts
                         b = intersect_unionall(x, (jl_unionall_t*)y, e, 1, param);
                     }
@@ -2099,10 +2099,10 @@ static int eq_msp(jl_value_t *a, jl_value_t *b, jl_typeenv_t *env)
 {
     // equate ANY and Any for specificity purposes, #16153
     if ((a == (jl_value_t*)jl_any_type && b == jl_ANY_flag) ||
-        (b == (jl_value_t*)jl_any_type && a == jl_ANY_flag))
+            (b == (jl_value_t*)jl_any_type && a == jl_ANY_flag))
         return 1;
     if (!(jl_is_type(a) || jl_is_typevar(a)) ||
-        !(jl_is_type(b) || jl_is_typevar(b)))
+            !(jl_is_type(b) || jl_is_typevar(b)))
         return jl_egal(a, b);
     JL_GC_PUSH2(&a, &b);
     jl_typeenv_t *e = env;
@@ -2231,7 +2231,7 @@ static int partially_morespecific(jl_value_t *a, jl_value_t *b, int invariant, j
     if (jl_is_uniontype(b)) {
         jl_uniontype_t *u = (jl_uniontype_t*)b;
         if (type_morespecific_(a, u->a, invariant, env) ||
-            type_morespecific_(a, u->b, invariant, env))
+                type_morespecific_(a, u->b, invariant, env))
             return 1;
         return 0;
     }

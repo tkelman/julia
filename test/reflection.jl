@@ -449,11 +449,10 @@ test_typed_ast_printing(g15714, Tuple{Vector{Float32}},
 @test used_unique_var_tested15714
 
 let li = typeof(getfield).name.mt.cache.func::Core.MethodInstance,
-    lrepr = string(li),
-    mrepr = string(li.def),
-    lmime = stringmime("text/plain", li),
-    mmime = stringmime("text/plain", li.def)
-
+        lrepr = string(li),
+        mrepr = string(li.def),
+        lmime = stringmime("text/plain", li),
+        mmime = stringmime("text/plain", li.def)
     @test lrepr == lmime == "MethodInstance for getfield(...)"
     @test mrepr == mmime == "getfield(...) in Core"
 end
