@@ -154,8 +154,8 @@ let exename = `$(Base.julia_cmd()) --precompiled=yes --startup-file=no`
 
     # --check-bounds
     let JL_OPTIONS_CHECK_BOUNDS_DEFAULT = 0,
-        JL_OPTIONS_CHECK_BOUNDS_ON = 1,
-        JL_OPTIONS_CHECK_BOUNDS_OFF = 2
+            JL_OPTIONS_CHECK_BOUNDS_ON = 1,
+            JL_OPTIONS_CHECK_BOUNDS_OFF = 2
         @test parse(Int,readchomp(`$exename -E "Int(Base.JLOptions().check_bounds)"`)) ==
             JL_OPTIONS_CHECK_BOUNDS_DEFAULT
         @test parse(Int,readchomp(`$exename -E "Int(Base.JLOptions().check_bounds)"
@@ -196,9 +196,8 @@ let exename = `$(Base.julia_cmd()) --precompiled=yes --startup-file=no`
         @test !success(`$exename -E "$code" --depwarn=error`)
 
         let out  = Pipe(),
-            proc = spawn(pipeline(`$exename -E "$code" --depwarn=yes`, stderr=out)),
-            output = @async readchomp(out)
-
+                proc = spawn(pipeline(`$exename -E "$code" --depwarn=yes`, stderr=out)),
+                output = @async readchomp(out)
             close(out.in)
             wait(proc)
             @test success(proc)
@@ -206,9 +205,8 @@ let exename = `$(Base.julia_cmd()) --precompiled=yes --startup-file=no`
         end
 
         let out  = Pipe(),
-            proc = spawn(pipeline(`$exename -E "$code" --depwarn=no`, stderr=out))
-            output = @async readstring(out)
-
+                proc = spawn(pipeline(`$exename -E "$code" --depwarn=no`, stderr=out))
+                output = @async readstring(out)
             wait(proc)
             close(out.in)
             @test success(proc)
@@ -232,8 +230,8 @@ let exename = `$(Base.julia_cmd()) --precompiled=yes --startup-file=no`
 
     # --fast-math
     let JL_OPTIONS_FAST_MATH_DEFAULT = 0,
-        JL_OPTIONS_FAST_MATH_ON = 1,
-        JL_OPTIONS_FAST_MATH_OFF = 2
+            JL_OPTIONS_FAST_MATH_ON = 1,
+            JL_OPTIONS_FAST_MATH_OFF = 2
         @test parse(Int,readchomp(`$exename -E
             "Int(Base.JLOptions().fast_math)"`)) == JL_OPTIONS_FAST_MATH_DEFAULT
         @test parse(Int,readchomp(`$exename --math-mode=user -E
@@ -331,19 +329,18 @@ let exename = `$(Base.julia_cmd()) --precompiled=yes --startup-file=no`
     end
 end
 
-let exename = `$(Base.julia_cmd()) --precompiled=yes`
-    # --startup-file
-    let JL_OPTIONS_STARTUPFILE_ON = 1,
+let exename = `$(Base.julia_cmd()) --precompiled=yes`,
+        JL_OPTIONS_STARTUPFILE_ON = 1,
         JL_OPTIONS_STARTUPFILE_OFF = 2
-        # `HOME=$tmpdir` to avoid errors in the user .juliarc.jl, which hangs the tests.  Issue #17642
-        mktempdir() do tmpdir
-            withenv("HOME"=>tmpdir) do
-                @test parse(Int,readchomp(`$exename -E "Base.JLOptions().startupfile" --startup-file=yes`)) == JL_OPTIONS_STARTUPFILE_ON
-            end
+    # `HOME=$tmpdir` to avoid errors in the user .juliarc.jl, which hangs the tests.  Issue #17642
+    mktempdir() do tmpdir
+        withenv("HOME"=>tmpdir) do
+            @test parse(Int,readchomp(`$exename -E "Base.JLOptions().startupfile"
+                --startup-file=yes`)) == JL_OPTIONS_STARTUPFILE_ON
         end
-        @test parse(Int,readchomp(`$exename -E "Base.JLOptions().startupfile"
-            --startup-file=no`)) == JL_OPTIONS_STARTUPFILE_OFF
     end
+    @test parse(Int,readchomp(`$exename -E "Base.JLOptions().startupfile"
+        --startup-file=no`)) == JL_OPTIONS_STARTUPFILE_OFF
     @test !success(`$exename --startup-file=false`)
 end
 

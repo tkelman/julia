@@ -200,8 +200,8 @@ jl_code_info_t *jl_type_infer(jl_method_instance_t *li, int force)
     int lastIn = inInference;
     inInference = 1;
     if (force ||
-        (mod != jl_gf_mtable(jl_typeinf_func)->module &&
-         (mod != jl_core_module || !lastIn))) { // avoid any potential recursion in calling jl_typeinf_func on itself
+            (mod != jl_gf_mtable(jl_typeinf_func)->module &&
+             (mod != jl_core_module || !lastIn))) { // avoid any potential recursion in calling jl_typeinf_func on itself
         assert(li->inInference == 0);
         jl_value_t *fargs[2];
         fargs[0] = (jl_value_t*)jl_typeinf_func;
@@ -541,7 +541,7 @@ JL_DLLEXPORT int jl_is_cacheable_sig(
         // avoid specializing on an argument of type Tuple
         // unless matching a declared type of `::Type`
         if (jl_is_type_type(elt) && jl_is_tuple_type(jl_tparam0(elt)) &&
-            (!jl_subtype(decl_i, (jl_value_t*)jl_type_type, 0) || is_kind(decl_i))) { // Type{Tuple{...}}
+                (!jl_subtype(decl_i, (jl_value_t*)jl_type_type, 0) || is_kind(decl_i))) { // Type{Tuple{...}}
             if (elt != (jl_value_t*)jl_anytuple_type_type)
                 return 0;
             continue;
@@ -645,7 +645,7 @@ static jl_method_instance_t *cache_method(jl_methtable_t *mt, union jl_typemap_t
     // supertype of any other method signatures. so far we are conservative
     // and the types we find should be bigger.
     if (!definition->isstaged && jl_nparams(type) > mt->max_args
-        && jl_va_tuple_kind(decl) == JL_VARARG_UNBOUND) {
+            && jl_va_tuple_kind(decl) == JL_VARARG_UNBOUND) {
         size_t i, nspec = mt->max_args + 2;
         jl_svec_t *limited = jl_alloc_svec(nspec);
         temp = (jl_value_t*)limited;
@@ -1813,7 +1813,7 @@ JL_DLLEXPORT jl_value_t *jl_apply_generic(jl_value_t **args, uint32_t nargs)
     for (i = 0; i < 4; i++) {
         entry = call_cache[cache_idx[i]];
         if (entry && nargs == jl_svec_len(entry->sig->parameters) &&
-            sig_match_fast(args, jl_svec_data(entry->sig->parameters), 0, nargs)) {
+                sig_match_fast(args, jl_svec_data(entry->sig->parameters), 0, nargs)) {
             break;
         }
     }
@@ -2094,9 +2094,9 @@ static int ml_matches_visitor(jl_typemap_entry_t *ml, struct typemap_intersectio
             else
                 tv = jl_svecref(ml->tvars, i);
             if (jl_is_typevar(jl_svecref(closure->match.env, i)) &&
-                // if tvar is at the top level it will definitely be matched.
-                // see issue #5575
-                !tvar_exists_at_top_level(tv, ml->sig, 1)) {
+                    // if tvar is at the top level it will definitely be matched.
+                    // see issue #5575
+                    !tvar_exists_at_top_level(tv, ml->sig, 1)) {
                 matched_all_typevars = 0;
                 break;
             }
@@ -2106,7 +2106,7 @@ static int ml_matches_visitor(jl_typemap_entry_t *ml, struct typemap_intersectio
         // NOTE: jl_subtype check added in case the intersection is
         // over-approximated.
         if (matched_all_typevars && jl_types_equal(closure->match.ti, closure->match.type) &&
-            jl_subtype(closure->match.type, (jl_value_t*)ml->sig, 0)) {
+                jl_subtype(closure->match.type, (jl_value_t*)ml->sig, 0)) {
             done = 1; // terminate visiting method list
         }
         // here we have reached a definition that fully covers the arguments.

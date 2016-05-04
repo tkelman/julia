@@ -434,20 +434,20 @@ end
 setprecision(53) do
     for f in (:sin,:cos,:tan,:sec,:csc,:cot,:acos,:asin,:atan,
             :cosh,:sinh,:tanh,:sech,:csch,:coth,:asinh),
-        j in (-1., -0.5, -0.25, .25, .5, 1.)
+            j in (-1., -0.5, -0.25, .25, .5, 1.)
         @eval begin
             @test ($f)(BigFloat($j)) ≈ ($f)($j)
         end
     end
     for f in (:acos,:asin,:acosh,:atanh),
-        j in (-2, -1.5)
+            j in (-2, -1.5)
         @eval begin
             @test_throws DomainError ($f)(BigFloat($j))
         end
     end
     for f in (:sin,:cos,:tan,:sec,:csc,:cot,:cosh,:sinh,:tanh,
               :sech,:csch,:coth,:acosh,:asinh),
-        j in (1., 1.5, 1.9)
+            j in (1., 1.5, 1.9)
         @eval begin
             @test ($f)(BigFloat($j)) ≈ ($f)($j)
         end

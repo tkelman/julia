@@ -320,7 +320,7 @@ jl_value_t *jl_resolve_globals(jl_value_t *expr, jl_module_t *module)
             }
             size_t i = 0;
             if (e->head == method_sym || e->head == abstracttype_sym || e->head == compositetype_sym ||
-                e->head == bitstype_sym || e->head == module_sym)
+                    e->head == bitstype_sym || e->head == module_sym)
                 i++;
             for (; i < jl_array_len(e->args); i++) {
                 // TODO: this should be making a copy, not mutating the source

@@ -1171,7 +1171,8 @@ static std::string generate_func_sig(
         *prt = *lrt = T_void;
     }
     else {
-        if (!jl_is_datatype(rt) || ((jl_datatype_t*)rt)->layout == NULL || jl_is_cpointer_type(rt) || jl_is_array_type(rt)) {
+        if (!jl_is_datatype(rt) || ((jl_datatype_t*)rt)->layout == NULL ||
+                jl_is_cpointer_type(rt) || jl_is_array_type(rt)) {
             *prt = *lrt; // passed as pointer
         }
         else if (abi->use_sret((jl_datatype_t*)rt)) {
@@ -1355,8 +1356,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
                 if (jl_is_expr(args[2])) {
                     jl_expr_t *rtexpr = (jl_expr_t*)args[2];
                     if (rtexpr->head == call_sym && jl_expr_nargs(rtexpr) == 4 &&
-                        static_eval(jl_exprarg(rtexpr, 0), ctx, true, false) == jl_builtin_apply_type &&
-                        static_eval(jl_exprarg(rtexpr, 1), ctx, true, false) == (jl_value_t*)jl_array_type) {
+                            static_eval(jl_exprarg(rtexpr, 0), ctx, true, false) == jl_builtin_apply_type &&
+                            static_eval(jl_exprarg(rtexpr, 1), ctx, true, false) == (jl_value_t*)jl_array_type) {
                         // `Array` used as return type just returns a julia object reference
                         rt = (jl_value_t*)jl_any_type;
                         static_rt = true;
@@ -1475,8 +1476,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
 
     // some special functions
     if (fptr == (void(*)(void))&jl_array_ptr ||
-        ((f_lib==NULL || (intptr_t)f_lib==2)
-         && f_name && !strcmp(f_name,"jl_array_ptr"))) {
+            ((f_lib==NULL || (intptr_t)f_lib==2) &&
+             f_name && !strcmp(f_name,"jl_array_ptr"))) {
         assert(lrt->isPointerTy());
         assert(!isVa);
         assert(nargt==1);
@@ -1488,8 +1489,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
                                         retboxed, args[2], rt, static_rt, ctx);
     }
     if (fptr == (void(*)(void))&jl_value_ptr ||
-        ((f_lib==NULL || (intptr_t)f_lib==2)
-         && f_name && !strcmp(f_name,"jl_value_ptr"))) {
+            ((f_lib==NULL || (intptr_t)f_lib==2) &&
+             f_name && !strcmp(f_name,"jl_value_ptr"))) {
         assert(lrt->isPointerTy());
         assert(!isVa);
         assert(nargt==1);
@@ -1534,8 +1535,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
         return ghostValue(jl_void_type);
     }
     if (fptr == &jl_gc_safepoint ||
-        ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
-         strcmp(f_name, "jl_gc_safepoint") == 0)) {
+            ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
+             strcmp(f_name, "jl_gc_safepoint") == 0)) {
         assert(lrt == T_void);
         assert(!isVa);
         assert(nargt == 0);
@@ -1555,8 +1556,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
     static const auto ptls_getter = &jl_get_ptls_states;
 #endif
     if (fptr == (void(*)(void))(uintptr_t)ptls_getter ||
-        ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
-         strcmp(f_name, "jl_get_ptls_states") == 0)) {
+            ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
+             strcmp(f_name, "jl_get_ptls_states") == 0)) {
         assert(lrt == T_pint8);
         assert(!isVa);
         assert(nargt == 0);
@@ -1566,8 +1567,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
             retboxed, args[2], rt, static_rt, ctx);
     }
     if (fptr == &jl_sigatomic_begin ||
-        ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
-         strcmp(f_name, "jl_sigatomic_begin") == 0)) {
+            ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
+             strcmp(f_name, "jl_sigatomic_begin") == 0)) {
         assert(lrt == T_void);
         assert(!isVa);
         assert(nargt == 0);
@@ -1582,8 +1583,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
         return ghostValue(jl_void_type);
     }
     if (fptr == &jl_sigatomic_end ||
-        ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
-         strcmp(f_name, "jl_sigatomic_end") == 0)) {
+            ((!f_lib || (intptr_t)f_lib == 2) && f_name &&
+             strcmp(f_name, "jl_sigatomic_end") == 0)) {
         assert(lrt == T_void);
         assert(!isVa);
         assert(nargt == 0);
@@ -1613,8 +1614,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
         return ghostValue(jl_void_type);
     }
     if (fptr == (void(*)(void))&jl_is_leaf_type ||
-        ((f_lib==NULL || (intptr_t)f_lib==2)
-         && f_name && !strcmp(f_name, "jl_is_leaf_type"))) {
+            ((f_lib==NULL || (intptr_t)f_lib==2) &&
+             f_name && !strcmp(f_name, "jl_is_leaf_type"))) {
         assert(nargt == 1);
         jl_value_t *arg = args[4];
         jl_value_t *ty = expr_type(arg, ctx);
@@ -1626,8 +1627,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
         }
     }
     if (fptr == (void(*)(void))&jl_method_exists ||
-        ((f_lib==NULL || (intptr_t)f_lib==2)
-         && f_name && !strcmp(f_name, "jl_method_exists"))) {
+            ((f_lib==NULL || (intptr_t)f_lib==2) &&
+             f_name && !strcmp(f_name, "jl_method_exists"))) {
         assert(nargt == 2);
         jl_value_t *mt = static_eval(args[4], ctx, false, false);
         jl_value_t *usertypes = args[6];
@@ -1641,8 +1642,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
         }
     }
     if (fptr == (void(*)(void))&jl_function_ptr ||
-        ((f_lib==NULL || (intptr_t)f_lib==2)
-         && f_name && !strcmp(f_name, "jl_function_ptr"))) {
+            ((f_lib==NULL || (intptr_t)f_lib==2) &&
+             f_name && !strcmp(f_name, "jl_function_ptr"))) {
         assert(nargt == 3);
         jl_value_t *f = static_eval(args[4], ctx, false, false);
         jl_value_t *frt = expr_type(args[6], ctx);

@@ -894,7 +894,7 @@ function abstract_call_gf_by_type(f::ANY, argtype::ANY, sv::InferenceState)
                                 newsig = Array{Any}(ls)
                                 for i = 1:ls
                                     if p1[i] <: Function && type_depth(p1[i]) > type_depth(p2[i]) &&
-                                        isa(p1[i],DataType)
+                                            isa(p1[i],DataType)
                                         # if a Function argument is growing (e.g. nested closures)
                                         # then widen to the outermost function type. without this
                                         # inference fails to terminate on do_quadgk.
@@ -1126,8 +1126,8 @@ function abstract_call(f::ANY, fargs, argtypes::Vector{Any}, vtypes::VarTable, s
     if length(argtypes)>2 && argtypes[3] ⊑ Int
         at2 = widenconst(argtypes[2])
         if (at2 <: Tuple ||
-            (isa(at2, DataType) && isdefined(Main, :Base) && isdefined(Main.Base, :Pair) &&
-             (at2::DataType).name === Main.Base.Pair.name))
+                (isa(at2, DataType) && isdefined(Main, :Base) && isdefined(Main.Base, :Pair) &&
+                 (at2::DataType).name === Main.Base.Pair.name))
             # allow tuple indexing functions to take advantage of constant
             # index arguments.
             if istopfunction(tm, f, :getindex)
@@ -1154,10 +1154,9 @@ function abstract_call(f::ANY, fargs, argtypes::Vector{Any}, vtypes::VarTable, s
         # need to model the special inliner for ^
         # to ensure we have added the same edge
         if isdefined(Main, :Base) &&
-            ((isdefined(Main.Base, :^) && f === Main.Base.:^) ||
-             (isdefined(Main.Base, :.^) && f === Main.Base.:.^)) &&
-            length(argtypes) == 3 && (argtypes[3] ⊑ Int32 || argtypes[3] ⊑ Int64)
-
+                ((isdefined(Main.Base, :^) && f === Main.Base.:^) ||
+                 (isdefined(Main.Base, :.^) && f === Main.Base.:.^)) &&
+                length(argtypes) == 3 && (argtypes[3] ⊑ Int32 || argtypes[3] ⊑ Int64)
             a1 = argtypes[2]
             basenumtype = Union{corenumtype, Main.Base.Complex64, Main.Base.Complex128, Main.Base.Rational}
             if a1 ⊑ basenumtype
@@ -1400,7 +1399,7 @@ function tmerge(typea::ANY, typeb::ANY)
             return typejoin(typea, typeb)
         end
         if isa(typea, Union) || isa(typeb, Union) || (isa(typea,DataType) && length(typea.parameters)>3) ||
-            (isa(typeb,DataType) && length(typeb.parameters)>3)
+                (isa(typeb,DataType) && length(typeb.parameters)>3)
             # widen tuples faster (see #6704), but not too much, to make sure we can infer
             # e.g. (t::Union{Tuple{Bool},Tuple{Bool,Int}})[1]
             return Tuple
@@ -1953,7 +1952,7 @@ function isinlineable(m::Method, src::CodeInfo)
         name = m.name
         sig = m.sig
         if ((name === :+ || name === :* || name === :min || name === :max) &&
-            sig == Tuple{sig.parameters[1],Any,Any,Any,Vararg{Any}})
+                sig == Tuple{sig.parameters[1],Any,Any,Any,Vararg{Any}})
             inlineable = true
         elseif (name === :next || name === :done || name === :unsafe_convert ||
                 name === :cconvert)
@@ -2467,8 +2466,8 @@ function inlineable(f::ANY, ft::ANY, e::Expr, atypes::Vector{Any}, sv::Inference
     if sv.params.inlining
         if isconstType(e.typ,true)
             if (f === apply_type || f === fieldtype || f === typeof ||
-                istopfunction(topmod, f, :typejoin) ||
-                istopfunction(topmod, f, :promote_type))
+                    istopfunction(topmod, f, :typejoin) ||
+                    istopfunction(topmod, f, :promote_type))
                 # XXX: compute effect_free for the actual arguments
                 if length(argexprs) < 2 || effect_free(argexprs[2], sv.src, sv.mod, true)
                     return (e.typ.parameters[1],())
@@ -2478,7 +2477,7 @@ function inlineable(f::ANY, ft::ANY, e::Expr, atypes::Vector{Any}, sv::Inference
             end
         end
         if istopfunction(topmod, f, :isbits) && length(atypes)==2 && isType(atypes[2]) &&
-            effect_free(argexprs[2], sv.src, sv.mod, true) && isleaftype(atypes[2].parameters[1])
+                effect_free(argexprs[2], sv.src, sv.mod, true) && isleaftype(atypes[2].parameters[1])
             return (isbits(atypes[2].parameters[1]),())
         end
         if f === Core.kwfunc && length(argexprs) == 2 && isa(e.typ, Const)
@@ -2616,7 +2615,8 @@ function inlineable(f::ANY, ft::ANY, e::Expr, atypes::Vector{Any}, sv::Inference
     methsp = meth[2]
     method = meth[3]::Method
     # check whether call can be inlined to just a quoted constant value
-    if isa(f, widenconst(ft)) && !method.isstaged && (method.source.pure || f === return_type)
+    if isa(f, widenconst(ft)) && !method.isstaged &&
+            (method.source.pure || f === return_type)
         if isconstType(e.typ,false)
             return inline_as_constant(e.typ.parameters[1], argexprs, sv)
         elseif isa(e.typ,Const)
@@ -2669,8 +2669,8 @@ function inlineable(f::ANY, ft::ANY, e::Expr, atypes::Vector{Any}, sv::Inference
                 if length(atypes) > 2 && atypes[3] ⊑ Int
                     at2 = widenconst(atypes[2])
                     if (at2 <: Tuple ||
-                        (isa(at2, DataType) && isdefined(Main, :Base) && isdefined(Main.Base, :Pair) &&
-                         (at2::DataType).name === Main.Base.Pair.name))
+                            (isa(at2, DataType) && isdefined(Main, :Base) && isdefined(Main.Base, :Pair) &&
+                             (at2::DataType).name === Main.Base.Pair.name))
                         force_infer = true
                     end
                 end
@@ -3128,10 +3128,9 @@ function inlining_pass(e::Expr, sv::InferenceState)
 
     if sv.params.inlining
         if isdefined(Main, :Base) &&
-            ((isdefined(Main.Base, :^) && f === Main.Base.:^) ||
-             (isdefined(Main.Base, :.^) && f === Main.Base.:.^)) &&
-            length(e.args) == 3
-
+                ((isdefined(Main.Base, :^) && f === Main.Base.:^) ||
+                 (isdefined(Main.Base, :.^) && f === Main.Base.:.^)) &&
+                length(e.args) == 3
             a2 = e.args[3]
             if isa(a2, Symbol) || isa(a2, Slot) || isa(a2, SSAValue)
                 ta2 = exprtype(a2, sv.src, sv.mod)
@@ -3826,7 +3825,7 @@ function alloc_elim_pass!(sv::InferenceState)
                 for j=1:nv
                     tupelt = tup[j+1]
                     if !(isa(tupelt,Number) || isa(tupelt,AbstractString) ||
-                         isa(tupelt,QuoteNode) || isa(tupelt, SSAValue))
+                             isa(tupelt,QuoteNode) || isa(tupelt, SSAValue))
                         insert!(body, i+n_ins, tupelt)
                         n_ins += 1
                     end
@@ -3931,7 +3930,7 @@ function replace_getfield!(e::Expr, tupname, vals, field_names, sv::InferenceSta
     for i = 1:length(e.args)
         a = e.args[i]
         if isa(a,Expr) && is_known_call(a, getfield, sv.src, sv.mod) &&
-            symequal(a.args[2],tupname)
+                symequal(a.args[2],tupname)
             idx = if isa(a.args[3], Int)
                 a.args[3]
             else

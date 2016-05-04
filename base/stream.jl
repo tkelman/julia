@@ -494,9 +494,9 @@ function uv_readcb(handle::Ptr{Void}, nread::Cssize_t, buf::Ptr{Void})
         # 2) we have accumulated a lot of unread data OR
         # 3) we have an alternate buffer that has reached its limit.
         if stream.status == StatusPaused ||
-           (stream.status == StatusActive &&
-            ((nb_available(stream.buffer) >= stream.throttle) ||
-             (nb_available(stream.buffer) >= stream.buffer.maxsize)))
+               (stream.status == StatusActive &&
+                ((nb_available(stream.buffer) >= stream.throttle) ||
+                 (nb_available(stream.buffer) >= stream.buffer.maxsize)))
             # save cycles by stopping kernel notifications from arriving
             ccall(:uv_read_stop, Cint, (Ptr{Void},), stream)
             stream.status = StatusOpen

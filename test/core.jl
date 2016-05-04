@@ -4372,8 +4372,7 @@ end
 
 # issue #12096
 let a = Val{Val{TypeVar(:_, Int, true)}},
-    b = Val{Val{TypeVar(:_, Int)}}
-
+        b = Val{Val{TypeVar(:_, Int)}}
     @test !isdefined(a, :instance)
     @test  isdefined(b, :instance)
     @test isleaftype(b)

@@ -945,9 +945,9 @@ jl_llvm_functions_t jl_compile_linfo(jl_method_instance_t *li, jl_code_info_t *s
     if (li->jlcall_api != 2) {
         // if not inlineable, code won't be needed again
         if (JL_DELETE_NON_INLINEABLE && jl_options.debug_level <= 1 &&
-            li->def && li->inferred && jl_is_code_info(li->inferred) &&
-            !((jl_code_info_t*)li->inferred)->inlineable &&
-            li != li->def->unspecialized && !imaging_mode) {
+                li->def && li->inferred && jl_is_code_info(li->inferred) &&
+                !((jl_code_info_t*)li->inferred)->inlineable &&
+                li != li->def->unspecialized && !imaging_mode) {
             li->inferred = jl_nothing;
         }
     }
@@ -1997,9 +1997,9 @@ static void simple_escape_analysis(jl_value_t *expr, bool esc, jl_codectx_t *ctx
                     }
                     else {
                         if ((fv==jl_builtin_getfield && alen==3 &&
-                             expr_type(jl_exprarg(e,2),ctx) == (jl_value_t*)jl_long_type) ||
-                            fv==jl_builtin_nfields ||
-                            (fv==jl_builtin__apply && alen==3)) {
+                                 expr_type(jl_exprarg(e,2),ctx) == (jl_value_t*)jl_long_type) ||
+                                fv==jl_builtin_nfields ||
+                                (fv==jl_builtin__apply && alen==3)) {
                             esc = false;
                         }
                     }
@@ -3668,7 +3668,7 @@ static Function *gen_cfun_wrapper(jl_function_t *ff, jl_value_t *jlrettype, jl_t
         if (lam) {
             astrt = lam->rettype;
             if (astrt != (jl_value_t*)jl_bottom_type &&
-                jl_type_intersection(astrt, declrt) == jl_bottom_type) {
+                    jl_type_intersection(astrt, declrt) == jl_bottom_type) {
                 // Do not warn if the function does not return since it is
                 // occasionally required by the C API (typically error callbacks)
                 // and doesn't capture the majority of the case when a function
@@ -5046,7 +5046,7 @@ static std::unique_ptr<Module> emit_function(jl_method_instance_t *lam, jl_code_
             builder.SetCurrentDebugLocation(props.loc);
         // Disable coverage for pop_loc, it doesn't start a new expression
         if (props.loc_changed && do_coverage(props.in_user_code) &&
-            !props.is_poploc) {
+                !props.is_poploc) {
             coverageVisitLine(props.file, props.line);
         }
         ctx.is_inbounds = props.is_inbounds;
@@ -5997,7 +5997,7 @@ static inline std::string getNativeTarget()
                 return "armv7-m";
             }
             if (strcmp(name.machine, "armv8l") == 0 ||
-                strcmp(name.machine, "aarch64") == 0) {
+                    strcmp(name.machine, "aarch64") == 0) {
                 return "armv8";
             }
         }

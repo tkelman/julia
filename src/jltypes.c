@@ -2200,7 +2200,7 @@ static jl_value_t *inst_datatype(jl_datatype_t *dt, jl_svec_t *p, jl_value_t **i
         jl_value_t *va = iparams[ntp - 1];
         // return same `Tuple` object for types equal to it
         if (ntp == 1 && jl_tparam0(va) == (jl_value_t*)jl_any_type &&
-            jl_tparam1(va) == jl_tparam1(jl_tparam0(jl_anytuple_type))) {
+                jl_tparam1(va) == jl_tparam1(jl_tparam0(jl_anytuple_type))) {
             if (cacheable) JL_UNLOCK(&typecache_lock); // Might GC
             return (jl_value_t*)jl_anytuple_type;
         }

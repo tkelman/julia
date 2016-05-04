@@ -1212,7 +1212,7 @@ void LowerGCFrame::runOnFunction(Module *M, Function &F, Function *ptls_getter,
 {
     CallInst *ptlsStates = nullptr;
     for (auto I = F.getEntryBlock().begin(), E = F.getEntryBlock().end();
-         ptls_getter && I != E; ++I) {
+            ptls_getter && I != E; ++I) {
         if (CallInst *callInst = dyn_cast<CallInst>(&*I)) {
             if (callInst->getCalledValue() == ptls_getter) {
                 ptlsStates = callInst;
