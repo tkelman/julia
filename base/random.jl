@@ -1175,14 +1175,11 @@ let Floats = Union{Float16,Float32,Float64}
     for randfun in [:randn, :randexp]
         randfun! = Symbol(randfun, :!)
         @eval begin
-
             # scalars
-
             $randfun{T<:$Floats}(rng::AbstractRNG, ::Type{T}) = convert(T, $randfun(rng))
             $randfun{T<:$Floats}(::Type{T}) = $randfun(GLOBAL_RNG, T)
 
             # filling arrays
-
             function $randfun!{T}(rng::AbstractRNG, A::AbstractArray{T})
                 for i in eachindex(A)
                     @inbounds A[i] = $randfun(rng, T)
@@ -1193,7 +1190,6 @@ let Floats = Union{Float16,Float32,Float64}
             $randfun!(A::AbstractArray) = $randfun!(GLOBAL_RNG, A)
 
             # generating arrays
-
             $randfun{T}(rng::AbstractRNG, ::Type{T}, dims::Dims)       = $randfun!(rng, Array(T, dims))
             $randfun{T}(rng::AbstractRNG, ::Type{T}, dims::Integer...) = $randfun!(rng, Array(T, dims...))
             $randfun{T}(                  ::Type{T}, dims::Dims)       = $randfun(GLOBAL_RNG, T, dims)

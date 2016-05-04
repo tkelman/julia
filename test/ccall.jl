@@ -532,7 +532,6 @@ typealias V4xF32 VecReg{4,Float32}
 typealias V4xI32 VecReg{4,Int32}
 
 if Base.ARCH==:x86_64
-
     function test_sse(a1::V4xF32,a2::V4xF32,a3::V4xF32,a4::V4xF32)
         ccall((:test_m128, libccalltest), V4xF32, (V4xF32,V4xF32,V4xF32,V4xF32), a1, a2, a3, a4)
     end

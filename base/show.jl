@@ -687,8 +687,8 @@ function show_unquoted(io::IO, ex::Expr, indent::Int, prec::Int)
         func_args = args[2:end]
 
         if (in(ex.args[1], (GlobalRef(Base, :box), :throw)) ||
-            ismodulecall(ex) ||
-            (ex.typ === Any && is_intrinsic_expr(ex.args[1])))
+                ismodulecall(ex) ||
+                (ex.typ === Any && is_intrinsic_expr(ex.args[1])))
             show_type = false
         end
         if show_type
@@ -696,8 +696,8 @@ function show_unquoted(io::IO, ex::Expr, indent::Int, prec::Int)
         end
 
         # scalar multiplication (i.e. "100x")
-        if (func == :(*) &&
-            length(func_args)==2 && isa(func_args[1], Real) && isa(func_args[2], Symbol))
+        if (func == :(*) && length(func_args) == 2 &&
+                isa(func_args[1], Real) && isa(func_args[2], Symbol))
             if func_prec <= prec
                 show_enclosed_list(io, '(', func_args, "", ')', indent, func_prec)
             else

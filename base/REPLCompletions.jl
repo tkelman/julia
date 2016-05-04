@@ -299,7 +299,7 @@ function get_type(sym::Expr, fn)
         # is inexpensive and it is also performed in the complete_symbol function.
         a1 = sym.args[1]
         if isa(a1,GlobalRef) && isconst(a1.mod,a1.name) && isdefined(a1.mod,a1.name) &&
-            eval(a1) === Core.getfield
+                eval(a1) === Core.getfield
             val, found = get_value_getfield(sym, Main)
             return found ? Base.typesof(val).parameters[1] : Any, found
         end

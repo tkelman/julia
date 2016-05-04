@@ -1860,7 +1860,7 @@ function isinlineable(linfo::LambdaInfo)
             name = linfo.def.name
             sig = linfo.def.sig
             if ((name === :+ || name === :* || name === :min || name === :max) &&
-                sig == Tuple{sig.parameters[1],Any,Any,Any,Vararg{Any}})
+                    sig == Tuple{sig.parameters[1],Any,Any,Any,Vararg{Any}})
                 inlineable = true
             elseif (name === :next || name === :done || name === :unsafe_convert ||
                     name === :cconvert)
@@ -2196,7 +2196,7 @@ function effect_free(e::ANY, sv, allow_volatile::Bool)
         return allow_volatile
     end
     if isa(e,Number) || isa(e,AbstractString) || isa(e,SSAValue) ||
-        isa(e,QuoteNode) || isa(e,Type) || isa(e,Tuple)
+            isa(e,QuoteNode) || isa(e,Type) || isa(e,Tuple)
         return true
     end
     if isa(e,GlobalRef)

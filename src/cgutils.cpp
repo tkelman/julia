@@ -1678,8 +1678,8 @@ static jl_cgval_t emit_new_struct(jl_value_t *ty, size_t nargs, jl_value_t **arg
             // or instead initialize the stack buffer with stores
             bool init_as_value = false;
             if (lt->isVectorTy() ||
-                is_vecelement_type(ty) ||
-                type_is_ghost(lt)) // maybe also check the size ?
+                    is_vecelement_type(ty) ||
+                    type_is_ghost(lt)) // maybe also check the size ?
                 init_as_value = true;
 
             size_t na = nargs-1 < nf ? nargs-1 : nf;

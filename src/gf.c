@@ -488,8 +488,8 @@ static jl_lambda_info_t *cache_method(jl_methtable_t *mt, union jl_typemap_t *ca
     // in general, here we want to find the biggest type that's not a
     // supertype of any other method signatures. so far we are conservative
     // and the types we find should be bigger.
-    if (!isstaged && jl_nparams(type) > mt->max_args
-        && jl_va_tuple_kind(decl) == JL_VARARG_UNBOUND) {
+    if (!isstaged && jl_nparams(type) > mt->max_args &&
+            jl_va_tuple_kind(decl) == JL_VARARG_UNBOUND) {
         size_t nspec = mt->max_args + 2;
         limited = jl_alloc_svec(nspec);
         temp3 = (jl_value_t*)limited;

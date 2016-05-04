@@ -1296,8 +1296,8 @@ static jl_cgval_t emit_ccall(jl_value_t **args, size_t nargs, jl_codectx_t *ctx)
         }
     }
     if (fptr == (void(*)(void))&jl_method_exists ||
-        ((f_lib==NULL || (intptr_t)f_lib==2)
-         && f_name && !strcmp(f_name, "jl_method_exists"))) {
+            ((f_lib==NULL || (intptr_t)f_lib==2)
+             && f_name && !strcmp(f_name, "jl_method_exists"))) {
         assert(nargt == 2);
         jl_value_t *mt = static_eval(args[4], ctx, false, false);
         jl_value_t *usertypes = args[6];
