@@ -780,7 +780,7 @@ jl_typemap_entry_t *jl_typemap_entry_assoc_exact(jl_typemap_entry_t *ml, jl_valu
             }
             else if (n == 3) {
                 if (jl_typeof(args[1]) == jl_tparam(ml->sig, 1) &&
-                    jl_typeof(args[2]) == jl_tparam(ml->sig, 2))
+                        jl_typeof(args[2]) == jl_tparam(ml->sig, 2))
                     return ml;
             }
             else {
@@ -1097,7 +1097,8 @@ static void jl_typemap_list_insert_sorted(jl_typemap_entry_t **pml, jl_value_t *
         if (!l->isleafsig) { // quickly ignore all of the leafsig entries (these were handled by caller)
             if (jl_args_morespecific((jl_value_t*)newrec->sig, (jl_value_t*)l->sig)) {
                 if (l->simplesig == (void*)jl_nothing ||
-                    newrec->simplesig != (void*)jl_nothing || !sigs_eq((jl_value_t*)l->sig, (jl_value_t*)newrec->sig, 1)) {
+                        newrec->simplesig != (void*)jl_nothing ||
+                        !sigs_eq((jl_value_t*)l->sig, (jl_value_t*)newrec->sig, 1)) {
                     // might need to insert multiple entries for a lookup differing only by their simplesig
                     // when simplesig contains a kind
                     // TODO: make this test more correct or figure out a better way to compute this

@@ -476,8 +476,8 @@ static int jl_prune_tcache(jl_typemap_entry_t *ml, void *closure)
 {
     jl_value_t *ret = ml->func.value;
     if (jl_is_lambda_info(ret) &&
-        ((!jl_is_leaf_type((jl_value_t*)ml->sig) && !((jl_lambda_info_t*)ret)->inlineable) ||
-         ((jl_lambda_info_t*)ret)->code == jl_nothing)) {
+            ((!jl_is_leaf_type((jl_value_t*)ml->sig) && !((jl_lambda_info_t*)ret)->inlineable) ||
+             ((jl_lambda_info_t*)ret)->code == jl_nothing)) {
         ml->func.value = ((jl_lambda_info_t*)ret)->rettype;
         jl_gc_wb(ml, ml->func.value);
     }
@@ -2352,7 +2352,7 @@ static jl_array_t *_jl_restore_incremental(ios_t *f)
         return NULL;
     }
     if (!jl_read_verify_header(f) ||
-        !read_verify_mod_list(f)) {
+            !read_verify_mod_list(f)) {
         ios_close(f);
         return NULL;
     }

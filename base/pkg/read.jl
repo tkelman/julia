@@ -8,7 +8,8 @@ using ..Types
 readstrip(path...) = strip(readstring(joinpath(path...)))
 
 url(pkg::AbstractString) = readstrip(Dir.path("METADATA"), pkg, "url")
-sha1(pkg::AbstractString, ver::VersionNumber) = readstrip(Dir.path("METADATA"), pkg, "versions", string(ver), "sha1")
+sha1(pkg::AbstractString, ver::VersionNumber) =
+    readstrip(Dir.path("METADATA"), pkg, "versions", string(ver), "sha1")
 
 function available(names=readdir("METADATA"))
     pkgs = Dict{String,Dict{VersionNumber,Available}}()
@@ -124,7 +125,7 @@ function installed_version(pkg::AbstractString, prepo::LibGit2.GitRepo, avail::D
     catch ex
         # refs/heads/master does not exist
         if isa(ex,LibGit2.GitError) &&
-            ex.code == LibGit2.Error.EUNBORNBRANCH
+                ex.code == LibGit2.Error.EUNBORNBRANCH
             head = ""
         else
             rethrow(ex)
@@ -217,7 +218,7 @@ function installed(avail::Dict=available())
 end
 
 function fixed(avail::Dict=available(), inst::Dict=installed(avail), dont_update::Set{String}=Set{String}(),
-    julia_version::VersionNumber=VERSION)
+        julia_version::VersionNumber=VERSION)
     pkgs = Dict{String,Fixed}()
     for (pkg,(ver,fix)) in inst
         (fix || pkg in dont_update) || continue

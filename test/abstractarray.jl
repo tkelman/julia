@@ -712,9 +712,9 @@ end
 
 # conversion to arrays
 let v = collect(1:15), m = reshape(v, 5, 3),
-    sv = sparse(v), sm = sparse(m),
-    r = 1:15, t = take(1:20, 15),
-    g1 = (i for i in 1:15), g2 = ((j-1)*5+i for i in 1:5, j in 1:3)
+        sv = sparse(v), sm = sparse(m),
+        r = 1:15, t = take(1:20, 15),
+        g1 = (i for i in 1:15), g2 = ((j-1)*5+i for i in 1:5, j in 1:3)
     for x in (v, m, sv, sm, r, t, g1, g2)
         @test Vector(x) == convert(Vector, x) == v
         @test Vector{Int}(x) == convert(Vector{Int}, x) == v
