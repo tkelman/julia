@@ -98,6 +98,25 @@ struct Classification {
     }
 };
 
+// Determine if object of bitstype ty should be passed in a SIMD register.
+static bool prefer_simd_register(jl_value_t *ty) {
+    size_t size = jl_datatype_size(ty);
+    if (size!=16 && size!=32 && size!=64)
+        // Wrong size for xmm, ymm, or zmm register.
+        return false;
+    uint32_t n = jl_datatype_nfields(ty);
+    if (n<2)
+        // Not mapped to a LLVM vector.
+        return false;
+    jl_value_t *ft0 = jl_field_type(ty, 0);
+    for (uint32_t i = 1; i < n; ++i)
+        if (jl_field_type(ty, i)!=ft0)
+            // Not homogeneous
+            return false;
+    // Type is homogeneous.  Check if it maps to LLVM vector.
+    return jl_special_vector_alignment(n,ft0) != 0;
+}
+
 /*else if (ty == jl_float80_type) { //if this is ever added
         accum.addField(offset, X87);
         accum.addField(offset+8, X87Up);
@@ -132,6 +151,10 @@ void classifyType(Classification& accum, jl_value_t *ty, uint64_t offset)
         else {
             accum.addField(offset, Memory);
         }
+    }
+    // struct types that map to SIMD registers
+    else if (prefer_simd_register(ty)) {
+        accum.addField(offset, Sse);
     }
     // Other struct types
     else if (jl_datatype_size(ty) <= 16) {
