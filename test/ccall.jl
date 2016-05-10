@@ -524,3 +524,29 @@ let A = [1]
     finalize(A)
     @test ccall((:get_c_int, libccalltest), Cint, ()) == -1
 end
+
+# SIMD Registers
+
+typealias VecReg{N,T} NTuple{N,VecElement{T}}
+typealias V4xF32 VecReg{4,Float32}
+typealias V4xI32 VecReg{4,Int32}
+
+if Base.ARCH==:x86_64
+
+    function test_sse(a1::V4xF32,a2::V4xF32,a3::V4xF32,a4::V4xF32)
+        ccall((:test_m128, libccalltest), V4xF32, (V4xF32,V4xF32,V4xF32,V4xF32), a1, a2, a3, a4)
+    end
+
+    function test_sse(a1::V4xI32,a2::V4xI32,a3::V4xI32,a4::V4xI32)
+        ccall((:test_m128i, libccalltest), V4xI32, (V4xI32,V4xI32,V4xI32,V4xI32), a1, a2, a3, a4)
+    end
+
+    for s in [Float32,Int32]
+        a1 = VecReg(ntuple(i->VecElement(s(1i)),4))
+        a2 = VecReg(ntuple(i->VecElement(s(2i)),4))
+        a3 = VecReg(ntuple(i->VecElement(s(3i)),4))
+        a4 = VecReg(ntuple(i->VecElement(s(4i)),4))
+        r = VecReg(ntuple(i->VecElement(s(1i+2i*(3i-4i))),4))
+        @assert test_sse(a1,a2,a3,a4)==r
+    end
+end

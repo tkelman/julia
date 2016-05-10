@@ -561,23 +561,26 @@ Arrays of unknown size are not supported.
 
 In the future, some of these restrictions may be reduced or eliminated.
 
-SIMD (SSE, AVX)
-~~~~~~~~~~~~~~~
+SIMD Values
+~~~~~~~~~~~
 
-On 64-bit x86, if a C/C++ routine has an argument or return value with an 
-SSE or AVX type, the corresponding Julia type is a homogeneous tuple 
-of ``VecElement`` that naturally maps to the type.  Specifically:
+Note: This feature is currently implemented on 64-bit x86 platforms only.
 
-    - The tuple must have exactly the same size as the SSE/AVX type, 
-      that is it must be 16, 32, or 64 bytes long
+If a C/C++ routine has an argument or return value that is a native
+SIMD type, the corresponding Julia type is a homogeneous tuple
+of ``VecElement`` that naturally maps to the SIMD type.  Specifically:
 
-    - The element type of the tuple must be an instance of ``VecElement{T}`` 
+    - The tuple must be the same size as the SIMD type.
+      For example, a tuple representing an ``__m128`` on x86
+      must have a size of 16 bytes.
+
+    - The element type of the tuple must be an instance of ``VecElement{T}``
       where ``T`` is a bitstype that is 1, 2, 4 or 8 bytes.
 
 For instance, consider this C routine that uses AVX intrinsics::
 
     #include <immintrin.h>
-                          
+
     __m256 dist( __m256 a, __m256 b ) {
         return _mm256_sqrt_ps(_mm256_add_ps(_mm256_mul_ps(a, a),
                                             _mm256_mul_ps(b, b)));

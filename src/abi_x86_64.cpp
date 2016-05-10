@@ -106,7 +106,7 @@ static bool prefer_simd_register(jl_value_t *ty) {
         return false;
     uint32_t n = jl_datatype_nfields(ty);
     if (n<2)
-        // Not mapped to a LLVM vector.
+        // Not mapped to SIMD register.
         return false;
     jl_value_t *ft0 = jl_field_type(ty, 0);
     for (uint32_t i = 1; i < n; ++i)
@@ -214,11 +214,16 @@ void needPassByRef(AbiState *state, jl_value_t *ty, bool *byRef, bool *inReg)
     }
 }
 
+// Called on behalf of ccall to determine preferred LLVM representation
+// for an argument or return value.
 Type *preferred_llvm_type(jl_value_t *ty, bool isret)
 {
     (void) isret;
     // no need to rewrite these types (they are returned as pointers anyways)
     if (!jl_is_datatype(ty) || jl_is_abstracttype(ty) || jl_is_cpointer_type(ty) || jl_is_array_type(ty))
+        return NULL;
+
+    if (prefer_simd_register(ty))
         return NULL;
 
     int size = jl_datatype_size(ty);
