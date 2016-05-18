@@ -1219,6 +1219,9 @@ STATIC_INLINE jl_function_t *jl_get_function(jl_module_t *m, const char *name)
 }
 int jl_is_submodule(jl_module_t *child, jl_module_t *parent);
 
+// methods
+JL_DLLEXPORT int jl_method_exists(jl_methtable_t *mt, jl_tupletype_t *types);
+
 // eq hash tables
 JL_DLLEXPORT jl_array_t *jl_eqtable_put(jl_array_t *h, void *key, void *val);
 JL_DLLEXPORT jl_value_t *jl_eqtable_get(jl_array_t *h, void *key,
