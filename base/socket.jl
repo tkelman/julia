@@ -586,12 +586,12 @@ function uv_getaddrinfocb(req::Ptr{Void}, status::Cint, addrinfo::Ptr{Void})
 end
 
 function getaddrinfo(cb::Function, host::String)
-    isascii(host) || error("non-ASCII hostname: $host")
+    host = ascii(host)
     callback_dict[cb] = cb
     status = ccall(:jl_getaddrinfo, Int32, (Ptr{Void}, Cstring, Ptr{UInt8}, Any, Ptr{Void}),
                    eventloop(), host, C_NULL, cb, uv_jl_getaddrinfocb::Ptr{Void})
     if status == UV_EINVAL
-        throw(ArgumentError("Invalid uv_getaddrinfo() agument"))
+        throw(ArgumentError("Invalid uv_getaddrinfo() argument"))
     elseif status in [UV_ENOMEM, UV_ENOBUFS]
         throw(OutOfMemoryError())
     elseif status < 0

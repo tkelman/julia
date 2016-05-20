@@ -603,7 +603,7 @@ end
 
 ### cholmod_check.h ###
 function print_sparse{Tv<:VTypes}(A::Sparse{Tv}, name::String)
-    isascii(name) || error("non-ASCII name: $name")
+    name = ascii(name)
     cm = common()
     set_print_level(cm, 3)
     @isok ccall((@cholmod_name("print_sparse", SuiteSparse_long),:libcholmod), Cint,
