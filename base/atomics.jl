@@ -3,7 +3,7 @@
 using Core.Intrinsics: llvmcall
 
 import Base: setindex!, getindex, unsafe_convert
-import Base.Sys: Sys, WORD_SIZE
+import Base.Sys: ARCH, WORD_SIZE
 
 export
     Atomic,
