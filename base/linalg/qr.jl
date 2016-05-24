@@ -520,7 +520,7 @@ function A_ldiv_B!(A::QRPivoted, B::StridedMatrix)
 end
 
 # convenience methods
-## return only the solution of a least squares problem while avoiding to promote
+## return only the solution of a least squares problem while avoiding promoting
 ## vectors to matrices.
 _cut_B(x::AbstractVector, r::UnitRange) = length(x)  > length(r) ? x[r]   : x
 _cut_B(X::AbstractMatrix, r::UnitRange) = size(X, 1) > length(r) ? X[r,:] : X
@@ -559,7 +559,7 @@ end
 # With a real lhs and complex rhs with the same precision, we can reinterpret the complex
 # rhs as a real rhs with twice the number of columns.
 
-# convenience to compute the return size correctly for vector and matrices
+# convenience methods to compute the return size correctly for vectors and matrices
 _ret_size(A::Factorization, b::AbstractVector) = (max(size(A, 2), length(b)),)
 _ret_size(A::Factorization, B::AbstractMatrix) = (max(size(A, 2), size(B, 1)), size(B, 2))
 
@@ -567,18 +567,18 @@ function (\){T<:BlasReal}(A::Union{QR{T},QRCompactWY{T},QRPivoted{T}}, BIn::VecO
     m, n = size(A)
     m == size(BIn, 1) || throw(DimensionMismatch("left hand side has $m rows, but right hand side has $(size(BIn,1)) rows"))
 
-# | z | z |  reinterpret  | x | x | x | x |  transpose  | x | y |  reshape  | x | y | x | y |
-# | z | z |      ->       | y | y | y | y |     ->      | x | y |     ->    | x | y | x | y |
-#                                                       | x | y |
-#                                                       | x | y |
+# |z1|z3|  reinterpret  |x1|x2|x3|x4|  transpose  |x1|y1|  reshape  |x1|y1|x3|y3|
+# |z2|z4|      ->       |y1|y2|y3|y4|     ->      |x2|y2|     ->    |x2|y2|x4|y4|
+#                                                 |x3|y3|
+#                                                 |x4|y4|
     B = reshape(transpose(reinterpret(T, BIn, (2, length(BIn)))), size(BIn, 1), 2*size(BIn, 2))
 
     X = A_ldiv_B!(A, _append_zeros(B, T, n))
 
-# | z | z |  reinterpret  | x | x | x | x |  transpose  | x | y |  reshape  | x | y | x | y |
-# | z | z |      <-       | y | y | y | y |     <-      | x | y |     <-    | x | y | x | y |
-#                                                       | x | y |
-#                                                       | x | y |
+# |z1|z3|  reinterpret  |x1|x2|x3|x4|  transpose  |x1|y1|  reshape  |x1|y1|x3|y3|
+# |z2|z4|      <-       |y1|y2|y3|y4|     <-      |x2|y2|     <-    |x2|y2|x4|y4|
+#                                                 |x3|y3|
+#                                                 |x4|y4|
     XX = reinterpret(Complex{T}, transpose(reshape(X, div(length(X), 2), 2)), _ret_size(A, BIn))
     return _cut_B(XX, 1:n)
 end
