@@ -419,7 +419,7 @@ for elty in (Float64, Complex{Float64})
 
 end
 
-A8 = 100 * [-1+1im 0 0 1e-8; 0 1 0 0; 0 0 1 0; 0 0 0 1];
+A8 = 100 * [-1+1im 0 0 1e-8; 0 1 0 0; 0 0 1 0; 0 0 0 1]
 @test_approx_eq expm(logm(A8)) A8
 
 # issue 5116
