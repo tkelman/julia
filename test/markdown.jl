@@ -175,8 +175,7 @@ let doc = Markdown.parse(
            * four
         ... another paragraph.
         """
-    )
-
+        )
     @test length(doc.content) === 3
     @test isa(doc.content[1], Markdown.Paragraph)
     @test isa(doc.content[2], Markdown.List)

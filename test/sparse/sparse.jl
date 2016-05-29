@@ -247,8 +247,7 @@ b = randn(3)
 @test scale!(sC, 0.5, sA) == scale!(sC, sA, 0.5)
 
 # copy!
-let
-    A = sprand(5, 5, 0.2)
+let A = sprand(5, 5, 0.2)
     B = sprand(5, 5, 0.2)
     copy!(A, B)
     @test A == B
@@ -1096,7 +1095,8 @@ S = sparse(B)
 @test spdiagm(([1,2],[3.5],[4+5im]), (0,1,-1), 2,2) == [1 3.5; 4+5im 2]
 
 #Test broadcasting of sparse matrixes
-let  A = sprand(10,10,0.3), B = sprand(10,10,0.3), CF = rand(10,10), AF = Array(A), BF = Array(B), C = sparse(CF)
+let A = sprand(10,10,0.3), B = sprand(10,10,0.3), CF = rand(10,10),
+        AF = Array(A), BF = Array(B), C = sparse(CF)
     @test A .* B == AF .* BF
     @test A[1,:] .* B == AF[1,:] .* BF
     @test A[:,1] .* B == AF[:,1] .* BF
@@ -1406,8 +1406,7 @@ A = sprandn(10,10,0.5)
 @test_throws ArgumentError sparse([1,2,3], [1,2,3], [1,2], 3, 3)
 
 #Issue 12118: sparse matrices are closed under +, -, min, max
-let
-    A12118 = sparse([1,2,3,4,5], [1,2,3,4,5], [1,2,3,4,5])
+let A12118 = sparse([1,2,3,4,5], [1,2,3,4,5], [1,2,3,4,5])
     B12118 = sparse([1,2,4,5],   [1,2,3,5],   [2,1,-1,-2])
 
     @test A12118 + B12118 == sparse([1,2,3,4,4,5], [1,2,3,3,4,5], [3,3,3,-1,4,3])
@@ -1484,8 +1483,7 @@ end
 @test_throws ArgumentError sparse(Int[], collect(1:5), collect(1:5))
 
 # issue #13024
-let
-    A13024 = sparse([1,2,3,4,5], [1,2,3,4,5], fill(true,5))
+let A13024 = sparse([1,2,3,4,5], [1,2,3,4,5], fill(true,5))
     B13024 = sparse([1,2,4,5],   [1,2,3,5],   fill(true,4))
 
     @test A13024 & B13024 == sparse([1,2,5], [1,2,5], fill(true,3))
@@ -1515,8 +1513,7 @@ let A = 2. * speye(5,5)
     @test Array(spones(A)) == eye(Array(A))
 end
 
-let
-    A = spdiagm(rand(5)) + sprandn(5,5,0.2) + im*sprandn(5,5,0.2)
+let A = spdiagm(rand(5)) + sprandn(5,5,0.2) + im*sprandn(5,5,0.2)
     A = A + A'
     @test !Base.USE_GPL_LIBS || abs(det(factorize(Hermitian(A)))) ≈ abs(det(factorize(Array(A))))
     A = spdiagm(rand(5)) + sprandn(5,5,0.2) + im*sprandn(5,5,0.2)
@@ -1539,8 +1536,7 @@ let
     @test_throws ErrorException inv(A)
 end
 
-let
-    n = 100
+let n = 100
     A = sprandn(n, n, 0.5) + sqrt(n)*I
     x = LowerTriangular(A)*ones(n)
     @test LowerTriangular(A)\x ≈ ones(n)
@@ -1557,8 +1553,7 @@ end
 @test sparsevec([1,1], [true, true]) == sparsevec([1,1], [true, true], 1) == fill(true, 1)
 
 # issparse for specialized matrix types
-let
-    m = sprand(10, 10, 0.1)
+let m = sprand(10, 10, 0.1)
     @test issparse(Symmetric(m))
     @test issparse(Hermitian(m))
     @test issparse(LowerTriangular(m))
@@ -1573,8 +1568,7 @@ let
     @test issparse(LinAlg.UnitUpperTriangular(Array(m))) == false
 end
 
-let
-    m = sprand(Float32, 10, 10, 0.1)
+let m = sprand(Float32, 10, 10, 0.1)
     @test eltype(m) == Float32
     m = sprand(Float64, 10, 10, 0.1)
     @test eltype(m) == Float64
@@ -1589,8 +1583,7 @@ end
 
 # Test that concatenations of combinations of sparse matrices with sparse matrices or dense
 # matrices/vectors yield sparse arrays
-let
-    N = 4
+let N = 4
     densevec = ones(N)
     densemat = diagm(ones(N))
     spmat = spdiagm(ones(N))
@@ -1665,8 +1658,7 @@ end
 
 # Test that broadcast[!](f, [C::SparseMatrixCSC], A::SparseMatrixCSC, B::SparseMatrixCSC)
 # returns the correct (densely populated) result when f(zero(eltype(A)), zero(eltype(B))) != 0
-let
-    N = 5
+let N = 5
     sparsesqrmat = sprand(N, N, 0.5)
     sparsesqrmat2 = sprand(N, N, 0.5)
     sparserowmat = sprand(1, N, 0.5)
