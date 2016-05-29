@@ -1053,8 +1053,7 @@ end
 
 ## Reductions ##
 
-let
-    b1 = bitrand(s1, s2, s3, s4)
+let b1 = bitrand(s1, s2, s3, s4)
     m1 = 1
     m2 = 3
     @check_bit_operation maximum(b1, (m1, m2)) BitArray{4}

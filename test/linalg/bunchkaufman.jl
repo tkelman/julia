@@ -80,8 +80,7 @@ end
 
 
 debug && println("Bunch-Kaufman factors of a singular matrix")
-let
-    As1 = ones(n, n)
+let As1 = ones(n, n)
     As2 = complex(ones(n, n))
     As3 = complex(ones(n, n))
     As3[end, 1] += im

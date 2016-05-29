@@ -81,9 +81,9 @@ let b = IOBuffer("1\n2\n3\n"), a = []
 end
 
 # zip eachline (issue #7369)
-let zeb     = IOBuffer("1\n2\n3\n4\n5\n"),
-    letters = ['a', 'b', 'c', 'd', 'e'],
-    res     = []
+let zeb = IOBuffer("1\n2\n3\n4\n5\n"),
+        letters = ['a', 'b', 'c', 'd', 'e'],
+        res     = []
     for (number, letter) in zip(eachline(zeb), letters)
         push!(res, (parse(Int,strip(number)), letter))
     end
@@ -227,8 +227,7 @@ end
 @test collect(Base.product(1:2, 3:4, 5:6)) == [(i, j, k) for i=1:2, j=3:4, k=5:6]
 
 # iteration order
-let
-    expected = [(1,3,5), (2,3,5), (1,4,5), (2,4,5), (1,3,6), (2,3,6), (1,4,6), (2,4,6)]
+let expected = [(1,3,5), (2,3,5), (1,4,5), (2,4,5), (1,3,6), (2,3,6), (1,4,6), (2,4,6)]
     actual = Base.product(1:2, 3:4, 5:6)
     for (exp, act) in zip(expected, actual)
         @test exp == act
@@ -236,9 +235,8 @@ let
 end
 
 # collect multidimensional array
-let
-    a, b = 1:3, [4 6;
-                 5 7]
+let (a, b) = (1:3, [4 6;
+                    5 7])
     p = Base.product(a, b)
     @test size(p)    == (3, 2, 2)
     @test length(p)  == 12
@@ -252,9 +250,7 @@ let
 end
 
 # with 1D inputs
-let
-    a, b, c = 1:2, 1.0:10.0, Int32(1):Int32(0)
-
+let (a, b, c) = (1:2, 1.0:10.0, Int32(1):Int32(0))
     # length
     @test length(Base.product(a))       == 2
     @test length(Base.product(a, b))    == 20
@@ -277,8 +273,7 @@ let
 end
 
 # with multidimensional inputs
-let
-    a, b, c = randn(4, 4), randn(3, 3, 3), randn(2, 2, 2, 2)
+let (a, b, c) = (randn(4, 4), randn(3, 3, 3), randn(2, 2, 2, 2))
     args = Any[(a,),
                (a, a),
                (a, b),
@@ -297,8 +292,7 @@ let
 end
 
 # more tests on product with iterators of various type
-let
-    iters = (1:2,
+let iters = (1:2,
              rand(2, 2, 2),
              take(1:4, 2),
              Base.product(1:2, 1:3),
@@ -321,8 +315,7 @@ let
 end
 
 # product of finite length and infinite length iterators
-let
-    a = 1:2
+let a = 1:2
     b = countfrom(1)
     ab = Base.product(a, b)
     ba = Base.product(b, a)
@@ -402,8 +395,7 @@ import Base.flatten
 @test Base.iteratoreltype(Base.Flatten((i for i=1:2) for j=1:1)) == Base.EltypeUnknown()
 
 # foreach
-let
-    a = []
+let a = []
     foreach(()->push!(a,0))
     @test a == [0]
     a = []

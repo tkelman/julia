@@ -151,8 +151,8 @@ let
 end
 
 debug && println("real svds")
-let # svds test
-    A = sparse([1, 1, 2, 3, 4], [2, 1, 1, 3, 1], [2.0, -1.0, 6.1, 7.0, 1.5])
+# svds test
+let A = sparse([1, 1, 2, 3, 4], [2, 1, 1, 3, 1], [2.0, -1.0, 6.1, 7.0, 1.5])
     S1 = svds(A, nsv = 2)
     S2 = svd(full(A))
 
@@ -192,8 +192,8 @@ let # svds test
 end
 
 debug && println("complex svds")
-let # complex svds test
-    A = sparse([1, 1, 2, 3, 4], [2, 1, 1, 3, 1], exp.(im*[2.0:2:10;]))
+# complex svds test
+let A = sparse([1, 1, 2, 3, 4], [2, 1, 1, 3, 1], exp.(im*[2.0:2:10;]))
     S1 = svds(A, nsv = 2)
     S2 = svd(full(A))
 
@@ -233,8 +233,7 @@ svds(rand(1:10, 10, 8))
 @test_throws MethodError svds(big(rand(1:10, 10, 8)))
 
 # Symmetric generalized with singular B
-let
-    n = 10
+let n = 10
     k = 3
     A = randn(n,n); A = A'A
     B = randn(n,k);  B = B*B'
