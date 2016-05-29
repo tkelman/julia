@@ -234,8 +234,7 @@ rt = Base.return_types(setindex!, Tuple{Array{Int32, 3}, UInt8, Vector{Int}, Int
 @test size(Matrix()) == (0,0)
 
 # get
-let
-    A = reshape(1:24, 3, 8)
+let A = reshape(1:24, 3, 8)
     x = get(A, 32, -12)
     @test x == -12
     x = get(A, 14, -12)
@@ -867,8 +866,7 @@ end
 
 
 # single multidimensional index
-let
-    a = rand(6,6)
+let a = rand(6,6)
     I = [1 4 5; 4 2 6; 5 6 3]
     a2 = a[I]
     @test size(a2) == size(I)
@@ -1101,8 +1099,7 @@ for N = 1:Nmax
 end
 
 # issue #6645 (32-bit)
-let
-    x = Float64[]
+let x = Float64[]
     for i=1:5; push!(x, 1.0); end
     @test dot(zeros(5),x) == 0.0
 end
@@ -1718,8 +1715,7 @@ end
 end
 
 # Test that concatenations of dense matrices/vectors yield dense matrices/vectors
-let
-    N = 4
+let N = 4
     densevec = ones(N)
     densemat = diagm(ones(N))
     # Test that concatenations of homogeneous pairs of either dense matrices or dense vectors
