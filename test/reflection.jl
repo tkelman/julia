@@ -172,7 +172,7 @@ foo7648(x) = x
 function foo7648_nomethods end
 type Foo7648 end
 
-    module TestModSub9475
+module TestModSub9475
     using Base.Test
     using ..TestMod7648
     export a9475, foo9475
@@ -186,7 +186,7 @@ type Foo7648 end
         @test Base.fullname(current_module()) == (:TestMod7648, :TestModSub9475)
         @test Base.module_parent(current_module()) == TestMod7648
     end
-    end # module TestModSub9475
+end # module TestModSub9475
 
 using .TestModSub9475
 
@@ -535,8 +535,7 @@ else
 end
 
 # Adds test for PR #17636
-let
-    a = @code_typed 1 + 1
+let a = @code_typed 1 + 1
     b = @code_lowered 1 + 1
     @test isa(a, LambdaInfo)
     @test isa(b, LambdaInfo)
