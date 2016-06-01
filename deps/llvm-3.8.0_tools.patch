@@ -1,12 +1,12 @@
 diff --git a/cmake/modules/AddLLVM.cmake b/cmake/modules/AddLLVM.cmake
-index a829751..d251932 100644
+index cc7445f..1e2baae 100644
 --- a/cmake/modules/AddLLVM.cmake
 +++ b/cmake/modules/AddLLVM.cmake
-@@ -696,13 +696,16 @@ macro(add_llvm_tool name)
+@@ -765,13 +765,16 @@ macro(add_llvm_tool name)
      set(EXCLUDE_FROM_ALL ON)
    endif()
    add_llvm_executable(${name} ${ARGN})
-+  if( NOT DEFINED LLVM_TOOLS_INSTALL_DIR )
++  if (NOT DEFINED LLVM_TOOLS_INSTALL_DIR)
 +    set(LLVM_TOOLS_INSTALL_DIR bin)
 +  endif()
  
@@ -20,15 +20,29 @@ index a829751..d251932 100644
                COMPONENT ${name})
  
        if (NOT CMAKE_CONFIGURATION_TYPES)
+@@ -1209,9 +1212,12 @@ function(llvm_install_symlink name dest)
+ 
+   set(full_name ${name}${CMAKE_EXECUTABLE_SUFFIX})
+   set(full_dest ${dest}${CMAKE_EXECUTABLE_SUFFIX})
++  if (NOT DEFINED LLVM_TOOLS_INSTALL_DIR)
++    set(LLVM_TOOLS_INSTALL_DIR bin)
++  endif()
+ 
+   install(SCRIPT ${INSTALL_SYMLINK}
+-          CODE "install_symlink(${full_name} ${full_dest} bin)"
++          CODE "install_symlink(${full_name} ${full_dest} ${LLVM_TOOLS_INSTALL_DIR})"
+           COMPONENT ${component})
+ 
+   if (NOT CMAKE_CONFIGURATION_TYPES AND NOT ARG_ALWAYS_GENERATE)
 diff --git a/cmake/modules/TableGen.cmake b/cmake/modules/TableGen.cmake
-index fca7d1b..e55d4d7 100644
+index fca7d1b..a512b9f 100644
 --- a/cmake/modules/TableGen.cmake
 +++ b/cmake/modules/TableGen.cmake
 @@ -138,10 +138,13 @@ macro(add_tablegen target project)
        set_target_properties(${target} PROPERTIES LINK_FLAGS -Wl,--stack,16777216)
      endif(CMAKE_SIZEOF_VOID_P MATCHES "8")
    endif( MINGW )
-+  if( NOT DEFINED LLVM_TOOLS_INSTALL_DIR )
++  if (NOT DEFINED LLVM_TOOLS_INSTALL_DIR)
 +    set(LLVM_TOOLS_INSTALL_DIR bin)
 +  endif()
    if (${project} STREQUAL LLVM AND NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
@@ -39,13 +53,3 @@ index fca7d1b..e55d4d7 100644
    endif()
    set_property(GLOBAL APPEND PROPERTY LLVM_EXPORTS ${target})
  endmacro()
-diff --git a/tools/llvm-ar/CMakeLists.txt b/tools/llvm-ar/CMakeLists.txt
-index 86233df..d693124 100644
---- a/tools/llvm-ar/CMakeLists.txt
-+++ b/tools/llvm-ar/CMakeLists.txt
-@@ -10,5 +10,3 @@ add_llvm_tool(llvm-ar
-   llvm-ar.cpp
-   )
- 
--add_llvm_tool_symlink(llvm-ranlib llvm-ar)
--add_llvm_tool_symlink(llvm-lib llvm-ar)
