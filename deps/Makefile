@@ -47,6 +47,7 @@ CMAKE_CC_ARG := $(CC_ARG) $(DEPS_CFLAGS)
 CMAKE_CXX_ARG := $(CXX_ARG) $(DEPS_CXXFLAGS)
 
 CMAKE_COMMON := -DCMAKE_INSTALL_PREFIX:PATH=$(build_prefix)
+CMAKE_COMMON += -DCMAKE_INSTALL_BINDIR:PATH=$(shell $(JULIAHOME)/contrib/relative_path.sh $(build_prefix) $(build_depsbindir))
 ifneq ($(VERBOSE), 0)
 CMAKE_COMMON += -DCMAKE_VERBOSE_MAKEFILE=ON
 endif
@@ -79,7 +80,7 @@ endif
 
 # If the top-level Makefile is called with environment variables,
 # they will override the values passed above to ./configure
-MAKE_COMMON := DESTDIR="" prefix=$(build_prefix) libdir=$(build_libdir) libexecdir=$(build_libexecdir) datarootdir=$(build_datarootdir) includedir=$(build_includedir) sysconfdir=$(build_sysconfdir) O=
+MAKE_COMMON := DESTDIR="" prefix=$(build_prefix) bindir=$(build_depsbindir) libdir=$(build_libdir) shlibdir=$(build_shlibdir) libexecdir=$(build_libexecdir) datarootdir=$(build_datarootdir) includedir=$(build_includedir) sysconfdir=$(build_sysconfdir) O=
 
 
 ## Overall configuration of which rules exist and should be run by default ##
