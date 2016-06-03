@@ -131,7 +131,8 @@ JL_DLLEXPORT jl_lambda_info_t *jl_specializations_get_linfo(jl_method_t *m, jl_t
     jl_lambda_info_t *li = jl_get_specialized(m, type, sparams);
     JL_GC_PUSH1(&li);
     // TODO: fuse lookup and insert steps
-    jl_typemap_insert(&m->specializations, (jl_value_t*)m, type, jl_emptysvec, NULL, jl_emptysvec, (jl_value_t*)li, 0, &tfunc_cache, NULL);
+    jl_typemap_insert(&m->specializations, (jl_value_t*)m, type, jl_emptysvec,
+        NULL, jl_emptysvec, (jl_value_t*)li, 0, &tfunc_cache, NULL);
     JL_UNLOCK(&m->writelock);
     JL_GC_POP();
     return li;
@@ -156,7 +157,8 @@ JL_DLLEXPORT jl_value_t *jl_methtable_lookup(jl_methtable_t *mt, jl_tupletype_t 
 // ----- LambdaInfo specialization instantiation ----- //
 
 JL_DLLEXPORT jl_method_t *jl_new_method_uninit(void);
-static jl_function_t *jl_new_generic_function_with_supertype(jl_sym_t *name, jl_module_t *module, jl_datatype_t *st, int iskw);
+static jl_function_t *jl_new_generic_function_with_supertype(jl_sym_t *name,
+    jl_module_t *module, jl_datatype_t *st, int iskw);
 jl_value_t *jl_mk_builtin_func(const char *name, jl_fptr_t fptr)
 {
     jl_sym_t *sname = jl_symbol(name);
@@ -177,7 +179,8 @@ jl_value_t *jl_mk_builtin_func(const char *name, jl_fptr_t fptr)
     li->def->tvars = jl_emptysvec;
 
     jl_methtable_t *mt = jl_gf_mtable(f);
-    jl_typemap_insert(&mt->cache, (jl_value_t*)mt, jl_anytuple_type, jl_emptysvec, NULL, jl_emptysvec, (jl_value_t*)li, 0, &lambda_cache, NULL);
+    jl_typemap_insert(&mt->cache, (jl_value_t*)mt, jl_anytuple_type, jl_emptysvec,
+        NULL, jl_emptysvec, (jl_value_t*)li, 0, &lambda_cache, NULL);
     return f;
 }
 
@@ -795,7 +798,8 @@ static jl_lambda_info_t *cache_method(jl_methtable_t *mt, union jl_typemap_t *ca
         }
     }
 
-    jl_typemap_insert(cache, parent, origtype, jl_emptysvec, type, guardsigs, (jl_value_t*)newmeth, jl_cachearg_offset(mt), &lambda_cache, NULL);
+    jl_typemap_insert(cache, parent, origtype, jl_emptysvec, type, guardsigs,
+        (jl_value_t*)newmeth, jl_cachearg_offset(mt), &lambda_cache, NULL);
 
     if (definition->traced && jl_method_tracer)
         jl_call_tracer(jl_method_tracer, (jl_value_t*)newmeth);
@@ -984,7 +988,8 @@ static void method_overwrite(jl_typemap_entry_t *newentry, jl_method_t *oldvalue
 
 // invalidate cached methods that overlap this definition
 static void flush_from_cache(jl_typemap_entry_t *entry);
-static void invalidate_conflicting(union jl_typemap_t *pml, jl_value_t *type, jl_value_t *parent, jl_array_t *shadowed)
+static void invalidate_conflicting(union jl_typemap_t *pml, jl_value_t *type,
+                                   jl_value_t *parent, jl_array_t *shadowed)
 {
     jl_typemap_entry_t **pl;
     if (jl_typeof(pml->unknown) == (jl_value_t*)jl_typemap_level_type) {

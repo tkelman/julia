@@ -3,11 +3,16 @@
 # Methods operating on different special matrix types
 
 # Interconversion between special matrix types
-convert{T}(::Type{Bidiagonal}, A::Diagonal{T})=Bidiagonal(A.diag, zeros(T, size(A.diag,1)-1), true)
-convert{T}(::Type{SymTridiagonal}, A::Diagonal{T})=SymTridiagonal(A.diag, zeros(T, size(A.diag,1)-1))
-convert{T}(::Type{Tridiagonal}, A::Diagonal{T})=Tridiagonal(zeros(T, size(A.diag,1)-1), A.diag, zeros(T, size(A.diag,1)-1))
-convert(::Type{LowerTriangular}, A::Bidiagonal) = !A.isupper ? LowerTriangular(full(A)) : throw(ArgumentError("Bidiagonal matrix must have lower off diagonal to be converted to LowerTriangular"))
-convert(::Type{UpperTriangular}, A::Bidiagonal) = A.isupper ? UpperTriangular(full(A)) : throw(ArgumentError("Bidiagonal matrix must have upper off diagonal to be converted to UpperTriangular"))
+convert{T}(::Type{Bidiagonal}, A::Diagonal{T}) =
+    Bidiagonal(A.diag, zeros(T, size(A.diag,1)-1), true)
+convert{T}(::Type{SymTridiagonal}, A::Diagonal{T}) =
+    SymTridiagonal(A.diag, zeros(T, size(A.diag,1)-1))
+convert{T}(::Type{Tridiagonal}, A::Diagonal{T}) =
+    Tridiagonal(zeros(T, size(A.diag,1)-1), A.diag, zeros(T, size(A.diag,1)-1))
+convert(::Type{LowerTriangular}, A::Bidiagonal) = !A.isupper ? LowerTriangular(full(A)) :
+    throw(ArgumentError("Bidiagonal matrix must have lower off diagonal to be converted to LowerTriangular"))
+convert(::Type{UpperTriangular}, A::Bidiagonal) = A.isupper ? UpperTriangular(full(A)) :
+    throw(ArgumentError("Bidiagonal matrix must have upper off diagonal to be converted to UpperTriangular"))
 
 function convert(::Type{UnitUpperTriangular}, A::Diagonal)
     if !all(A.diag .== one(eltype(A)))
@@ -37,7 +42,9 @@ function convert(::Type{SymTridiagonal}, A::Bidiagonal)
     SymTridiagonal(A.dv, A.ev)
 end
 
-convert{T}(::Type{Tridiagonal}, A::Bidiagonal{T})=Tridiagonal(A.isupper?zeros(T, size(A.dv,1)-1):A.ev, A.dv, A.isupper?A.ev:zeros(T, size(A.dv,1)-1))
+convert{T}(::Type{Tridiagonal}, A::Bidiagonal{T}) =
+    Tridiagonal(A.isupper ? zeros(T, size(A.dv,1)-1) : A.ev, A.dv,
+                A.isupper ? A.ev:zeros(T, size(A.dv,1)-1))
 
 function convert(::Type{Bidiagonal}, A::SymTridiagonal)
     if !all(A.ev .== 0)
@@ -89,7 +96,8 @@ function convert(::Type{Bidiagonal}, A::AbstractTriangular)
     end
 end
 
-convert(::Type{SymTridiagonal}, A::AbstractTriangular) = convert(SymTridiagonal, convert(Tridiagonal, A))
+convert(::Type{SymTridiagonal}, A::AbstractTriangular) =
+    convert(SymTridiagonal, convert(Tridiagonal, A))
 
 function convert(::Type{Tridiagonal}, A::AbstractTriangular)
     fA = full(A)
