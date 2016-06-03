@@ -104,7 +104,8 @@ a dictionary `lidict` of line information.
 
 See `Profile.print([io], data)` for an explanation of the valid keyword arguments.
 """
-print{T<:Unsigned}(data::Vector{T} = fetch(), lidict::Dict = getdict(data); kwargs...) = print(STDOUT, data, lidict; kwargs...)
+print{T<:Unsigned}(data::Vector{T} = fetch(), lidict::Dict = getdict(data); kwargs...) =
+    print(STDOUT, data, lidict; kwargs...)
 
 """
     retrieve() -> data, lidict
@@ -187,12 +188,14 @@ function callers(funcname::String, bt::Vector{UInt}, lidict; filename = nothing,
     if linerange === nothing
         return callersf(li -> li.func == funcname && li.file == filename, bt, lidict)
     else
-        return callersf(li -> li.func == funcname && li.file == filename && in(li.line, linerange), bt, lidict)
+        return callersf(li -> li.func == funcname && li.file == filename &&
+            in(li.line, linerange), bt, lidict)
     end
 end
 
 callers(funcname::String; kwargs...) = callers(funcname, retrieve()...; kwargs...)
-callers(func::Function, bt::Vector{UInt}, lidict; kwargs...) = callers(string(func), bt, lidict; kwargs...)
+callers(func::Function, bt::Vector{UInt}, lidict; kwargs...) =
+    callers(string(func), bt, lidict; kwargs...)
 callers(func::Function; kwargs...) = callers(string(func), retrieve()...; kwargs...)
 
 ##
@@ -244,7 +247,9 @@ function fetch()
     len = len_data()
     maxlen = maxlen_data()
     if (len == maxlen)
-        warn("The profile data buffer is full; profiling probably terminated\nbefore your program finished. To profile for longer runs, call Profile.init\nwith a larger buffer and/or larger delay.")
+        warn("The profile data buffer is full; profiling probably terminated\n" *
+            "before your program finished. To profile for longer runs, call Profile.init\n" *
+            "with a larger buffer and/or larger delay.")
     end
     unsafe_wrap(Array, get_data_pointer(), (len,))
 end
@@ -292,7 +297,8 @@ function parse_flat(iplist, n, lidict, C::Bool)
     lilist, n
 end
 
-function flat{T<:Unsigned}(io::IO, data::Vector{T}, lidict::Dict{T,StackFrame}, C::Bool, combine::Bool, cols::Integer, sortedby)
+function flat{T<:Unsigned}(io::IO, data::Vector{T}, lidict::Dict{T,StackFrame},
+        C::Bool, combine::Bool, cols::Integer, sortedby)
     if !C
         data = purgeC(data, lidict)
     end
@@ -305,12 +311,14 @@ function flat{T<:Unsigned}(io::IO, data::Vector{T}, lidict::Dict{T,StackFrame}, 
     print_flat(io, lilist, n, combine, cols, sortedby)
 end
 
-function flat{T<:Unsigned}(io::IO, data::Vector{T}, lidict::Dict{T,Vector{StackFrame}}, C::Bool, combine::Bool, cols::Integer, sortedby)
+function flat{T<:Unsigned}(io::IO, data::Vector{T}, lidict::Dict{T,Vector{StackFrame}},
+        C::Bool, combine::Bool, cols::Integer, sortedby)
     newdata, newdict = flatten(data, lidict)
     flat(io, newdata, newdict, C, combine, cols, sortedby)
 end
 
-function print_flat(io::IO, lilist::Vector{StackFrame}, n::Vector{Int}, combine::Bool, cols::Integer, sortedby)
+function print_flat(io::IO, lilist::Vector{StackFrame}, n::Vector{Int},
+        combine::Bool, cols::Integer, sortedby)
     p = liperm(lilist)
     lilist = lilist[p]
     n = n[p]
@@ -352,7 +360,8 @@ function print_flat(io::IO, lilist::Vector{StackFrame}, n::Vector{Int}, combine:
         wfile = floor(Integer,2*ntext/5)
         wfunc = floor(Integer,3*ntext/5)
     end
-    println(io, lpad("Count", wcounts, " "), " ", rpad("File", wfile, " "), " ", lpad("Line", wline, " "), " ", rpad("Function", wfunc, " "))
+    println(io, lpad("Count", wcounts, " "), " ", rpad("File", wfile, " "), " ",
+        lpad("Line", wline, " "), " ", rpad("Function", wfunc, " "))
     for i = 1:length(n)
         li = lilist[i]
         Base.print(io, lpad(string(n[i]), wcounts, " "), " ")
@@ -414,24 +423,24 @@ function tree_format(lilist::Vector{StackFrame}, counts::Vector{Int}, level::Int
             end
             if li.line == li.pointer
                 strs[i] = string(base,
-                          rpad(string(counts[i]), ndigcounts, " "),
-                          " ",
-                          "unknown function (pointer: 0x",
-                          hex(li.pointer,2*sizeof(Ptr{Void})),
-                          ")")
+                    rpad(string(counts[i]), ndigcounts, " "),
+                    " ",
+                    "unknown function (pointer: 0x",
+                    hex(li.pointer,2*sizeof(Ptr{Void})),
+                    ")")
             else
                 fname = string(li.func)
                 if !li.from_c && !isnull(li.linfo)
                     fname = sprint(show_spec_linfo, li)
                 end
                 strs[i] = string(base,
-                              rpad(string(counts[i]), ndigcounts, " "),
-                              " ",
-                              rtruncto(string(li.file), widthfile),
-                              ":",
-                              li.line == -1 ? "?" : string(li.line),
-                              "; ",
-                              ltruncto(fname, widthfunc))
+                    rpad(string(counts[i]), ndigcounts, " "),
+                    " ",
+                    rtruncto(string(li.file), widthfile),
+                    ":",
+                    li.line == -1 ? "?" : string(li.line),
+                    "; ",
+                    ltruncto(fname, widthfunc))
             end
         else
             strs[i] = ""
@@ -441,7 +450,8 @@ function tree_format(lilist::Vector{StackFrame}, counts::Vector{Int}, level::Int
 end
 
 # Print a "branch" starting at a particular level. This gets called recursively.
-function tree{T<:Unsigned}(io::IO, bt::Vector{Vector{T}}, counts::Vector{Int}, lidict::Dict, level::Int, combine::Bool, cols::Integer, maxdepth)
+function tree{T<:Unsigned}(io::IO, bt::Vector{Vector{T}}, counts::Vector{Int},
+        lidict::Dict, level::Int, combine::Bool, cols::Integer, maxdepth)
     if level > maxdepth
         return
     end
@@ -520,7 +530,8 @@ function tree{T<:Unsigned}(io::IO, bt::Vector{Vector{T}}, counts::Vector{Int}, l
     end
 end
 
-function tree{T<:Unsigned}(io::IO, data::Vector{T}, lidict::Dict{T,StackFrame}, C::Bool, combine::Bool, cols::Integer, maxdepth)
+function tree{T<:Unsigned}(io::IO, data::Vector{T}, lidict::Dict{T,StackFrame},
+        C::Bool, combine::Bool, cols::Integer, maxdepth)
     if !C
         data = purgeC(data, lidict)
     end
