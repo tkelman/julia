@@ -1,0 +1,31 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure(2) do |config|
+  config.vm.box = "jhcook/osx-yosemite-10.10"
+  config.vm.provider "virtualbox" do |vb|
+    # make it work when host is a more convenient os
+    vb.customize ["modifyvm", :id, "--usbehci", "off"]
+    vb.memory = "4096"
+    vb.cpus = 4
+  end
+  # install xcode command line tools
+#  config.vm.provision "xcodeclt", type: "shell", env: {"INSTALL_XCODE_CLI_TOOLS" => "1"},
+#    path: "https://raw.githubusercontent.com/timsutton/osx-vm-templates/master/scripts/xcode-cli-tools.sh"
+  # install homebrew (tarball only)
+#  config.vm.provision "homebrewtar", type: "shell", inline: <<-SCRIPT
+#    mkdir /usr/local
+#    curl -sSL https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C /usr/local
+#    chgrp -R admin /usr/local
+#    chmod g+w /usr/local
+#  SCRIPT
+  # install homebrew (this version also installs command line tools if they are not found)
+  config.vm.provision "homebrewscript", type: "shell", privileged: false,
+    path: "https://raw.githubusercontent.com/Homebrew/install/master/install"
+  # build julia
+  config.vm.provision "buildjulia", type: "shell", privileged: false, inline: <<-SCRIPT
+    brew install gcc cmake
+    git clone https://github.com/JuliaLang/julia ~/julia
+    cd ~/julia
+    make -j4 testall
+  SCRIPT
+end
