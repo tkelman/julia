@@ -12,20 +12,24 @@ Vagrant.configure(2) do |config|
 #  config.vm.provision "xcodeclt", type: "shell", env: {"INSTALL_XCODE_CLI_TOOLS" => "1"},
 #    path: "https://raw.githubusercontent.com/timsutton/osx-vm-templates/master/scripts/xcode-cli-tools.sh"
   # install homebrew (tarball only)
-#  config.vm.provision "homebrewtar", type: "shell", inline: <<-SCRIPT
-#    mkdir /usr/local
-#    curl -sSL https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C /usr/local
-#    chgrp -R admin /usr/local
-#    chmod g+w /usr/local
-#  SCRIPT
+  config.vm.provision "homebrewtar", type: "shell", inline: <<-SCRIPT
+    mkdir -p /usr/local/Library/Taps/homebrew/homebrew-core
+    curl -sSL https://github.com/staticfloat/brew/tarball/sf/no_clt_no_problem | tar xz --strip 1 -C /usr/local
+    curl -sSL https://github.com/Homebrew/homebrew-core/tarball/master | tar xz --strip 1 -C /usr/local/Library/Taps/homebrew/homebrew-core
+    chgrp -R admin /usr/local
+    chmod -R g+w /usr/local
+  SCRIPT
   # install homebrew (this version also installs command line tools if they are not found)
-  config.vm.provision "homebrewscript", type: "shell", privileged: false,
-    path: "https://raw.githubusercontent.com/Homebrew/install/master/install"
+#  config.vm.provision "homebrewscript", type: "shell", privileged: false,
+#    path: "https://raw.githubusercontent.com/Homebrew/install/master/install"
   # build julia
   config.vm.provision "buildjulia", type: "shell", privileged: false, inline: <<-SCRIPT
-    brew install gcc cmake
+    brew install cmake homebrew/dupes/make
+    brew install --force-bottle gcc # TODO: figure out why --force-bottle is needed here
+    ln -s /usr/local/bin/gmake /usr/local/bin/make
     git clone https://github.com/JuliaLang/julia ~/julia
     cd ~/julia
-    make -j4 testall
-  SCRIPT
+    make -j4 USEGCC=1 USECLANG=0 USE_LIBCPP=0 CC=gcc-6 CXX=g++-6 testall
+#    make -j4 testall
+   SCRIPT
 end
