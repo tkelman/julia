@@ -69,17 +69,8 @@ $(BUILDDIR)/julia_res.o: $(JULIAHOME)/contrib/windows/julia.rc
 		'/^(\d+)\.?(\d*)\.?(\d*)/ && \
 		print int $$1,",",int $$2,",0,",int $$3'` && \
 	$(CROSS_COMPILE)windres $< -O coff -o $@ -DJLVER=$$JLVERi -DJLVER_STR=\\\"$$JLVER\\\"
-$(BUILDDIR)/julia_res_manifest.o: $(JULIAHOME)/contrib/windows/julia-manifest.rc
-	JLVER=`cat $(JULIAHOME)/VERSION` && \
-	JLVERi=`echo $$JLVER | perl -nle \
-		'/^(\d+)\.?(\d*)\.?(\d*)/ && \
-		print int $$1,",",int $$2,",0,",int $$3'` && \
-	$(CROSS_COMPILE)windres $< -O coff -o $@ -DJLVER=$$JLVERi -DJLVER_STR=\\\"$$JLVER\\\"
 $(build_bindir)/julia$(EXE): julia_res.o
 $(build_bindir)/julia-debug$(EXE): julia_res.o
-julia-release: $(build_bindir)/julia-manifest$(EXE)
-$(build_bindir)/julia-manifest$(EXE): $(OBJS) julia_res_manifest.o
-	@$(call PRINT_LINK, $(CXXLD) $(CXXFLAGS) $(CXXLDFLAGS) $(LINK_FLAGS) $(SHIPFLAGS) $^ -o $@ -L$(build_private_libdir) -L$(build_libdir) -L$(build_shlibdir) -ljulia $(JLDFLAGS) $(CXXLDFLAGS))
 endif
 endif
 
