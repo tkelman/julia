@@ -55,7 +55,7 @@ throw an error when passed an array `A` with non-1 indexing.
 should return the size of `A` along dimension `d` even in cases where
 `A` uses non-1 indexing.
 
-See also @safeindices, UnsafeIndices, and IndicesSafety.
+See also `@safeindices`, `UnsafeIndices`, and `IndicesSafety`.
 """
 immutable SafeIndices <: IndicesSafety end
 """
@@ -82,7 +82,6 @@ immutable UnsafeIndices <: IndicesSafety end
 
 """
     @safeindices ex
-
 
 Marks `ex` as being safe for arrays that have indexing that does not
 start at 1. Functions such as `size` throw errors on such arrays,

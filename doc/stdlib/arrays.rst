@@ -118,11 +118,64 @@ Basic functions
 
 .. function:: @safeindices ex
 
+   .. Docstring generated from Julia source
+
+   Marks ``ex`` as being safe for arrays that have indexing that does not start at 1. Functions such as ``size`` throw errors on such arrays, unless such calls have been wrapped in ``@safeindices``\ .
+
+   Internally, this macro simply rewrites such calls as ``size(Base.SafeIndices(), A)``\ .
+
+   Example:
+
+   .. code-block:: julia
+
+       @safeindices function foo(args...)
+           body
+       end
+
+   will annotate all of ``foo``\ 's calls to ``length`` and ``size`` with ``SafeIndices``\ .
+
 .. function:: IndicesSafety
 
-.. function:: SafeIndices
+   .. Docstring generated from Julia source
 
-.. function:: UnsafeIndices
+   is an abstract-trait intended to help migrate code that assumes that array indexing starts with 1.
+
+   See ``@safeindices``\ , ``SafeIndices``\ , and ``UnsafeIndices`` for more information.
+
+.. function:: SafeIndices()
+
+   .. Docstring generated from Julia source
+
+   is a trait-value whose purpose is to help migrate functions to a form safe for arrays that have indexing that does not necessarily start with 1. For example, a great deal of "legacy" code uses ``for i = 1:size(A,d)`` to iterate over dimension ``d``\ , but this usage assumes that indexing starts with 1. (One should use ``for i in indices(A, d)`` instead.)
+
+   To help discover code that makes such assumptions, ``size(A, d)`` should throw an error when passed an array ``A`` with non-1 indexing. ``SafeIndices()`` can then be used to mark a call as having been "vetted" for its correctness. For example,
+
+   .. code-block:: julia
+
+       size(SafeIndices(), A, d)
+
+   should return the size of ``A`` along dimension ``d`` even in cases where ``A`` uses non-1 indexing.
+
+   See also ``@safeindices``\ , ``UnsafeIndices``\ , and ``IndicesSafety``\ .
+
+.. function:: UnsafeIndices()
+
+   .. Docstring generated from Julia source
+
+   is used as a default value that can be used to make a call "brittle" for arrays whose indices may not start with 1. See ``@safeindices`` or ``SafeIndices`` for more information.  Example:
+
+   .. code-block:: julia
+
+       trailingsize(A, n) = trailingsize(UnsafeIndices(), A, n)
+       function trailingsize(s::IndicesSafety, A, n)
+           sz = size(s, A, n)
+           for i = n+1:ndims(A)
+               sz *= size(s, A, i)
+           end
+           sz
+       end
+
+   would make ``trailingsize`` by-default unsafe for non-1 arrays, forcing the user to make the call as ``trailingsize(SafeIndices(), A, n)`` if s/he is certain that the usage is safe.
 
 .. function:: countnz(A)
 
@@ -1063,3 +1116,4 @@ dense counterparts. The following functions are specific to sparse arrays.
    Generates a copy of ``x`` and removes numerical zeros from that copy, optionally trimming excess space from the result's ``nzind`` and ``nzval`` arrays when ``trim`` is ``true``\ .
 
    For an in-place version and algorithmic information, see :func:`Base.SparseArrays.dropzeros!`\ .
+
