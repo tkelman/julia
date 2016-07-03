@@ -116,6 +116,14 @@ Basic functions
 
        Base.linearindexing{T<:MyArray}(::Type{T}) = Base.LinearFast()
 
+.. function:: @safeindices ex
+
+.. function:: IndicesSafety
+
+.. function:: SafeIndices
+
+.. function:: UnsafeIndices
+
 .. function:: countnz(A)
 
    .. Docstring generated from Julia source
@@ -1055,4 +1063,3 @@ dense counterparts. The following functions are specific to sparse arrays.
    Generates a copy of ``x`` and removes numerical zeros from that copy, optionally trimming excess space from the result's ``nzind`` and ``nzval`` arrays when ``trim`` is ``true``\ .
 
    For an in-place version and algorithmic information, see :func:`Base.SparseArrays.dropzeros!`\ .
-
