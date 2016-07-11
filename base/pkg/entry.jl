@@ -227,11 +227,12 @@ function checkout(pkg::AbstractString, branch::AbstractString, do_merge::Bool, d
     with(GitRepo, pkg) do r
         LibGit2.transact(r) do repo
             LibGit2.isdirty(repo) && throw(PkgError("$pkg is dirty, bailing"))
-            LibGit2.branch!(repo, branch, track=LibGit2.Consts.REMOTE_ORIGIN)
-            do_merge && LibGit2.merge!(repo, fastforward=true) # merge changes
+            LibGit2.branch!(repo, branch, track=LibGit2.Consts.REMOTE_ORIGIN, force=true)
             if do_pull
                 info("Pulling $pkg latest $branch...")
                 LibGit2.fetch(repo)
+            end
+            if do_merge || do_pull
                 LibGit2.merge!(repo, fastforward=true)
             end
             resolve()

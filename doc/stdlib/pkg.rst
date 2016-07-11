@@ -111,7 +111,7 @@ Functions for package development (e.g. ``tag``, ``publish``, etc.) have been mo
 
    Update the metadata repo – kept in ``Pkg.dir("METADATA")`` – then update any fixed packages that can safely be pulled from their origin; then call ``Pkg.resolve()`` to determine a new optimal set of packages versions.
 
-.. function:: checkout(pkg, [branch="master"]; merge=true, pull=true)
+.. function:: checkout(pkg, [branch="master"]; merge=false, pull=true)
 
    .. Docstring generated from Julia source
 

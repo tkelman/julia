@@ -160,14 +160,14 @@ provided, `pkg` is determined automatically from `url`.
 clone(url::AbstractString, pkg::AbstractString) = cd(Entry.clone,url,pkg)
 
 """
-    checkout(pkg, [branch="master"]; merge=true, pull=true)
+    checkout(pkg, [branch="master"]; merge=false, pull=true)
 
 Checkout the `Pkg.dir(pkg)` repo to the branch `branch`. Defaults to checking out the
 "master" branch. To go back to using the newest compatible released version, use
 `Pkg.free(pkg)`. Changes are merged (fast-forward only) if the keyword argument `merge ==
 true`, and the latest version is pulled from the upstream repo if `pull == true`.
 """
-checkout(pkg::AbstractString, branch::AbstractString="master"; merge::Bool=true, pull::Bool=true) =
+checkout(pkg::AbstractString, branch::AbstractString="master"; merge::Bool=false, pull::Bool=true) =
     cd(Entry.checkout,pkg,branch,merge,pull)
 
 """
