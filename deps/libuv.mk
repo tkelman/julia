@@ -5,7 +5,7 @@ $(eval $(call git-external,libuv,LIBUV,configure,,$(SRCDIR)/srccache))
 
 UV_CFLAGS := -D_GNU_SOURCE
 ifeq ($(USEMSVC), 1)
-UV_CFLAGS += -DBUILDING_UV_SHARED
+UV_CFLAGS += -DBUILDING_UV_SHARED -Dsnprintf=_snprintf -wd4820
 endif
 ifeq ($(USEICC), 1)
 UV_CFLAGS += -static-intel
