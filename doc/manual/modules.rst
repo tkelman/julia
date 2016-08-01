@@ -220,7 +220,7 @@ Note that relative-import qualifiers are only valid in ``using`` and
 Module file paths
 -----------------
 
-The global variable LOAD_PATH contains the directories Julia searches for
+The global variable ``LOAD_PATH`` contains the directories Julia searches for
 modules when calling ``require``. It can be extended using ``push!``::
 
     push!(LOAD_PATH, "/Path/To/My/Module/")
@@ -275,7 +275,7 @@ dependencies are modules it imports, the Julia build, files it includes,
 or explicit dependencies declared by ``include_dependency(path)`` in the module file(s).
 
 For file dependencies, a change is determined by examining whether the modification time (mtime)
-of each file loaded by ``include`` or added explicity by ``include_dependency`` is unchanged,
+of each file loaded by ``include`` or added explicitly by ``include_dependency`` is unchanged,
 or equal to the modification time truncated to the nearest second
 (to accommodate systems that can't copy mtime with sub-second accuracy).
 It also takes into account whether the path to the file chosen by the search logic in ``require``

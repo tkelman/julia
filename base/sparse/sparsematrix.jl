@@ -1745,7 +1745,7 @@ function _broadcast_binzeropres!{Tf}(f::Tf, C::SparseMatrixCSC, A::SparseMatrixC
     maxnnzfromB = nnz(B) * div(C.n, B.n) * div(C.m, B.m)
     maxnnzfromAB = maxnnzfromA + maxnnzfromB
     nnzC = maxnnzfromAB
-    # Resize C to accomodate max number of entries in C
+    # Resize C to accommodate max number of entries in C
     length(C.rowval) < nnzC && resize!(C.rowval, nnzC)
     length(C.nzval) < nnzC && resize!(C.nzval, nnzC)
 
@@ -1762,7 +1762,7 @@ function _broadcast_binzeropres!{Tf}(f::Tf, C::SparseMatrixCSC, A::SparseMatrixC
         # The following conditional chain separates column-pairs into three cases: (1) the
         # columns have the same number of rows, or either or both columns have only one row
         # and contain no stored entries; (2) A has more than one row, B has only one row,
-        # and B's column has a stored entry in that one row; (3) B has more than oen row,
+        # and B's column has a stored entry in that one row; (3) B has more than one row,
         # A has only one row, and A's column has a stored entry in that one row.
 
         if A.m == B.m || (A.m == 1 && Aptr == Astop) || (B.m == 1 && Bptr == Bstop)
@@ -1897,7 +1897,7 @@ function _broadcast_notbinzeropres!{Tf}(f::Tf, fillvalue, C::SparseMatrixCSC, A:
         # The following conditional chain separates column-pairs into three cases: (1) the
         # columns have the same number of rows, or either or both columns have only one row
         # and contain no stored entries; (2) A has more than one row, B has only one row,
-        # and B's column has a stored entry in that one row; (3) B has more than oen row,
+        # and B's column has a stored entry in that one row; (3) B has more than one row,
         # A has only one row, and A's column has a stored entry in that one row.
 
         if A.m == B.m || (A.m == 1 && Aptr == Astop) || (B.m == 1 && Bptr == Bstop)
