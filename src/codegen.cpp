@@ -5979,7 +5979,7 @@ static inline std::string getNativeTarget()
 {
     std::string cpu = sys::getHostCPUName();
 #if defined(_CPU_ARM_)
-    // Try slightly harder than LLVM at determine the CPU architecture.
+    // Try slightly harder than LLVM at determining the CPU architecture.
     if (cpu == "generic") {
         // This is the most reliable way I can find
         // `/proc/cpuinfo` changes between kernel versions
