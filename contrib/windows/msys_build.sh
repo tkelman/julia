@@ -85,26 +85,6 @@ case $(uname) in
     ;;
 esac
 
-# Download most recent Julia binary for dependencies
-if ! [ -e julia-installer.exe ]; then
-  f=julia-latest-win$bits.exe
-  echo "Downloading $f"
-  $curlflags -O https://s3.amazonaws.com/julianightlies/bin/winnt/x$archsuffix/$f
-  echo "Extracting $f"
-  $SEVENZIP x -y $f >> get-deps.log
-fi
-for i in bin/*.dll; do
-  $SEVENZIP e -y julia-installer.exe "$i" \
-    -ousr\\`dirname $i | sed -e 's|/julia||' -e 's|/|\\\\|g'` >> get-deps.log
-done
-for i in share/julia/base/pcre_h.jl; do
-  $SEVENZIP e -y julia-installer.exe "$i" -obase >> get-deps.log
-done
-echo "override PCRE_INCL_PATH =" >> Make.user
-# Remove libjulia.dll if it was copied from downloaded binary
-rm -f usr/bin/libjulia.dll
-rm -f usr/bin/libjulia-debug.dll
-
 if [ -z "$USEMSVC" ]; then
   if [ -z "`which ${CROSS_COMPILE}gcc 2>/dev/null`" -o -n "$APPVEYOR" ]; then
     f=$ARCH-4.9.2-release-win32-$exc-rt_v4-rev3.7z
@@ -133,6 +113,9 @@ else
 
   f=llvm-3.3-$ARCH-msvc12-juliadeps.7z
 fi
+
+make -C doc linkcheck
+exit 1
 
 checksum_download \
     "$f" "https://bintray.com/artifact/download/tkelman/generic/$f"
