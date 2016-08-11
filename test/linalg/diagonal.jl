@@ -10,7 +10,6 @@ srand(1)
 
 debug && println("Diagonal matrices")
 for relty in (Float32, Float64, BigFloat), elty in (relty, Complex{relty})
-
     debug && println("elty is $(elty), relty is $(relty)")
     d=convert(Vector{elty}, randn(n))
     v=convert(Vector{elty}, randn(n))
