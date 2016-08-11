@@ -149,10 +149,8 @@ pred = afiro'*sol
 @test norm(afiro * (convert(Matrix, y) - convert(Matrix, pred))) < 1e-8
 
 let # Issue 9160
-
     for Ti in CHOLMOD.ITypes.types
         for elty in CHOLMOD.VRealTypes.types
-
             A = sprand(10,10,0.1)
             A = convert(SparseMatrixCSC{elty,Ti},A)
             cmA = CHOLMOD.Sparse(A)
@@ -679,7 +677,6 @@ let Apre = sprandn(10, 10, 0.2) - I
     for A in (Symmetric(Apre), Hermitian(Apre),
               Symmetric(Apre + 10I), Hermitian(Apre + 10I),
               Hermitian(complex(Apre)), Hermitian(complex(Apre) + 10I))
-
         x = ones(10)
         b = A*x
         @test x ≈ A\b
