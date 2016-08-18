@@ -265,6 +265,8 @@ Julia its ability to abstractly express high-level algorithms decoupled
 from implementation details, yet generate efficient, specialized code to
 handle each case at run time.
 
+.. _man-ambiguities:
+
 Method Ambiguities
 ------------------
 
@@ -316,6 +318,10 @@ by specifying an appropriate method for the intersection case:
 It is recommended that the disambiguating method be defined first,
 since otherwise the ambiguity exists, if transiently, until the more
 specific method is defined.
+
+In more complex cases, resolving method ambiguities involves a certain
+element of design; this topic is explored further :ref:`below
+<man-method-design-ambiguities>`.
 
 .. _man-parametric-methods:
 
@@ -551,5 +557,165 @@ arguments::
 
     function emptyfunc
     end
+
+.. _man-method-design-ambiguities:
+
+Method design and the avoidance of ambiguities
+----------------------------------------------
+
+Julia's method polymorphism is one of its most powerful features, yet
+exploiting this power can pose design challenges.  In particular, in
+more complex method hierarchies it is not uncommon for
+:ref:`ambiguities <man-ambiguities>` to arise.
+
+Above, it was pointed out that one can resolve ambiguities like
+::
+
+   f(x, y::Int) = 1
+   f(x::Int, y) = 2
+
+by defining a method
+::
+
+   f(x::Int, y::Int) = 3
+
+This is often the right strategy; however, there are circumstances
+where following this advice blindly can be counterproductive. In
+particular, the more methods you have, the more possibilities there
+are for ambiguities. When your method hierarchies get more complicated
+than this simple example, it can be worth your while to think
+carefully about alternative strategies.
+
+Below we discuss particular challenges and some alternative ways to resolve such issues.
+
+Tuple and NTuple arguments
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``Tuple`` (and ``NTuple``) arguments present special challenges. For example,
+::
+
+   f{N}(x::NTuple{N,Int}) = 1
+   f{N}(x::NTuple{N,Float64}) = 2
+
+are ambiguous because of the possibility that ``N == 0``. To resolve the
+ambiguity, one approach is define a method for the empty tuple::
+
+  f(x::Tuple{}) = 3
+
+Alternatively, you can insist that there is at least one element in the tuple::
+
+  f(x::Tuple{Float64, Vararg{Float64}}) = 2
+
+and let the ``NTuple{N,Int}`` method be the fallback.
+
+Use generic single-argument wrapper functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When you might be tempted to dispatch on two or more arguments,
+consider whether a "wrapper" function might make for a simpler
+design. For example, instead of writing multiple variants::
+
+  f(x::A, y::A) = ...
+  f(x::A, y::B) = ...
+  f(x::B, y::A) = ...
+  f(x::B, y::B) = ...
+
+you might consider defining
+::
+
+   f(x::A, y::A) = ...
+   f(x, y) = f(g(x), g(y))
+
+where ``g`` converts the argument to type ``A``. Most likely, ``g`` will
+need a fallback definition
+::
+
+   g(x::A) = x
+
+
+Dispatch on one argument at a time
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you need to dispatch on multiple arguments, and there are many
+fallbacks with too many combinations to make it practical to define
+all possible variants, then consider introducing a "name cascade"
+where (for example) you dispatch on the first argument and then call
+an internal method::
+
+  f(x::A, y) = _fA(x, y)
+  f(x::B, y) = _fB(x, y)
+
+Then the internal methods ``_fA`` and ``_fB`` can dispatch on ``y`` without
+concern about ambiguities with each other with respect to ``x``.
+
+Be aware that this strategy has at least one major disadvantage: in
+many cases, it is not possible for users to further customize the
+behavior of ``f`` by defining further specializations of your exported
+function ``f``. Instead, they have to define specializations for your
+internal methods ``_fA`` and ``_fB``, and this blurs the lines between
+exported and internal methods.
+
+Abstract containers and element types
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Where possible, try to avoid defining methods that dispatch on element types of abstract
+containers. For example,
+::
+
+   -{T<:Date}(A::AbstractArray{T}, b::Date)
+
+will generate ambiguities for anyone who defines a method
+::
+
+   -{T}(A::MyArrayType{T}, b::T)
+
+In order of preference, some strategies are:
+
+- avoid defining either of these methods: instead, rely on a generic method ``-{T}(A::AbstractArray{T}, b)`` and make sure this method is implemented with generic calls (like ``similar`` and ``-``) that do the right thing for each container type and element type *separately*.
+
+- if at least one of these must be defined, prioritize dispatch on the container
+- as a last resort, define ``-{T<:Date}(A::MyArrayType{T}, b::Date) = ...``
+
+Complex method "cascades" with default arguments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you are defining a method "cascade" that supplies defaults, be
+careful about dropping any arguments that correspond to potential
+defaults. For example, suppose you're writing a digital filtering
+algorithm and you have a method that handles the edges of the signal
+by applying padding::
+
+  function myfilter(A, kernel, ::Replicate)
+      Apadded = replicate_edges(A, size(kernel))
+      myfilter(Apadded, kernel)  # now perform the "real" computation
+  end
+
+This will run afoul of a method that supplies default padding::
+
+  # default boundary conditions are to replicate the edge
+  myfilter(A, kernel) = myfilter(A, kernel, Replicate())
+
+Together, these two methods generate an infinite recursion with ``A`` constantly growing bigger.
+
+The better design would be to define your call hierarchy like this::
+
+  immutable NoPad end  # indicate that no padding is desired, or that it's already applied
+
+  myfilter(A, kernel) = myfilter(A, kernel, Replicate())  # default boundary conditions
+  function myfilter(A, kernel, ::Replicate)
+      Apadded = pad(A, kernel)
+      myfilter(Apadded, kernel, NoPad())  # indicate the new boundary conditions
+  end
+
+  function myfilter(A, kernel, ::NoPad)
+       # Here's the "real" implementation of the computation
+  end
+
+``NoPad`` is supplied in the same argument position as any other kind of
+padding, so it keeps the dispatch hierarchy well organized and with
+reduced likelihood of ambiguities. Moreover, it extends the "public"
+``myfilter`` interface: a user who wants to control the padding
+explicitly can call the ``NoPad`` variant directly.
+
 
 .. [Clarke61] Arthur C. Clarke, *Profiles of the Future* (1961): Clarke's Third Law.
