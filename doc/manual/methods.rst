@@ -708,7 +708,7 @@ The better design would be to define your call hierarchy like this::
   end
 
   function myfilter(A, kernel, ::NoPad)
-       # Here's the "real" implementation of the computation
+      # Here's the "real" implementation of the computation
   end
 
 ``NoPad`` is supplied in the same argument position as any other kind of
