@@ -1246,7 +1246,7 @@ void *jl_get_llvmf_defn(jl_method_instance_t *linfo, bool getwrapper)
     jl_llvm_functions_t declarations;
     std::unique_ptr<Module> m;
     JL_TRY {
-         m = emit_function(linfo, src, &declarations);
+        m = emit_function(linfo, src, &declarations);
     }
     JL_CATCH {
         // something failed!
