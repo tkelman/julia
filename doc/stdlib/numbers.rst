@@ -476,8 +476,8 @@ General Number Functions and Constants
       .. code-block:: julia
 
           julia> setrounding(Float64,RoundDown) do
-              1.1 + 0.1
-          end
+                     1.1 + 0.1
+                 end
           1.2000000000000002
 
       Here the compiler is *constant folding*, that is evaluating a known constant expression at compile time, however the rounding mode is only changed at runtime, so this is not reflected in the function result. This can be avoided by moving constants outside the expression, e.g.
@@ -487,8 +487,8 @@ General Number Functions and Constants
           julia> x = 1.1; y = 0.1;
 
           julia> setrounding(Float64,RoundDown) do
-              x + y
-          end
+                     x + y
+                 end
           1.2
 
 
