@@ -1161,8 +1161,7 @@ end
 @test pr8622() == [0,3,1,0]
 
 #6828 - size of specific dimensions
-let
-    a = Array{Float64}(10)
+let a = Array{Float64}(10)
     @test size(a) == (10,)
     @test size(a, 1) == 10
     @test size(a,2,1) == (1,10)
@@ -1785,7 +1784,7 @@ for op in (:.+, :.*, :.÷, :.%, :.<<, :.>>, :.-, :./, :.\, :.//, :.^)
     @eval @test typeof($(op)(A,A)) == Matrix{Foo}
 end
 
-end
+end # module AutoRetType
 
 # Test that concatenations of dense matrices/vectors yield dense matrices/vectors
 let N = 4
@@ -1809,8 +1808,7 @@ let N = 4
 end
 
 # Test that type constructor Array{T, N}(d...) works (especially for N>3)
-let
-    a = Array{Float64}(10)
+let a = Array{Float64}(10)
     b = Array{Float64, 1}(10)
     @test size(a) == (10,)
     @test size(a, 1) == 10
