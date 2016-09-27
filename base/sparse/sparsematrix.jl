@@ -1430,7 +1430,7 @@ function _broadcast_unary_nz2z_z2z_T{TvA,TiA,TvB}(f::Function, A::SparseMatrixCS
     return SparseMatrixCSC(A.m, A.n, Bcolptr, Browval, Bnzval)
 end
 function _broadcast_unary_nz2z_z2z{Tv}(f::Function, A::SparseMatrixCSC{Tv})
-    _broadcast_unary_nz2z_z2z_T(f, A, Tv)
+    _broadcast_unary_nz2z_z2z_T(f, A, promote_op(f, Tv))
 end
 @_enumerate_childmethods(_broadcast_unary_nz2z_z2z,
     sin, sinh, sind, asin, asinh, asind,
@@ -1462,7 +1462,7 @@ function _broadcast_unary_nz2nz_z2z_T{TvA,TiA,TvB}(f::Function, A::SparseMatrixC
     return SparseMatrixCSC(A.m, A.n, Bcolptr, Browval, Bnzval)
 end
 function _broadcast_unary_nz2nz_z2z{Tv}(f::Function, A::SparseMatrixCSC{Tv})
-    _broadcast_unary_nz2nz_z2z_T(f, A, Tv)
+    _broadcast_unary_nz2nz_z2z_T(f, A, promote_op(f, Tv))
 end
 @_enumerate_childmethods(_broadcast_unary_nz2nz_z2z,
     log1p, expm1, abs, abs2, conj)
