@@ -1620,8 +1620,7 @@ end
 
 # Check that `broadcast` methods specialized for unary operations over
 # `SparseMatrixCSC`s are called. (Issue #18705.)
-let
-    A = spdiagm(1.0:5.0)
+let A = spdiagm(1.0:5.0)
     @test isa(sin.(A), SparseMatrixCSC) # representative for _unary_nz2z_z2z class
     @test isa(abs.(A), SparseMatrixCSC) # representative for _unary_nz2nz_z2z class
     @test isa(exp.(A), Array) # representative for _unary_nz2nz_z2nz class
