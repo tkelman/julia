@@ -1605,13 +1605,13 @@ Internals
                       1
                   end
                   function f()
-                     (@macroexpand(@m), macroexpand(:(@m)))
+                      (@macroexpand(@m), macroexpand(:(@m)))
                   end
               end
        M
 
        julia> macro m()
-                 2
+                  2
               end
        @m (macro with 1 method)
 
