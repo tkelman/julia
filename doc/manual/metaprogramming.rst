@@ -372,8 +372,8 @@ function, which takes a string of Julia code and returns the corresponding
 arguments, and return another :obj:`Expr`. Here is a simple, motivating example::
 
    julia> function math_expr(op, op1, op2)
-            expr = Expr(:call, op, op1, op2)
-            return expr
+              expr = Expr(:call, op, op1, op2)
+              return expr
           end
 
     julia>  ex = math_expr(:+, 1, Expr(:call, :*, 4, 5))
@@ -386,11 +386,11 @@ As another example, here is a function that doubles any numeric argument,
 but leaves expressions alone::
 
     julia> function make_expr2(op, opr1, opr2)
-             opr1f, opr2f = map(x -> isa(x, Number) ? 2*x : x, (opr1, opr2))
-             retexpr = Expr(:call, op, opr1f, opr2f)
+               opr1f, opr2f = map(x -> isa(x, Number) ? 2*x : x, (opr1, opr2))
+               retexpr = Expr(:call, op, opr1f, opr2f)
 
-             return retexpr
-       end
+               return retexpr
+           end
     make_expr2 (generic function with 1 method)
 
     julia> make_expr2(:+, 1, 2)
@@ -521,9 +521,9 @@ expressions, literals, or symbols. One way to explore macro arguments
 is to call the :func:`show` function within the macro body::
 
     julia> macro showarg(x)
-       show(x)
-       # ... remainder of macro, returning an expression
-    end
+               show(x)
+               # ... remainder of macro, returning an expression
+           end
 
 
     julia> @showarg(a)
@@ -673,13 +673,13 @@ and then has the value of the expression as its final value.
 The macro might look like this::
 
     macro time(ex)
-      return quote
-        local t0 = time()
-        local val = $ex
-        local t1 = time()
-        println("elapsed time: ", t1-t0, " seconds")
-        val
-      end
+        return quote
+            local t0 = time()
+            local val = $ex
+            local t1 = time()
+            println("elapsed time: ", t1-t0, " seconds")
+            val
+        end
     end
 
 Here, we want ``t0``, ``t1``, and ``val`` to be private temporary variables,
@@ -732,13 +732,13 @@ in order to introduce or manipulate user variables. For example, the
 following macro sets ``x`` to zero in the call environment::
 
     macro zerox()
-      return esc(:(x = 0))
+        return esc(:(x = 0))
     end
 
     function foo()
-      x = 1
-      @zerox
-      x  # is zero
+        x = 1
+        @zerox
+        x  # is zero
     end
 
 This kind of manipulation of variables should be used judiciously, but
@@ -756,9 +756,9 @@ program execution. For example, the following code defines a series of
 operators on three arguments in terms of their 2-argument forms::
 
     for op = (:+, :*, :&, :|, :$)
-      eval(quote
-        ($op)(a,b,c) = ($op)(($op)(a,b),c)
-      end)
+        eval(quote
+            ($op)(a,b,c) = ($op)(($op)(a,b),c)
+        end)
     end
 
 In this manner, Julia acts as its own `preprocessor
@@ -767,7 +767,7 @@ generation from inside the language. The above code could be written
 slightly more tersely using the ``:`` prefix quoting form::
 
     for op = (:+, :*, :&, :|, :$)
-      eval(:(($op)(a,b,c) = ($op)(($op)(a,b),c)))
+        eval(:(($op)(a,b,c) = ($op)(($op)(a,b),c)))
     end
 
 This sort of in-language code generation, however, using the
@@ -775,7 +775,7 @@ This sort of in-language code generation, however, using the
 macro to abbreviate this pattern::
 
     for op = (:+, :*, :&, :|, :$)
-      @eval ($op)(a,b,c) = ($op)(($op)(a,b),c)
+        @eval ($op)(a,b,c) = ($op)(($op)(a,b),c)
     end
 
 The :obj:`@eval` macro rewrites this call to be precisely equivalent to the
@@ -783,7 +783,7 @@ above longer versions. For longer blocks of generated code, the
 expression argument given to :obj:`@eval` can be a block::
 
     @eval begin
-      # multiple lines
+        # multiple lines
     end
 
 .. _man-non-standard-string-literals2:
@@ -808,7 +808,7 @@ parsed as calls to specially-named macros. For example, the regular
 expression macro is just the following::
 
     macro r_str(p)
-      Regex(p)
+        Regex(p)
     end
 
 That's all. This macro says that the literal contents of the string
@@ -827,12 +827,12 @@ the compilation occurs only once, rather than every time the code is
 executed. Consider if the regular expression occurs in a loop::
 
     for line = lines
-      m = match(r"^\s*(?:#|$)", line)
-      if m === nothing
-        # non-comment
-      else
-        # comment
-      end
+        m = match(r"^\s*(?:#|$)", line)
+        if m === nothing
+            # non-comment
+        else
+            # comment
+        end
     end
 
 Since the regular expression ``r"^\s*(?:#|$)"`` is compiled and inserted
@@ -843,12 +843,12 @@ this::
 
     re = Regex("^\\s*(?:#|\$)")
     for line = lines
-      m = match(re, line)
-      if m === nothing
-        # non-comment
-      else
-        # comment
-      end
+        m = match(re, line)
+        if m === nothing
+            # non-comment
+        else
+            # comment
+        end
     end
 
 Moreover, if the compiler could not determine that the regex object was
@@ -870,7 +870,7 @@ it, but also the command literal syntax (```echo "Hello, $person"```)
 is implemented with the following innocuous-looking macro::
 
     macro cmd(str)
-      :(cmd_gen($shell_parse(str)))
+        :(cmd_gen($shell_parse(str)))
     end
 
 Of course, a large amount of complexity is hidden in the functions used
