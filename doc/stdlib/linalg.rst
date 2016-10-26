@@ -582,7 +582,7 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   ``lufact!`` is the same as :func:`lufact`\ , but saves space by overwriting the input ``A``\ , instead of creating a copy. An :obj:`InexactError` exception is thrown if the factorisation produces a number not representable by the element type of ``A``\ , e.g. for integer types.
+   ``lufact!`` is the same as :func:`lufact`\ , but saves space by overwriting the input ``A``\ , instead of creating a copy. An :obj:`InexactError` exception is thrown if the factorization produces a number not representable by the element type of ``A``\ , e.g. for integer types.
 
 .. function:: chol(A) -> U
 
@@ -693,7 +693,7 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   The same as ``cholfact``\ , but saves space by overwriting the input ``A``\ , instead of creating a copy. An ``InexactError`` exception is thrown if the factorisation produces a number not representable by the element type of ``A``\ , e.g. for integer types.
+   The same as ``cholfact``\ , but saves space by overwriting the input ``A``\ , instead of creating a copy. An ``InexactError`` exception is thrown if the factorization produces a number not representable by the element type of ``A``\ , e.g. for integer types.
 
    **Example**
 
@@ -712,7 +712,7 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   The same as ``cholfact``\ , but saves space by overwriting the input ``A``\ , instead of creating a copy. An ``InexactError`` exception is thrown if the factorisation produces a number not representable by the element type of ``A``\ , e.g. for integer types.
+   The same as ``cholfact``\ , but saves space by overwriting the input ``A``\ , instead of creating a copy. An ``InexactError`` exception is thrown if the factorization produces a number not representable by the element type of ``A``\ , e.g. for integer types.
 
 .. currentmodule:: Base.LinAlg
 
@@ -887,7 +887,7 @@ Linear algebra functions in Julia are largely implemented by calling functions f
 
    .. Docstring generated from Julia source
 
-   ``qrfact!`` is the same as :func:`qrfact` when ``A`` is a subtype of ``StridedMatrix``\ , but saves space by overwriting the input ``A``\ , instead of creating a copy. An :obj:`InexactError` exception is thrown if the factorisation produces a number not representable by the element type of ``A``\ , e.g. for integer types.
+   ``qrfact!`` is the same as :func:`qrfact` when ``A`` is a subtype of ``StridedMatrix``\ , but saves space by overwriting the input ``A``\ , instead of creating a copy. An :obj:`InexactError` exception is thrown if the factorization produces a number not representable by the element type of ``A``\ , e.g. for integer types.
 
 .. function:: full(A::Union{QRPackedQ,QRCompactWYQ}; thin::Bool=true) -> Matrix
 
