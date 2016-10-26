@@ -96,7 +96,7 @@ qrfact!{T<:BlasFloat}(A::StridedMatrix{T}) = qrfact!(A, Val{false})
 
 `qrfact!` is the same as [`qrfact`](:func:`qrfact`) when `A` is a subtype of
 `StridedMatrix`, but saves space by overwriting the input `A`, instead of creating a copy.
-An [`InexactError`](:obj:`InexactError`) exception is thrown if the factorisation produces a number not
+An [`InexactError`](:obj:`InexactError`) exception is thrown if the factorization produces a number not
 representable by the element type of `A`, e.g. for integer types.
 """
 qrfact!(A::StridedMatrix, ::Type{Val{false}}) = qrfactUnblocked!(A)

@@ -1395,7 +1395,7 @@ function ldltfact!{Tv}(F::Factor{Tv}, A::Sparse{Tv}; shift::Real=0.0)
     # Compute the numerical factorization
     factorize_p!(A, shift, F, cm)
 
-    # Really make sure it's an LDLt by avoiding supernodal factorisation
+    # Really make sure it's an LDLt by avoiding supernodal factorization
     unsafe_store!(common_supernodal, 0)
 
     s = unsafe_load(get(F.p))
