@@ -220,7 +220,7 @@ Note that relative-import qualifiers are only valid in ``using`` and
 Module file paths
 -----------------
 
-The global variable LOAD_PATH contains the directories Julia searches for
+The global variable ``LOAD_PATH`` contains the directories Julia searches for
 modules when calling ``require``. It can be extended using ``push!``::
 
     push!(LOAD_PATH, "/Path/To/My/Module/")
