@@ -4,16 +4,16 @@ module Rounding
 
 let fenv_consts = Vector{Cint}(9)
     ccall(:jl_get_fenv_consts, Void, (Ptr{Cint},), fenv_consts)
-    @show global const JL_FE_INEXACT = fenv_consts[1]
-    @show global const JL_FE_UNDERFLOW = fenv_consts[2]
-    @show global const JL_FE_OVERFLOW = fenv_consts[3]
-    @show global const JL_FE_DIVBYZERO = fenv_consts[4]
-    @show global const JL_FE_INVALID = fenv_consts[5]
+    global const JL_FE_INEXACT = fenv_consts[1]
+    global const JL_FE_UNDERFLOW = fenv_consts[2]
+    global const JL_FE_OVERFLOW = fenv_consts[3]
+    global const JL_FE_DIVBYZERO = fenv_consts[4]
+    global const JL_FE_INVALID = fenv_consts[5]
 
-    @show global const JL_FE_TONEAREST = fenv_consts[6]
-    @show global const JL_FE_UPWARD = fenv_consts[7]
-    @show global const JL_FE_DOWNWARD = fenv_consts[8]
-    @show global const JL_FE_TOWARDZERO = fenv_consts[9]
+    global const JL_FE_TONEAREST = fenv_consts[6]
+    global const JL_FE_UPWARD = fenv_consts[7]
+    global const JL_FE_DOWNWARD = fenv_consts[8]
+    global const JL_FE_TOWARDZERO = fenv_consts[9]
 end
 
 export
