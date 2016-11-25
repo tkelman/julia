@@ -372,6 +372,7 @@ JL_DLLEXPORT void (jl_cpu_wake)(void)
 
 JL_DLLEXPORT void jl_get_fenv_consts(int *ret)
 {
+jl_safe_printf("in jl_get_fenv_consts\n");
     ret[0] = FE_INEXACT;
     ret[1] = FE_UNDERFLOW;
     ret[2] = FE_OVERFLOW;
@@ -381,6 +382,7 @@ JL_DLLEXPORT void jl_get_fenv_consts(int *ret)
     ret[6] = FE_UPWARD;
     ret[7] = FE_DOWNWARD;
     ret[8] = FE_TOWARDZERO;
+jl_safe_printf("finishing jl_get_fenv_consts\n");
 }
 
 #ifdef __cplusplus
