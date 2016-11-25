@@ -14,7 +14,10 @@
 #include "julia.h"
 
 #ifdef __cplusplus
+#include <cfenv>
 extern "C" {
+#else
+#include <fenv.h>
 #endif
 
 #if defined(_OS_WINDOWS_) && !defined(_COMPILER_MINGW_)
