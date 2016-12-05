@@ -1685,8 +1685,7 @@ end
 @test eltype(sin.(spdiagm(Int64(1):Int64(4)))) == Float64
 
 # Test map/map! over sparse matrices
-let
-    N, M = 10, 12
+let N = 10, M = 12
     # test map/map! implementation specialized for a single (input) sparse matrix
     # (also tested through broadcast/broadcast! over a single (input) sparse matrix)
     # --> test map entry point
