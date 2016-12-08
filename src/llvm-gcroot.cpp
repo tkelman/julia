@@ -508,7 +508,7 @@ void JuliaGCAllocator::collapseRedundantRoots()
             }
 
             if ((theLoad != NULL && variable_slot) ||
-                (theLoad == NULL && theStore != NULL)) {
+                    (theLoad == NULL && theStore != NULL)) {
                 Value *theValue = theLoad ? theLoad : theStore->getValueOperand();
                 if (theValue->hasNUses(theLoad ? 1 : 2)) { // only uses are theStore and theLoad and theOther
                     // check if this value is only used for a store to another gcroot
