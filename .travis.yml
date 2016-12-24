@@ -45,6 +45,7 @@ branches:
   only:
     - master
     - /release-.*/
+    - tk/llvm39
 notifications:
     email: false
     irc:
