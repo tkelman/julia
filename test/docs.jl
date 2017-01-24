@@ -934,7 +934,6 @@ end
 @test string(@doc f15684) == "abc\n"
 
 # Dynamic docstrings
-
 mutable struct DynamicDocType
     x
 end
@@ -952,7 +951,6 @@ dynamic_test.x = "test 2"
 
 
 # Equality testing
-
 @test Text("docstring") == Text("docstring")
 @test hash(Text("docstring")) == hash(Text("docstring"))
 @test HTML("<b>docstring</b>") == HTML("<b>docstring</b>")

@@ -5324,7 +5324,6 @@ for (gehrd, elty) in
      (:zgehrd_,:Complex128),
      (:cgehrd_,:Complex64))
     @eval begin
-
         #                 .. Scalar Arguments ..
         #       INTEGER            IHI, ILO, INFO, LDA, LWORK, N
         # *     ..

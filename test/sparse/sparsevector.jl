@@ -29,7 +29,6 @@ end
 @test count(SparseVector(8, [2, 5, 6], [true,false,true])) == 2
 
 # full
-
 for (x, xf) in [(spv_x1, x1_full)]
     @test isa(Array(x), Vector{Float64})
     @test Array(x) == xf
@@ -53,11 +52,9 @@ function exact_equal(x::AbstractSparseVector, y::AbstractSparseVector)
 end
 
 # construct empty sparse vector
-
 @test exact_equal(spzeros(Float64, 8), SparseVector(8, Int[], Float64[]))
 
 # from list of indices and values
-
 @test exact_equal(
     sparsevec(Int[], Float64[], 8),
     SparseVector(8, Int[], Float64[]))
@@ -103,7 +100,6 @@ end
     sparsevec([1, 3], [1, 1], 5))
 
 # from dictionary
-
 function my_intmap(x)
     a = Dict{Int,eltype(x)}()
     for i in SparseArrays.nonzeroinds(x)
@@ -132,7 +128,6 @@ let x = SparseVector(8, [2, 3, 6], [12.0, 18.0, 25.0])
 end
 
 # sprand & sprandn
-
 let xr = sprand(1000, 0.9)
     @test isa(xr, SparseVector{Float64,Int})
     @test length(xr) == 1000
@@ -207,7 +202,6 @@ let x = sprand(10, 0.5)
 end
 
 # setindex
-
 let xc = spzeros(Float64, 8)
     xc[3] = 2.0
     @test exact_equal(xc, SparseVector(8, [3], [2.0]))
@@ -266,7 +260,6 @@ end
 ### Array manipulation
 
 # copy
-
 let x = spv_x1
     xc = copy(x)
     @test isa(xc, SparseVector{Float64,Int})
@@ -638,7 +631,6 @@ let x = spv_x1, x2 = spv_x2
         SparseVector(8, [1,2,5,6,7], [3.25+0.0im, 4.0+1.25im, -0.75im, -5.5+3.5im, -6.0+0.0im]))
 
     # real & imag
-
     @test real(x) === x
     @test exact_equal(imag(x), spzeros(Float64, length(x)))
 
@@ -704,7 +696,6 @@ let x = spv_x1
 end
 
 # maximum, minimum
-
 let x = spv_x1
     @test maximum(x) == 3.5
     @test minimum(x) == -0.75

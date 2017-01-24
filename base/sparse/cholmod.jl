@@ -159,7 +159,6 @@ function __init__()
             unsafe_store!(cnfg, cglobal(:jl_realloc, Ptr{Void}), 3)
             unsafe_store!(cnfg, cglobal(:jl_free, Ptr{Void}), 4)
         end
-
     catch ex
         Base.showerror_nostdio(ex,
             "WARNING: Error during initialization of module CHOLMOD")

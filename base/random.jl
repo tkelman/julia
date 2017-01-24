@@ -29,7 +29,6 @@ mutable struct Close1Open2 <: FloatInterval end
 ## RandomDevice
 
 if is_windows()
-
     struct RandomDevice <: AbstractRNG
         buffer::Vector{UInt128}
 
@@ -551,7 +550,6 @@ end
 for (T, U) in [(UInt8, UInt32), (UInt16, UInt32),
                (Int8, UInt32), (Int16, UInt32), (Int32, UInt32), (Int64, UInt64), (Int128, UInt128),
                (Bool, UInt32)]
-
     @eval RangeGenerator(r::UnitRange{$T}) = begin
         if isempty(r)
             throw(ArgumentError("range must be non-empty"))
@@ -567,7 +565,6 @@ if GMP_VERSION.major >= 6
         nlimbs::Int           # number of limbs in generated BigInt's
         mask::Limb            # applied to the highest limb
     end
-
 else
     struct RangeGeneratorBigInt <: RangeGenerator
         a::BigInt             # first

@@ -234,7 +234,6 @@ mktempdir() do dir
     end
 
     @testset "Cloning repository" begin
-
         @testset "bare" begin
             repo_path = joinpath(dir, "Example.Bare1")
             repo = LibGit2.clone(cache_repo, repo_path, isbare = true)
@@ -285,7 +284,6 @@ mktempdir() do dir
     end
 
     @testset "Update cache repository" begin
-
         @testset "with commits" begin
             repo = LibGit2.GitRepo(cache_repo)
             repo_file = open(joinpath(cache_repo,test_file), "a")

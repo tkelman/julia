@@ -423,9 +423,7 @@ function expm{T}(A::Hermitian{T})
 end
 
 for (funm, func) in ([:logm,:log], [:sqrtm,:sqrt])
-
     @eval begin
-
         function ($funm)(A::Symmetric)
             F = eigfact(A)
             if isposdef(F)
