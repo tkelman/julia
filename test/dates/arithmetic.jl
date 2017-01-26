@@ -384,7 +384,17 @@ t4 = [DateTime(2009,1,1,0,0,1), DateTime(2009,1,2,0,1), DateTime(2009,1,3,1)]
 @test t3 - (Hour(1) + Minute(1)) == [DateTime(2008,12,31,22,59), DateTime(2009,1,1,22,59), DateTime(2009,1,2,22,59)]
 
 # Array{TimeType}, Array{TimeType}
-@test t2 - t1 == [Day(1) Day(31) Day(365); Day(365) Day(28) Day(1)]
-@test t4 - t3 == [Millisecond(1000), Millisecond(60000), Millisecond(3600000)]
-@test (Date(2009,1,1):Week(1):Date(2009,1,21)) - (Date(2009,1,1):Day(1):Date(2009,1,3)) == [0d, 6d, 12d]
-@test (DateTime(2009,1,1,1,1,1):Second(1):DateTime(2009,1,1,1,1,3)) - (DateTime(2009,1,1,1,1):Second(1):DateTime(2009,1,1,1,1,2)) == [1s, 1s, 1s]
+@test t2 - t1 == [Dates.Day(1) Dates.Day(31) Dates.Day(365); Dates.Day(365) Dates.Day(28) Dates.Day(1)]
+@test t4 - t3 == [Dates.Millisecond(1000), Dates.Millisecond(60000), Dates.Millisecond(3600000)]
+@test (Dates.Date(2009,1,1):Dates.Week(1):Dates.Date(2009,1,21)) - (Dates.Date(2009,1,1):Dates.Day(1):Dates.Date(2009,1,3)) == [Dates.Day(0), Dates.Day(6), Dates.Day(12)]
+@test (Dates.DateTime(2009,1,1,1,1,1):Dates.Second(1):Dates.DateTime(2009,1,1,1,1,3)) - (Dates.DateTime(2009,1,1,1,1):Dates.Second(1):Dates.DateTime(2009,1,1,1,1,2)) == [Dates.Second(1), Dates.Second(1), Dates.Second(1)]
+
+# ensure commutative subtraction methods are not defined, #20205
+@test_throws MethodError Dates.Day(1) .- t1
+@test_throws MethodError Dates.Hour(1) .- t3
+@test_throws MethodError Dates.Day(1) - t1
+@test_throws MethodError Dates.Hour(1) - t3
+@test_throws MethodError (Dates.Month(1) + Dates.Day(1)) .- t1
+@test_throws MethodError (Dates.Hour(1) + Dates.Minute(1)) .- t3
+@test_throws MethodError (Dates.Month(1) + Dates.Day(1)) - t1
+@test_throws MethodError (Dates.Hour(1) + Dates.Minute(1)) - t3
