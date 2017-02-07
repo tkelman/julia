@@ -655,7 +655,7 @@ end
 struct T20332{T}
 end
 
-(::T20332{T})(x) where T = 0
+(::T20332{T})(x) where {T} = 0
 
 let m = which(T20332{Int}(), (Int,)),
     mi = ccall(:jl_specializations_get_linfo, Ref{Core.MethodInstance}, (Any, Any, Any, UInt),

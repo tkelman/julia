@@ -1099,7 +1099,7 @@ end
 # issue #2562
 mutable struct Node2562{T}
     value::T
-    Node2562{T}(value::T) where T = new(value)
+    Node2562{T}(value::T) where {T} = new(value)
 end
 Node2562{T}(value::T, args...) = Node2562{T}(value, args...)
 makenode2562(value) = Node2562(value)
@@ -1109,7 +1109,7 @@ makenode2562(value) = Node2562(value)
 # issue #2619
 mutable struct I2619{T}
     v::T
-    I2619{T}(v) where T = new(convert(T,v))
+    I2619{T}(v) where {T} = new(convert(T,v))
 end
 bad2619 = false
 function i2619()
@@ -1295,8 +1295,8 @@ convert_default_should_fail_here() = similar([1],typeof(zero(typeof(rand(2,2))))
 
 mutable struct Foo4376{T}
     x
-    Foo4376{T}(x::T) where T = new(x)
-    Foo4376{T}(a::Foo4376{Int}) where T = new(a.x)
+    Foo4376{T}(x::T) where {T} = new(x)
+    Foo4376{T}(a::Foo4376{Int}) where {T} = new(a.x)
 end
 
 @test isa(Foo4376{Float32}(Foo4376{Int}(2)), Foo4376{Float32})
@@ -2890,7 +2890,7 @@ end
 # issue #11675
 struct T11675{T}
     x::T
-    T11675{T}() where T = new()
+    T11675{T}() where {T} = new()
 end
 let x = T11675{Union{}}()
     function f11675(x)

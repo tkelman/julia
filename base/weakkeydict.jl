@@ -17,7 +17,7 @@ mutable struct WeakKeyDict{K,V} <: Associative{K,V}
     finalizer::Function
 
     # Constructors mirror Dict's
-    function WeakKeyDict{K,V}() where V where K
+    function WeakKeyDict{K,V}() where {K,V}
         t = new(Dict{Any,V}(), Threads.RecursiveSpinLock(), identity)
         t.finalizer = function (k)
             # when a weak key is finalized, remove from dictionary if it is still there
@@ -27,15 +27,15 @@ mutable struct WeakKeyDict{K,V} <: Associative{K,V}
         return t
     end
 end
-function WeakKeyDict{K,V}(kv) where V where K
+function WeakKeyDict{K,V}(kv) where {K,V}
     h = WeakKeyDict{K,V}()
     for (k,v) in kv
         h[k] = v
     end
     return h
 end
-WeakKeyDict{K,V}(p::Pair) where V where K = setindex!(WeakKeyDict{K,V}(), p.second, p.first)
-function WeakKeyDict{K,V}(ps::Pair...) where V where K
+WeakKeyDict{K,V}(p::Pair) where {K,V} = setindex!(WeakKeyDict{K,V}(), p.second, p.first)
+function WeakKeyDict{K,V}(ps::Pair...) where {K,V}
     h = WeakKeyDict{K,V}()
     sizehint!(h, length(ps))
     for p in ps

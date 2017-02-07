@@ -99,11 +99,11 @@ mutable struct Dict{K,V} <: Associative{K,V}
     idxfloor::Int  # an index <= the indexes of all used slots
     maxprobe::Int
 
-    function Dict{K,V}() where V where K
+    function Dict{K,V}() where {K,V}
         n = 16
         new(zeros(UInt8,n), Array{K,1}(n), Array{V,1}(n), 0, 0, 0, 1, 0)
     end
-    function Dict{K,V}(d::Dict{K,V}) where V where K
+    function Dict{K,V}(d::Dict{K,V}) where {K,V}
         if d.ndel > 0
             rehash!(d)
         end
@@ -112,7 +112,7 @@ mutable struct Dict{K,V} <: Associative{K,V}
             d.maxprobe)
     end
 end
-function Dict{K,V}(kv) where V where K
+function Dict{K,V}(kv) where {K,V}
     h = Dict{K,V}()
     for (k,v) in kv
         h[k] = v
@@ -120,7 +120,7 @@ function Dict{K,V}(kv) where V where K
     return h
 end
 Dict{K,V}(p::Pair) where {K,V} = setindex!(Dict{K,V}(), p.second, p.first)
-function Dict{K,V}(ps::Pair...) where V where K
+function Dict{K,V}(ps::Pair...) where {K,V}
     h = Dict{K,V}()
     sizehint!(h, length(ps))
     for p in ps
@@ -135,10 +135,10 @@ copy(d::Dict) = Dict(d)
 
 const AnyDict = Dict{Any,Any}
 
-Dict(ps::Pair{K,V}...) where {K,V}        = Dict{K,V}(ps)
-Dict(ps::Pair{K}...,) where K             = Dict{K,Any}(ps)
-Dict(ps::(Pair{K,V} where K)...,) where V = Dict{Any,V}(ps)
-Dict(ps::Pair...)                         = Dict{Any,Any}(ps)
+Dict(ps::Pair{K,V}...) where {K,V}          = Dict{K,V}(ps)
+Dict(ps::Pair{K}...,) where {K}             = Dict{K,Any}(ps)
+Dict(ps::(Pair{K,V} where K)...,) where {V} = Dict{Any,V}(ps)
+Dict(ps::Pair...)                           = Dict{Any,Any}(ps)
 
 function Dict(kv)
     try

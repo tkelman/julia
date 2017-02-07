@@ -52,7 +52,8 @@ julia> Bl = Bidiagonal(dv, ev, false) # ev is on the first subdiagonal
  ⋅  ⋅  9  4
 ```
 """
-Bidiagonal(dv::AbstractVector{T}, ev::AbstractVector{T}, isupper::Bool) where {T} = Bidiagonal{T}(collect(dv), collect(ev), isupper)
+Bidiagonal(dv::AbstractVector{T}, ev::AbstractVector{T}, isupper::Bool) where {T} =
+    Bidiagonal{T}(collect(dv), collect(ev), isupper)
 Bidiagonal(dv::AbstractVector, ev::AbstractVector) = throw(ArgumentError("did you want an upper or lower Bidiagonal? Try again with an additional true (upper) or false (lower) argument."))
 
 """

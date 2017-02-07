@@ -199,7 +199,7 @@ mutable struct T24Linear{T,N,dims} <: AbstractArray{T,N}
     end
 end
 
-T24Linear(::Type{T}, dims::Int...) where T = T24Linear(T, dims)
+T24Linear(::Type{T}, dims::Int...) where {T} = T24Linear(T, dims)
 T24Linear(::Type{T}, dims::NTuple{N,Int}) where {T,N} = T24Linear{T,N,dims}()
 
 Base.convert{T,N  }(::Type{T24Linear     }, X::AbstractArray{T,N}) = convert(T24Linear{T,N}, X)

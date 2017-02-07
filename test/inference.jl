@@ -77,7 +77,7 @@ end
 struct Hanoi5906{T} <: Outer5906{T}
     a::T
     succ :: Outer5906{Inner5906{T}}
-    Hanoi5906{T}(a) where T = new(a, Empty5906{Inner5906{T}}())
+    Hanoi5906{T}(a) where {T} = new(a, Empty5906{Inner5906{T}}())
 end
 
 function f5906{T}(h::Hanoi5906{T})
