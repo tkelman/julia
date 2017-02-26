@@ -180,6 +180,7 @@ echo 'override LIBLAPACKNAME = $(LIBBLASNAME)' >> Make.user
 echo 'override DEP_LIBS = libuv utf8proc' >> Make.user
 
 if [ -n "$USEMSVC" ]; then
+  rm -rf /mingw/bin
   # Openlibm doesn't build well with MSVC right now
   echo 'USE_SYSTEM_OPENLIBM = 1' >> Make.user
   # Since we don't have a static library for openlibm
