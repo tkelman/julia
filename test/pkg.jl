@@ -420,12 +420,10 @@ temp_pkg_dir() do
     # issue #20695
     Pkg.cd() do
         @test Pkg.Entry.url_and_pkg("Example") == ("git://github.com/JuliaLang/Example.jl.git", "Example")
-        for url = [
-            "https://github.com/Org/Nonsense",
-            "git@github.com:Org/Nonsense",
-            "file:///home/user/Nonsense",
-            "/home/user/Nonsense",
-        ]
+        for url = ["https://github.com/Org/Nonsense",
+                   "git@github.com:Org/Nonsense",
+                   "file:///home/user/Nonsense",
+                   "/home/user/Nonsense"]
             @test Pkg.Entry.url_and_pkg(url) == (url, "Nonsense")
             @test Pkg.Entry.url_and_pkg("$url.jl") == ("$url.jl", "Nonsense")
             @test Pkg.Entry.url_and_pkg("$url.git") == ("$url.git", "Nonsense")
