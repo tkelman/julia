@@ -1587,7 +1587,7 @@ static jl_value_t *intersect_sub_datatype(jl_datatype_t *xd, jl_datatype_t *yd, 
                 // the exact typevar from the type's `wrapper`, or a free typevar.
                 jl_value_t *ei = env[i];
                 if (ei == (jl_value_t*)((jl_unionall_t*)wr)->var ||
-                    (jl_is_typevar(ei) && lookup(e, (jl_tvar_t*)ei) == NULL))
+                        (jl_is_typevar(ei) && lookup(e, (jl_tvar_t*)ei) == NULL))
                     env[i] = jl_tparam(xd,i);
                 wr = ((jl_unionall_t*)wr)->body;
             }
