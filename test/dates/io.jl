@@ -39,7 +39,8 @@ end
 
 # DateFormat printing
 
-@test sprint(show, DateFormat("yyyzzxmmdd\\MHH:MM:SS\\P")) == "dateformat\"yyyzzxmmdd\\MHH:MM:SSP\""
+@test sprint(show, DateFormat("yyyzzxmmdd\\MHH:MM:SS\\P")) ==
+    "dateformat\"yyyzzxmmdd\\MHH:MM:SSP\""
 @test sprint(show, DateFormat("yyy").tokens[1]) == "DatePart(yyy)"
 @test sprint(show, DateFormat("mmzzdd").tokens[2]) == "Delim(zz)"
 @test sprint(show, DateFormat("ddxmm").tokens[2]) == "Delim(x)"
@@ -150,8 +151,10 @@ f = "yyyy-mm-dd HH:MM:SS zzz"
 @test Dates.format(dt + Dates.Hour(10), f) == k * " zzz"
 l = "1996-01-15 10:10:10.25"
 f = "yyyy-mm-dd HH:MM:SS.ss zzz"
-@test Dates.DateTime(l, f) == dt + Dates.Hour(10) + Dates.Minute(10) + Dates.Second(10) + Dates.Millisecond(250)
-@test Dates.format(dt + Dates.Hour(10) + Dates.Minute(10) + Dates.Second(10) + Dates.Millisecond(250), f) == l * " zzz"
+@test Dates.DateTime(l, f) == dt + Dates.Hour(10) + Dates.Minute(10) +
+    Dates.Second(10) + Dates.Millisecond(250)
+@test Dates.format(dt + Dates.Hour(10) + Dates.Minute(10) +
+    Dates.Second(10) + Dates.Millisecond(250), f) == l * " zzz"
 
 r = "1/15/1996" # Excel
 f = "m/dd/yyyy"
@@ -351,18 +354,30 @@ dt = Dates.DateTime(2014, 8, 23, 17, 22, 15)
 @test Dates.format(dt, "yyyy-mm-dd e") == "2014-08-23 Sat"
 @test Dates.format(dt, "yyyy-e-mm-dd") == "2014-Sat-08-23"
 
-@test Dates.format(Dates.DateTime(2014, 1, 2, 0, 0, 0, 999), Dates.RFC1123Format) == "Thu, 02 Jan 2014 00:00:00"
-@test Dates.format(Dates.DateTime(2014, 2, 18, 0, 0, 0, 9), Dates.RFC1123Format) == "Tue, 18 Feb 2014 00:00:00"
-@test Dates.format(Dates.DateTime(2014, 3, 8, 0, 0, 0, 9), Dates.RFC1123Format) == "Sat, 08 Mar 2014 00:00:00"
-@test Dates.format(Dates.DateTime(2014, 4, 28, 0, 0, 0, 9), Dates.RFC1123Format) == "Mon, 28 Apr 2014 00:00:00"
-@test Dates.format(Dates.DateTime(2014, 5, 10, 0, 0, 0, 9), Dates.RFC1123Format) == "Sat, 10 May 2014 00:00:00"
-@test Dates.format(Dates.DateTime(2014, 6, 4, 0, 0, 0, 9), Dates.RFC1123Format) == "Wed, 04 Jun 2014 00:00:00"
-@test Dates.format(Dates.DateTime(2014, 7, 13, 0, 0, 0, 9), Dates.RFC1123Format) == "Sun, 13 Jul 2014 00:00:00"
-@test Dates.format(Dates.DateTime(2014, 8, 17, 0, 0, 0, 9), Dates.RFC1123Format) == "Sun, 17 Aug 2014 00:00:00"
-@test Dates.format(Dates.DateTime(2014, 9, 20, 0, 0, 0, 9), Dates.RFC1123Format) == "Sat, 20 Sep 2014 00:00:00"
-@test Dates.format(Dates.DateTime(2014, 10, 31, 0, 0, 0, 9), Dates.RFC1123Format) == "Fri, 31 Oct 2014 00:00:00"
-@test Dates.format(Dates.DateTime(2014, 11, 2, 0, 0, 0, 9), Dates.RFC1123Format) == "Sun, 02 Nov 2014 00:00:00"
-@test Dates.format(Dates.DateTime(2014, 12, 5, 0, 0, 0, 9), Dates.RFC1123Format) == "Fri, 05 Dec 2014 00:00:00"
+@test Dates.format(Dates.DateTime(2014, 1, 2, 0, 0, 0, 999), Dates.RFC1123Format) ==
+    "Thu, 02 Jan 2014 00:00:00"
+@test Dates.format(Dates.DateTime(2014, 2, 18, 0, 0, 0, 9), Dates.RFC1123Format) ==
+    "Tue, 18 Feb 2014 00:00:00"
+@test Dates.format(Dates.DateTime(2014, 3, 8, 0, 0, 0, 9), Dates.RFC1123Format) ==
+    "Sat, 08 Mar 2014 00:00:00"
+@test Dates.format(Dates.DateTime(2014, 4, 28, 0, 0, 0, 9), Dates.RFC1123Format) ==
+    "Mon, 28 Apr 2014 00:00:00"
+@test Dates.format(Dates.DateTime(2014, 5, 10, 0, 0, 0, 9), Dates.RFC1123Format) ==
+    "Sat, 10 May 2014 00:00:00"
+@test Dates.format(Dates.DateTime(2014, 6, 4, 0, 0, 0, 9), Dates.RFC1123Format) ==
+    "Wed, 04 Jun 2014 00:00:00"
+@test Dates.format(Dates.DateTime(2014, 7, 13, 0, 0, 0, 9), Dates.RFC1123Format) ==
+    "Sun, 13 Jul 2014 00:00:00"
+@test Dates.format(Dates.DateTime(2014, 8, 17, 0, 0, 0, 9), Dates.RFC1123Format) ==
+    "Sun, 17 Aug 2014 00:00:00"
+@test Dates.format(Dates.DateTime(2014, 9, 20, 0, 0, 0, 9), Dates.RFC1123Format) ==
+    "Sat, 20 Sep 2014 00:00:00"
+@test Dates.format(Dates.DateTime(2014, 10, 31, 0, 0, 0, 9), Dates.RFC1123Format) ==
+    "Fri, 31 Oct 2014 00:00:00"
+@test Dates.format(Dates.DateTime(2014, 11, 2, 0, 0, 0, 9), Dates.RFC1123Format) ==
+    "Sun, 02 Nov 2014 00:00:00"
+@test Dates.format(Dates.DateTime(2014, 12, 5, 0, 0, 0, 9), Dates.RFC1123Format) ==
+    "Fri, 05 Dec 2014 00:00:00"
 
 dt = Dates.DateTime(2016, 11, 12, 7, 45, 36)
 @test parse(Dates.DateTime, "Sat, 12 Nov 2016 07:45:36", Dates.RFC1123Format) == dt
