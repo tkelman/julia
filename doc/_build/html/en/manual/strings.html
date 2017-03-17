@@ -177,7 +177,7 @@ julia&gt; search(&quot;xylophone&quot;, &#39;o&#39;, 5)
 7
 
 julia&gt; search(&quot;xylophone&quot;, &#39;o&#39;, 8)
-0</code></pre><p>You can use the <a href="../stdlib/arrays.html#Base.contains-Tuple{Function,Any,Any}"><code>contains()</code></a> function to check if a substring is contained in a string:</p><pre><code class="language-julia">julia&gt; contains(&quot;Hello, world.&quot;, &quot;world&quot;)
+0</code></pre><p>You can use the <a href="../stdlib/strings.html#Base.contains-Tuple{AbstractString,AbstractString}"><code>contains()</code></a> function to check if a substring is contained in a string:</p><pre><code class="language-julia">julia&gt; contains(&quot;Hello, world.&quot;, &quot;world&quot;)
 true
 
 julia&gt; contains(&quot;Xylophon&quot;, &quot;o&quot;)
@@ -190,7 +190,7 @@ julia&gt; contains(&quot;Xylophon&quot;, &#39;o&#39;)
 ERROR: MethodError: no method matching contains(::String, ::Char)
 Closest candidates are:
   contains(!Matched::Function, ::Any, !Matched::Any) at reduce.jl:660
-  contains(::AbstractString, !Matched::AbstractString) at strings/search.jl:378</code></pre><p>The last error is because <code>&#39;o&#39;</code> is a character literal, and <a href="../stdlib/arrays.html#Base.contains-Tuple{Function,Any,Any}"><code>contains()</code></a> is a generic function that looks for subsequences. To look for an element in a sequence, you must use <a href="../stdlib/collections.html#Base.in"><code>in()</code></a> instead.</p><p>Two other handy string functions are <a href="../stdlib/linalg.html#Base.repeat"><code>repeat()</code></a> and <a href="../stdlib/strings.html#Base.join"><code>join()</code></a>:</p><pre><code class="language-julia">julia&gt; repeat(&quot;.:Z:.&quot;, 10)
+  contains(::AbstractString, !Matched::AbstractString) at strings/search.jl:378</code></pre><p>The last error is because <code>&#39;o&#39;</code> is a character literal, and <a href="../stdlib/strings.html#Base.contains-Tuple{AbstractString,AbstractString}"><code>contains()</code></a> is a generic function that looks for subsequences. To look for an element in a sequence, you must use <a href="../stdlib/collections.html#Base.in"><code>in()</code></a> instead.</p><p>Two other handy string functions are <a href="../stdlib/linalg.html#Base.repeat"><code>repeat()</code></a> and <a href="../stdlib/strings.html#Base.join"><code>join()</code></a>:</p><pre><code class="language-julia">julia&gt; repeat(&quot;.:Z:.&quot;, 10)
 &quot;.:Z:..:Z:..:Z:..:Z:..:Z:..:Z:..:Z:..:Z:..:Z:..:Z:.&quot;
 
 julia&gt; join([&quot;apples&quot;, &quot;bananas&quot;, &quot;pineapples&quot;], &quot;, &quot;, &quot; and &quot;)
