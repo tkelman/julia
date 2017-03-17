@@ -34,9 +34,8 @@ Returns a 3-element tuple `(values, pos, num_parsed)`:
 * `num_parsed::Int`: The number of values which were parsed and stored within `values`.
   Useful for distinguishing parsed values from default values.
 """
-@generated function tryparsenext_core(
-    str::AbstractString, pos::Int, len::Int, df::DateFormat, raise::Bool=false,
-)
+@generated function tryparsenext_core(str::AbstractString,
+        pos::Int, len::Int, df::DateFormat, raise::Bool=false)
     directives = _directives(df)
     letters = character_codes(directives)
 
@@ -125,9 +124,8 @@ Returns a 2-element tuple `(values, pos)`:
   the passed in type.
 * `pos::Int`: The character index at which parsing stopped.
 """
-@generated function tryparsenext_internal{T<:TimeType}(
-    ::Type{T}, str::AbstractString, pos::Int, len::Int, df::DateFormat, raise::Bool=false,
-)
+@generated function tryparsenext_internal{T<:TimeType}(::Type{T}, str::AbstractString,
+        pos::Int, len::Int, df::DateFormat, raise::Bool=false)
     letters = character_codes(df)
 
     tokens = Type[CONVERSION_SPECIFIERS[letter] for letter in letters]
@@ -160,7 +158,8 @@ Returns a 2-element tuple `(values, pos)`:
     end
 end
 
-@inline function tryparsenext_base10(str::AbstractString, i::Int, len::Int, min_width::Int=1, max_width::Int=0)
+@inline function tryparsenext_base10(str::AbstractString, i::Int, len::Int,
+        min_width::Int=1, max_width::Int=0)
     i > len && (return Nullable{Int64}(), i)
     min_pos = min_width <= 0 ? i : i + min_width - 1
     max_pos = max_width <= 0 ? len : min(i + max_width - 1, len)
@@ -267,17 +266,15 @@ function Base.parse(::Type{DateTime}, s::AbstractString, df::typeof(ISODateTimeF
     throw(ArgumentError("Invalid DateTime string"))
 end
 
-function Base.parse{T<:TimeType}(
-    ::Type{T}, str::AbstractString, df::DateFormat=default_format(T),
-)
+function Base.parse{T<:TimeType}(::Type{T}, str::AbstractString,
+        df::DateFormat=default_format(T))
     pos, len = start(str), endof(str)
     values, pos = tryparsenext_internal(T, str, pos, len, df, true)
     T(unsafe_get(values)...)
 end
 
-function Base.tryparse{T<:TimeType}(
-    ::Type{T}, str::AbstractString, df::DateFormat=default_format(T),
-)
+function Base.tryparse{T<:TimeType}(::Type{T}, str::AbstractString,
+        df::DateFormat=default_format(T))
     pos, len = start(str), endof(str)
     values, pos = tryparsenext_internal(T, str, pos, len, df, false)
     if isnull(values)
