@@ -1211,9 +1211,9 @@ static jl_value_t *intersect_var(jl_tvar_t *b, jl_value_t *a, jl_stenv_t *e, int
         return (jl_value_t*)b;
     if (ub == a) {
         if (bb->lb == jl_bottom_type ||
-            // if the var has an equality constraint then make sure bounds stay consistent.
-            // TODO: try to use this check in more cases
-            bb->ub != bb->lb || try_subtype_in_env(bb->lb, ub, e)) {
+                // if the var has an equality constraint then make sure bounds stay consistent.
+                // TODO: try to use this check in more cases
+                bb->ub != bb->lb || try_subtype_in_env(bb->lb, ub, e)) {
             bb->ub = ub;
             return (jl_value_t*)b;
         }
