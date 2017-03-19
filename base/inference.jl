@@ -1525,8 +1525,8 @@ function return_type_tfunc(argtypes::ANY, vtypes::VarTable, sv::InferenceState)
                     argtypes_vec = Any[aft, af_argtype.parameters...]
                     astype = argtypes_to_type(argtypes_vec)
                     if !(aft ⊑ Builtin) &&
-                        _methods_by_ftype(astype, 0, sv.params.world,
-                                          UInt[typemin(UInt)], UInt[typemax(UInt)]) !== false
+                            _methods_by_ftype(astype, 0, sv.params.world,
+                                              UInt[typemin(UInt)], UInt[typemax(UInt)]) !== false
                         # return_type returns Bottom if no methods match, even though
                         # inference doesn't necessarily.
                         return Const(Bottom)
