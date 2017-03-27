@@ -1129,17 +1129,17 @@ end
 
 # LibGit2 refactor (#19839)
 @eval Base.LibGit2 begin
-     Base.@deprecate_binding Oid GitHash
-     Base.@deprecate_binding GitAnyObject GitUnknownObject
+    Base.@deprecate_binding Oid GitHash
+    Base.@deprecate_binding GitAnyObject GitUnknownObject
 
-     @deprecate owner(x) repository(x) false
-     @deprecate get{T<:GitObject}(::Type{T}, repo::GitRepo, x) T(repo, x) false
-     @deprecate get{T<:GitObject}(::Type{T}, repo::GitRepo, oid::GitHash, oid_size::Int) T(repo, GitShortHash(oid, oid_size)) false
-     @deprecate revparse(repo::GitRepo, objname::AbstractString) GitObject(repo, objname) false
-     @deprecate object(repo::GitRepo, te::GitTreeEntry) GitObject(repo, te) false
-     @deprecate commit(ann::GitAnnotated) GitHash(ann) false
-     @deprecate cat{T<:GitObject}(repo::GitRepo, ::Type{T}, object::AbstractString) cat(repo, object)
-     @deprecate lookup(repo::GitRepo, oid::GitHash) GitBlob(repo, oid) false
+    @deprecate owner(x) repository(x) false
+    @deprecate get{T<:GitObject}(::Type{T}, repo::GitRepo, x) T(repo, x) false
+    @deprecate get{T<:GitObject}(::Type{T}, repo::GitRepo, oid::GitHash, oid_size::Int) T(repo, GitShortHash(oid, oid_size)) false
+    @deprecate revparse(repo::GitRepo, objname::AbstractString) GitObject(repo, objname) false
+    @deprecate object(repo::GitRepo, te::GitTreeEntry) GitObject(repo, te) false
+    @deprecate commit(ann::GitAnnotated) GitHash(ann) false
+    @deprecate cat{T<:GitObject}(repo::GitRepo, ::Type{T}, object::AbstractString) cat(repo, object)
+    @deprecate lookup(repo::GitRepo, oid::GitHash) GitBlob(repo, oid) false
 end
 
 # when this deprecation is deleted, remove all calls to it, and all
@@ -1295,7 +1295,7 @@ end
             "`sort!(filter!(el -> isa(el, Dates.Period), Dates.parse_components(x, df), rev=true, lt=Dates.periodisless)` ",
             " instead."), :parse)
         sort!(filter!(el -> isa(el, Period), parse_components(x, df)), rev=true, lt=periodisless)
-     end
+    end
 end
 
 # END 0.6 deprecations
