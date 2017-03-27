@@ -761,8 +761,10 @@ static int subtype(jl_value_t *x, jl_value_t *y, jl_stenv_t *e, int param)
     if (jl_is_unionall(y))
         return subtype_unionall(x, (jl_unionall_t*)y, e, 1, param);
     if (jl_is_datatype(x) && jl_is_datatype(y)) {
-        if (x == y) return 1;
-        if (y == (jl_value_t*)jl_any_type) return 1;
+        if (x == y)
+            return 1;
+        if (y == (jl_value_t*)jl_any_type)
+            return 1;
         jl_datatype_t *xd = (jl_datatype_t*)x, *yd = (jl_datatype_t*)y;
         if (jl_is_type_type(x) && !jl_is_type_type(y)) {
             jl_value_t *tp0 = jl_tparam0(xd);
@@ -1771,8 +1773,10 @@ static jl_value_t *intersect(jl_value_t *x, jl_value_t *y, jl_stenv_t *e, int pa
             return intersect_unionall(y, (jl_unionall_t*)x, e, 0, param);
         return intersect_union(x, (jl_uniontype_t*)y, e, 1, param);
     }
-    if (y == (jl_value_t*)jl_any_type) return x;
-    if (x == (jl_value_t*)jl_any_type) return y;
+    if (y == (jl_value_t*)jl_any_type)
+        return x;
+    if (x == (jl_value_t*)jl_any_type)
+        return y;
     if (jl_is_unionall(x)) {
         if (jl_is_unionall(y)) {
             jl_value_t *a=NULL, *b=jl_bottom_type, *res=NULL;
@@ -1832,11 +1836,13 @@ static jl_value_t *intersect(jl_value_t *x, jl_value_t *y, jl_stenv_t *e, int pa
                 if (ii == jl_bottom_type) return jl_bottom_type;
                 if (jl_is_typevar(xp1)) {
                     jl_varbinding_t *xb = lookup(e, (jl_tvar_t*)xp1);
-                    if (xb && is_leaf_typevar((jl_value_t*)xb->var)) xb->concrete = 1;
+                    if (xb && is_leaf_typevar((jl_value_t*)xb->var))
+                        xb->concrete = 1;
                 }
                 if (jl_is_typevar(yp1)) {
                     jl_varbinding_t *yb = lookup(e, (jl_tvar_t*)yp1);
-                    if (yb && is_leaf_typevar((jl_value_t*)yb->var)) yb->concrete = 1;
+                    if (yb && is_leaf_typevar((jl_value_t*)yb->var))
+                        yb->concrete = 1;
                 }
                 JL_GC_PUSH2(&ii, &i2);
                 // Vararg{T,N} <: Vararg{T2,N2}; equate N and N2
