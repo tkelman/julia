@@ -982,8 +982,7 @@ end
 
 end
 
-@test docstrings_equal(
-    @doc(I21016.Struct),
+@test docstrings_equal(@doc(I21016.Struct),
     doc"""
     String 1
 
@@ -992,6 +991,4 @@ end
     String 3
 
     String 4
-    """
-)
-
+    """)
