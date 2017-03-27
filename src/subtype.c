@@ -1163,7 +1163,7 @@ static jl_value_t *intersect_var(jl_tvar_t *b, jl_value_t *a, jl_stenv_t *e, int
                 jl_varbinding_t *btemp = e->vars;
                 while (btemp != NULL) {
                     if (btemp->lb == (jl_value_t*)b && btemp->ub == (jl_value_t*)b &&
-                        var_occurs_inside(ub, btemp->var, 0, 0)) {
+                            var_occurs_inside(ub, btemp->var, 0, 0)) {
                         JL_GC_POP();
                         return jl_bottom_type;
                     }
