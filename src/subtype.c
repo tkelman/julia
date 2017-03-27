@@ -501,7 +501,7 @@ static int subtype_unionall(jl_value_t *t, jl_unionall_t *u, jl_stenv_t *e, int8
     // !( Tuple{Int, String} <: Tuple{T, T} where T)
     // Then check concreteness by checking that the lower bound is not an abstract type.
     if (ans && (vb.concrete || (!vb.occurs_inv && vb.occurs_cov > 1)) &&
-        is_leaf_typevar((jl_value_t*)u->var)) {
+            is_leaf_typevar((jl_value_t*)u->var)) {
         if (jl_is_typevar(vb.lb)) {
             // TODO test case that demonstrates the need for this?
             /*
