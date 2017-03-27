@@ -190,29 +190,29 @@ srand(100)
             @test_throws DimensionMismatch BLAS.trmm('R','U','N','N',one(elty),triu(rand(elty,n,n)),ones(elty,n,n+1))
         end
 
-        #trsm
+        # trsm
         A = triu(rand(elty,n,n))
         B = rand(elty,(n,n))
         @test BLAS.trsm('L','U','N','N',one(elty),A,B) ≈ A\B
 
-        #will work for SymTridiagonal,Tridiagonal,Bidiagonal!
+        # will work for SymTridiagonal,Tridiagonal,Bidiagonal!
         @testset "banded matrix mv" begin
             @testset "gbmv" begin
                 TD  = Tridiagonal(rand(elty,n-1),rand(elty,n),rand(elty,n-1))
                 x   = rand(elty,n)
-                #put TD into the BLAS format!
+                # put TD into the BLAS format!
                 fTD = zeros(elty,3,n)
                 fTD[1,2:n] = TD.du
                 fTD[2,:] = TD.d
                 fTD[3,1:n-1] = TD.dl
                 @test BLAS.gbmv('N',n,1,1,fTD,x) ≈ TD*x
             end
-            #will work for SymTridiagonal only!
+            # will work for SymTridiagonal only!
             @testset "sbmv" begin
                 if elty <: BlasReal
                     ST  = SymTridiagonal(rand(elty,n),rand(elty,n-1))
                     x   = rand(elty,n)
-                    #put TD into the BLAS format!
+                    # put TD into the BLAS format!
                     fST = zeros(elty,2,n)
                     fST[1,2:n] = ST.ev
                     fST[2,:] = ST.dv
