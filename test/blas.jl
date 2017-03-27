@@ -122,8 +122,7 @@ srand(100)
             end
         end
         @testset "ger, her, syr" for x in (rand(elty, n), view(rand(elty,2n), 1:2:2n)),
-            y in (rand(elty,n), view(rand(elty,3n), 1:3:3n))
-
+                y in (rand(elty,n), view(rand(elty,3n), 1:3:3n))
             A = rand(elty,n,n)
             α = rand(elty)
 
