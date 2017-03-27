@@ -1131,9 +1131,8 @@ want to set this to `false`. See [`Base.isambiguous`](@ref).
 function detect_ambiguities(mods...;
         imported::Bool = false,
         ambiguous_bottom::Bool = false,
-        allow_bottom::Union{Bool,Void} = nothing
-    )
-    if allow_bottom != nothing
+        allow_bottom::Union{Bool,Void} = nothing)
+    if allow_bottom !== nothing
         Base.depwarn("the `allow_bottom` keyword to detect_ambiguities has been renamed to `ambiguous_bottom`", :detect_ambiguities)
         ambiguous_bottom = allow_bottom
     end
