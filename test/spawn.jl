@@ -205,9 +205,11 @@ exename = Base.julia_cmd()
 if valgrind_off
     # If --trace-children=yes is passed to valgrind, we will get a
     # valgrind banner here, not "Hello World\n".
-    @test readstring(pipeline(`$exename --startup-file=no -e 'println(STDERR,"Hello World")'`, stderr=catcmd)) == "Hello World\n"
+    @test readstring(pipeline(`$exename --startup-file=no
+        -e 'println(STDERR,"Hello World")'`, stderr=catcmd)) == "Hello World\n"
     out = Pipe()
-    proc = spawn(pipeline(`$exename --startup-file=no -e 'println(STDERR,"Hello World")'`, stderr = out))
+    proc = spawn(pipeline(`$exename --startup-file=no
+        -e 'println(STDERR,"Hello World")'`, stderr = out))
     close(out.in)
     @test readstring(out) == "Hello World\n"
     @test success(proc)
@@ -277,7 +279,8 @@ let bad = "bad\0name"
 end
 
 # issue #12829
-let out = Pipe(), echo = `$exename --startup-file=no -e 'print(STDOUT, " 1\t", readstring(STDIN))'`, ready = Condition(), t, infd, outfd
+let out = Pipe(), echo = `$exename --startup-file=no -e 'print(STDOUT, " 1\t", readstring(STDIN))'`,
+        ready = Condition(), t, infd, outfd
     @test_throws ArgumentError write(out, "not open error")
     t = @async begin # spawn writer task
         open(echo, "w", out) do in1
@@ -383,7 +386,8 @@ end
 
 # make sure windows_verbatim strips quotes
 if is_windows()
-    readstring(`cmd.exe /c dir /b spawn.jl`) == readstring(Cmd(`cmd.exe /c dir /b "\"spawn.jl\""`, windows_verbatim=true))
+    readstring(`cmd.exe /c dir /b spawn.jl`) ==
+        readstring(Cmd(`cmd.exe /c dir /b "\"spawn.jl\""`, windows_verbatim=true))
 end
 
 # make sure Cmd is nestable
@@ -418,7 +422,8 @@ end
 # tests for reducing over collection of Cmd
 @test_throws ArgumentError reduce(&, Base.AbstractCmd[])
 @test_throws ArgumentError reduce(&, Base.Cmd[])
-@test reduce(&, [`$echocmd abc`, `$echocmd def`, `$echocmd hij`]) == `$echocmd abc` & `$echocmd def` & `$echocmd hij`
+@test reduce(&, [`$echocmd abc`, `$echocmd def`, `$echocmd hij`]) ==
+    `$echocmd abc` & `$echocmd def` & `$echocmd hij`
 
 # test for proper handling of FD exhaustion
 if is_unix()

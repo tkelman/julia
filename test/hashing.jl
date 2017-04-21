@@ -96,8 +96,8 @@ let a = QuoteNode(1), b = QuoteNode(1.0)
 end
 
 let a = Expr(:block, TypedSlot(1, Any)),
-    b = Expr(:block, TypedSlot(1, Any)),
-    c = Expr(:block, TypedSlot(3, Any))
+        b = Expr(:block, TypedSlot(1, Any)),
+        c = Expr(:block, TypedSlot(3, Any))
     @test a == b && hash(a) == hash(b)
     @test a != c && hash(a) != hash(c)
     @test b != c && hash(b) != hash(c)
@@ -107,7 +107,7 @@ end
 
 # issue 15659
 for prec in [3, 11, 15, 16, 31, 32, 33, 63, 64, 65, 254, 255, 256, 257, 258, 1023, 1024, 1025],
-    v in Any[-0.0, 0, 1, -1, 1//10, 2//10, 3//10, 1//2, pi]
+        v in Any[-0.0, 0, 1, -1, 1//10, 2//10, 3//10, 1//2, pi]
     setprecision(prec) do
         x = convert(BigFloat, v)
         @test precision(x) == prec

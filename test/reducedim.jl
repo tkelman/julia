@@ -17,8 +17,8 @@ safe_minabs{T}(A::Array{T}, region) = safe_mapslices(minimum, abs.(A), region)
 
 Areduc = rand(3, 4, 5, 6)
 for region in Any[
-    1, 2, 3, 4, 5, (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4),
-    (1, 2, 3), (1, 3, 4), (2, 3, 4), (1, 2, 3, 4)]
+        1, 2, 3, 4, 5, (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (3, 4),
+        (1, 2, 3), (1, 3, 4), (2, 3, 4), (1, 2, 3, 4)]
     # println("region = $region")
     r = fill(NaN, map(length, Base.reduced_indices(indices(Areduc), region)))
     @test sum!(r, Areduc) ≈ safe_sum(Areduc, region)

@@ -76,13 +76,14 @@ let a, ci_ary, x
     @test x == a + 1 - 2im
 
     ci_ary = [a] # Make sure the array is alive during unsafe_load
-    x = unsafe_load(ccall((:cptest, libccalltest), Ptr{Complex{Int}},
-                          (Ptr{Complex{Int}},), ci_ary))
+    x = unsafe_load(ccall((:cptest, libccalltest),
+        Ptr{Complex{Int}}, (Ptr{Complex{Int}},), ci_ary))
 
     @test x == a + 1 - 2im
     @test a == 20 + 51im
 
-    x = ccall((:cptest_static, libccalltest), Ptr{Complex{Int}}, (Ptr{Complex{Int}},), &a)
+    x = ccall((:cptest_static, libccalltest),
+        Ptr{Complex{Int}}, (Ptr{Complex{Int}},), &a)
     @test unsafe_load(x) == a
     Libc.free(convert(Ptr{Void}, x))
 end
@@ -95,7 +96,8 @@ let a, b, x
     @test x == a + 1 - 2im
 
     b = [a] # Make sure the array is alive during unsafe_load
-    x = unsafe_load(ccall((:cgptest, libccalltest), Ptr{Complex128}, (Ptr{Complex128},), b))
+    x = unsafe_load(ccall((:cgptest, libccalltest),
+        Ptr{Complex128}, (Ptr{Complex128},), b))
 
     @test x == a + 1 - 2im
     @test a == 2.84 + 5.2im
@@ -109,7 +111,8 @@ let a, b, x
     @test x == a + 1 - 2im
 
     b = [a] # Make sure the array is alive during unsafe_load
-    x = unsafe_load(ccall((:cfptest, libccalltest), Ptr{Complex64}, (Ptr{Complex64},), b))
+    x = unsafe_load(ccall((:cfptest, libccalltest),
+        Ptr{Complex64}, (Ptr{Complex64},), b))
 
     @test x == a + 1 - 2im
     @test a == 3.34f0 + 53.2f0im
@@ -121,8 +124,10 @@ end
 let a
     a = 2.84 + 5.2im
 
-    @test_throws MethodError ccall((:cptest, libccalltest), Ptr{Complex{Int}}, (Ptr{Complex{Int}},), a)
-    @test_throws MethodError ccall((:cptest, libccalltest), Ptr{Complex{Int}}, (Complex{Int},), &a)
+    @test_throws MethodError ccall((:cptest, libccalltest),
+        Ptr{Complex{Int}}, (Ptr{Complex{Int}},), a)
+    @test_throws MethodError ccall((:cptest, libccalltest),
+        Ptr{Complex{Int}}, (Complex{Int},), &a)
 end
 
 
@@ -164,19 +169,22 @@ let a, b, x
     b = Float32(123.456)
     a2 = copy(a)
 
-    x = ccall((:test_1long_a, libccalltest), Struct1, (Int, Int, Int, Struct1, Float32), 2, 3, 4, a2, b)
+    x = ccall((:test_1long_a, libccalltest), Struct1,
+        (Int, Int, Int, Struct1, Float32), 2, 3, 4, a2, b)
     @test a2.x == a.x && a2.y == a.y
     @test !(a2 === x)
     @test x.x ≈ a.x + b + 9
     @test x.y ≈ a.y - 2*b
 
-    x = ccall((:test_1long_b, libccalltest), Struct1, (Int, Float64, Int, Struct1, Float32), 2, 3, 4, a2, b)
+    x = ccall((:test_1long_b, libccalltest), Struct1,
+        (Int, Float64, Int, Struct1, Float32), 2, 3, 4, a2, b)
     @test a2.x == a.x && a2.y == a.y
     @test !(a2 === x)
     @test x.x ≈ a.x + b + 9
     @test x.y ≈ a.y - 2*b
 
-    x = ccall((:test_1long_c, libccalltest), Struct1, (Int, Float64, Int, Int, Struct1, Float32), 2, 3, 4, 5, a2, b)
+    x = ccall((:test_1long_c, libccalltest), Struct1,
+        (Int, Float64, Int, Int, Struct1, Float32), 2, 3, 4, 5, a2, b)
     @test a2.x == a.x && a2.y == a.y
     @test !(a2 === x)
     @test x.x ≈ a.x + b + 14
@@ -659,7 +667,8 @@ test_struct_big(Struct_BigI)
 let a, a2, x
     a = Struct_Big(424,-5,Int8('Z'))
     a2 = copy(a)
-    x = ccall((:test_big_long, libccalltest), Struct_Big, (Int, Int, Int, Struct_Big,), 2, 3, 4, a2)
+    x = ccall((:test_big_long, libccalltest), Struct_Big,
+        (Int, Int, Int, Struct_Big,), 2, 3, 4, a2)
     @test a2.x == a.x && a2.y == a.y && a2.z == a.z
     @test x.x == a.x + 10
     @test x.y == a.y - 2
@@ -731,7 +740,8 @@ macro test_huge(i, b, init)
     ty = Symbol("Struct_huge", i, b)
     return quote
         let a = $ty($(esc(init))...), f
-            f(b) = ccall(($f, libccalltest), $ty, (Cchar, $ty, Cchar), '0' + $i, a, $b[1])
+            f(b) = ccall(($f, libccalltest), $ty,
+                (Cchar, $ty, Cchar), '0' + $i, a, $b[1])
             #code_llvm(f, typeof((a,)))
             verify_huge($ty($(esc(init))...), a, f(a))
         end
@@ -742,12 +752,16 @@ end
 @test_huge 2 'a' ((1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0),)
 @test_huge 2 'b' ((1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0),)
 @test_huge 3 'a' ((1.0 + 2.0im, 3.0 + 4.0im, 5.0 + 6.0im), 7.0, 8.0)
-@test_huge 3 'b' ((1.0 + 2.0im, 3.0 + 4.0im, 5.0 + 6.0im, 7.0 + 8.0im, 9.0 + 10.0im, 11.0 + 12.0im, 13.0 + 14.0im), 7.0, 8.0)
-@test_huge 3 'c' ((1.0 + 2.0im, 3.0 + 4.0im, 5.0 + 6.0im, 7.0 + 8.0im, 9.0 + 10.0im, 11.0 + 12.0im, 13.0 + 14.0im), 7.0, 8.0, 9.0)
+@test_huge 3 'b' ((1.0 + 2.0im, 3.0 + 4.0im, 5.0 + 6.0im,
+    7.0 + 8.0im, 9.0 + 10.0im, 11.0 + 12.0im, 13.0 + 14.0im), 7.0, 8.0)
+@test_huge 3 'c' ((1.0 + 2.0im, 3.0 + 4.0im, 5.0 + 6.0im,
+    7.0 + 8.0im, 9.0 + 10.0im, 11.0 + 12.0im, 13.0 + 14.0im), 7.0, 8.0, 9.0)
 @test_huge 4 'a' (1.0 + 2.0im, 3.0 + 4.0im, 5.0f0 + 6.0f0im, 7.0 + 8.0im, 9.0)
 @test_huge 4 'b' (1.0 + 2.0im, 3.0 + 4.0im, 5.0f0 + 6.0f0im, 7.0 + 8.0im, 9.0 + 10.0im)
-@test_huge 5 'a' ((1 + 2im, 3 + 4im, 5 + 6im, 7 + 8im, 9 + 10im, 11 + 12im, 13 + 14im, 15 + 16im),)
-@test_huge 5 'b' ((1 + 2im, 3 + 4im, 5 + 6im, 7 + 8im, 9 + 10im, 11 + 12im, 13 + 14im, 15 + 16im, 17 + 17im),)
+@test_huge 5 'a' ((1 + 2im, 3 + 4im, 5 + 6im, 7 + 8im, 9 + 10im,
+    11 + 12im, 13 + 14im, 15 + 16im),)
+@test_huge 5 'b' ((1 + 2im, 3 + 4im, 5 + 6im, 7 + 8im, 9 + 10im,
+    11 + 12im, 13 + 14im, 15 + 16im, 17 + 17im),)
 
 ## cfunction roundtrip
 
@@ -888,7 +902,8 @@ let A = [1]
 end
 
 # Pointer finalizer at exit (PR #19911)
-let result = readstring(`$(Base.julia_cmd()) --startup-file=no -e "A = Ref{Cint}(42); finalizer(A, cglobal((:c_exit_finalizer, \"$libccalltest\"), Void))"`)
+let result = readstring(`$(Base.julia_cmd()) --startup-file=no
+        -e "A = Ref{Cint}(42); finalizer(A, cglobal((:c_exit_finalizer, \"$libccalltest\"), Void))"`)
     @test result == "c_exit_finalizer: 42, 0"
 end
 
@@ -987,7 +1002,8 @@ if Sys.ARCH === :x86_64
         ccall((:test_m128i, libccalltest), V4xI32, (V4xI32, V4xI32, V4xI32, V4xI32), a1, a2, a3, a4)
     end
 
-    foo_ams(a1, a2, a3, a4) = VecReg(ntuple(i -> VecElement(a1[i].value + a2[i].value * (a3[i].value - a4[i].value)), 4))
+    foo_ams(a1, a2, a3, a4) = VecReg(ntuple(i ->
+        VecElement(a1[i].value + a2[i].value * (a3[i].value - a4[i].value)), 4))
 
     for s in [Float32, Int32]
         T = NTuple{4, VecElement{s}}
@@ -1127,8 +1143,9 @@ elseif Sys.ARCH === :powerpc64le || Sys.ARCH === :ppc64le
      V4xF32, V4xF32, V4xF32, V4xF32, V4xF32,
      V4xF32, V4xF32, V4xF32, V4xF32, V4xF32),
     600000, (4, 3, 2, 1), (5, 4, 3, 2), (6, 5, 4, 3), (7, 6, 5, 4),
-    (14, 13, 12, 11), (15, 14, 13, 12), (16, 15, 14, 13), (17, 16, 15, 14), (18, 17, 16, 15),
-    (1024, 1023, 1022, 1021), (1025, 1024, 1023, 1022), (1026, 1025, 1024, 1023), (1027, 1026, 1025, 1024), (10028, 10027, 10026, 10025))
+    (14, 13, 12, 11), (15, 14, 13, 12), (16, 15, 14, 13), (17, 16, 15, 14),
+    (18, 17, 16, 15), (1024, 1023, 1022, 1021), (1025, 1024, 1023, 1022),
+    (1026, 1025, 1024, 1023), (1027, 1026, 1025, 1024), (10028, 10027, 10026, 10025))
 
 elseif Sys.ARCH !== :i686 && Sys.ARCH !== :arm # TODO
 warn("ccall: no VecReg tests run for this platform")

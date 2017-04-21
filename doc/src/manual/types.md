@@ -1279,7 +1279,7 @@ julia> firstlast(Val{false})
 "Last"
 ```
 
-For consistency across Julia, the call site should always pass a `Val`*type* rather than creating
+For consistency across Julia, the call site should always pass a `Val` *type* rather than creating
 an *instance*, i.e., use `foo(Val{:bar})` rather than `foo(Val{:bar}())`.
 
 It's worth noting that it's extremely easy to mis-use parametric "value" types, including `Val`;

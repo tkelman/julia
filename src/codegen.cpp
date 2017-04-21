@@ -5524,9 +5524,9 @@ static std::unique_ptr<Module> emit_function(
             continue;
         }
         if (!varinfo.isArgument || // always need a slot if the variable is assigned
-            specsig || // for arguments, give them stack slots if they aren't in `argArray` (otherwise, will use that pointer)
-            (va && (int)i == ctx.vaSlot && varinfo.escapes) || // or it's the va arg tuple
-            (s != unused_sym && i == 0)) { // or it is the first argument (which isn't in `argArray`)
+                specsig || // for arguments, give them stack slots if they aren't in `argArray` (otherwise, will use that pointer)
+                (va && (int)i == ctx.vaSlot && varinfo.escapes) || // or it's the va arg tuple
+                (s != unused_sym && i == 0)) { // or it is the first argument (which isn't in `argArray`)
             AllocaInst *av = new AllocaInst(T_pjlvalue, jl_symbol_name(s), /*InsertBefore*/ctx.ptlsStates);
             varinfo.boxroot = av;
 #if JL_LLVM_VERSION >= 30600

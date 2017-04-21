@@ -132,10 +132,10 @@ end #let
 
 #for isvalid(SubString{String})
 let s = "Σx + βz - 2"
-  for i in -1:length(s)+2
-      ss=SubString(s,1,i)
-      @test isvalid(ss,i)==isvalid(s,i)
-  end
+    for i in -1:length(s)+2
+        ss=SubString(s,1,i)
+        @test isvalid(ss,i)==isvalid(s,i)
+    end
 end
 
 ss=SubString("hello",1,5)

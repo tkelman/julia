@@ -391,7 +391,6 @@ end
 
 # test reproducility of methods
 let mta = MersenneTwister(42), mtb = MersenneTwister(42)
-
     @test rand(mta) == rand(mtb)
     @test rand(mta,10) == rand(mtb,10)
     @test randn(mta) == randn(mtb)

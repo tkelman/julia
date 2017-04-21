@@ -79,7 +79,7 @@ mutable struct MersenneTwister <: AbstractRNG
     idx::Int
 
     function MersenneTwister(seed, state, vals, idx)
-        length(vals) == MTCacheLength &&  0 <= idx <= MTCacheLength || throw(DomainError())
+        length(vals) == MTCacheLength && 0 <= idx <= MTCacheLength || throw(DomainError())
         new(seed, state, vals, idx)
     end
 end

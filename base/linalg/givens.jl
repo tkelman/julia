@@ -13,6 +13,7 @@ function A_mul_Bc{T,S}(A::AbstractVecOrMat{T}, R::AbstractRotation{S})
     TS = typeof(zero(T)*zero(S) + zero(T)*zero(S))
     A_mul_Bc!(TS == T ? copy(A) : convert(AbstractArray{TS}, A), convert(AbstractRotation{TS}, R))
 end
+
 """
     LinAlg.Givens(i1,i2,c,s) -> G
 
@@ -232,7 +233,6 @@ function givensAlgorithm{T<:AbstractFloat}(f::Complex{T}, g::Complex{T})
 end
 
 """
-
     givens{T}(f::T, g::T, i1::Integer, i2::Integer) -> (G::Givens, r::T)
 
 Computes the Givens rotation `G` and scalar `r` such that for any vector `x` where
@@ -263,6 +263,7 @@ function givens{T}(f::T, g::T, i1::Integer, i2::Integer)
     end
     Givens(i1, i2, convert(T, c), convert(T, s)), r
 end
+
 """
     givens(A::AbstractArray, i1::Integer, i2::Integer, j::Integer) -> (G::Givens, r)
 

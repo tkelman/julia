@@ -12,7 +12,7 @@ mutable struct SerializationState{I<:IO} <: AbstractSerializer
     io::I
     counter::Int
     table::ObjectIdDict
-    SerializationState{I}(io::I) where I<:IO = new(io, 0, ObjectIdDict())
+    SerializationState{I}(io::I) where {I<:IO} = new(io, 0, ObjectIdDict())
 end
 
 SerializationState(io::IO) = SerializationState{typeof(io)}(io)

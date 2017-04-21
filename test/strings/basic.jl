@@ -70,7 +70,7 @@ end
 
 # issue #6949
 let f =IOBuffer(),
-    x = split("1 2 3")
+        x = split("1 2 3")
     @test write(f, x) == 3
     @test String(take!(f)) == "123"
     @test invoke(write, Tuple{IO, AbstractArray}, f, x) == 3
