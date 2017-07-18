@@ -2,10 +2,11 @@
 
 module Iterators
 
-import Base: start, done, next, isempty, length, size, eltype, iteratorsize, iteratoreltype, indices, ndims
+import Base: start, done, next, isempty, length, size, eltype, iteratorsize,
+             iteratoreltype, indices, ndims
 
-using Base: tail, tuple_type_head, tuple_type_tail, tuple_type_cons, SizeUnknown, HasLength, HasShape,
-            IsInfinite, EltypeUnknown, HasEltype, OneTo, @propagate_inbounds
+using Base: tail, tuple_type_head, tuple_type_tail, tuple_type_cons, SizeUnknown, HasLength,
+            HasShape, IsInfinite, EltypeUnknown, HasEltype, OneTo, @propagate_inbounds
 
 export enumerate, zip, rest, countfrom, take, drop, cycle, repeated, product, flatten, partition
 
@@ -189,8 +190,10 @@ eltype(::Type{Zip2{I1,I2}}) where {I1,I2} = Tuple{eltype(I1), eltype(I2)}
 end
 @inline done(z::Zip2, st) = done(z.a,st[1]) | done(z.b,st[2])
 
-iteratorsize(::Type{Zip2{I1,I2}}) where {I1,I2} = zip_iteratorsize(iteratorsize(I1),iteratorsize(I2))
-iteratoreltype(::Type{Zip2{I1,I2}}) where {I1,I2} = and_iteratoreltype(iteratoreltype(I1),iteratoreltype(I2))
+iteratorsize(::Type{Zip2{I1,I2}}) where {I1,I2} =
+    zip_iteratorsize(iteratorsize(I1),iteratorsize(I2))
+iteratoreltype(::Type{Zip2{I1,I2}}) where {I1,I2} =
+    and_iteratoreltype(iteratoreltype(I1),iteratoreltype(I2))
 
 struct Zip{I, Z<:AbstractZipIterator} <: AbstractZipIterator
     a::I
@@ -200,8 +203,8 @@ end
 """
     zip(iters...)
 
-For a set of iterable objects, returns an iterable of tuples, where the `i`th tuple contains
-the `i`th component of each input iterable.
+For a set of iterable objects, returns an iterable of tuples, where the `i`th
+tuple contains the `i`th component of each input iterable.
 
 # Examples
 ```jldoctest
@@ -239,8 +242,10 @@ eltype(::Type{Zip{I,Z}}) where {I,Z} = tuple_type_cons(eltype(I), eltype(Z))
 end
 @inline done(z::Zip, st) = done(z.a,st[1]) | done(z.z,st[2])
 
-iteratorsize(::Type{Zip{I1,I2}}) where {I1,I2} = zip_iteratorsize(iteratorsize(I1),iteratorsize(I2))
-iteratoreltype(::Type{Zip{I1,I2}}) where {I1,I2} = and_iteratoreltype(iteratoreltype(I1),iteratoreltype(I2))
+iteratorsize(::Type{Zip{I1,I2}}) where {I1,I2} =
+    zip_iteratorsize(iteratorsize(I1),iteratorsize(I2))
+iteratoreltype(::Type{Zip{I1,I2}}) where {I1,I2} =
+    and_iteratoreltype(iteratoreltype(I1),iteratoreltype(I2))
 
 # filter
 
@@ -596,8 +601,8 @@ julia> collect(Iterators.product(1:2,3:5))
 product(iters...) = ProductIterator(iters)
 
 iteratorsize(::Type{ProductIterator{Tuple{}}}) = HasShape()
-iteratorsize(::Type{ProductIterator{T}}) where {T<:Tuple} =
-    prod_iteratorsize( iteratorsize(tuple_type_head(T)), iteratorsize(ProductIterator{tuple_type_tail(T)}) )
+iteratorsize(::Type{ProductIterator{T}}) where {T<:Tuple} = prod_iteratorsize(
+    iteratorsize(tuple_type_head(T)), iteratorsize(ProductIterator{tuple_type_tail(T)}))
 
 prod_iteratorsize(::Union{HasLength,HasShape}, ::Union{HasLength,HasShape}) = HasShape()
 # products can have an infinite iterator
@@ -732,7 +737,8 @@ iteratoreltype(::Type{Flatten{I}}) where {I} = _flatteneltype(I, iteratoreltype(
 _flatteneltype(I, ::HasEltype) = iteratoreltype(eltype(I))
 _flatteneltype(I, et) = EltypeUnknown()
 
-flatten_iteratorsize(::Union{HasShape, HasLength}, b::Type{<:Tuple}) = isleaftype(b) ? HasLength() : SizeUnknown()
+flatten_iteratorsize(::Union{HasShape, HasLength}, b::Type{<:Tuple}) =
+    isleaftype(b) ? HasLength() : SizeUnknown()
 flatten_iteratorsize(::Union{HasShape, HasLength}, b::Type{<:Number}) = HasLength()
 flatten_iteratorsize(a, b) = SizeUnknown()
 
