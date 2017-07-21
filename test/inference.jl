@@ -65,7 +65,6 @@ end
 
 
 # issue #5906
-
 abstract type Outer5906{T} end
 
 struct Inner5906{T}
@@ -923,7 +922,6 @@ let niter = 0
 end
 
 # issue #22875
-
 typeargs = (Type{Int},)
 @test Base.Core.Inference.return_type((args...) -> one(args...), typeargs) === Int
 

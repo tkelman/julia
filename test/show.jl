@@ -553,14 +553,12 @@ end
 # Issue 14121
 @test_repr "(A'x)'"
 
-
 # issue #14481
 @test_repr "in(1,2,3)"
 @test_repr "<(1,2,3)"
 @test_repr "+(1,2,3)"
 @test_repr "-(1,2,3)"
 @test_repr "*(1,2,3)"
-
 
 # issue #15309
 let ex,
@@ -874,7 +872,6 @@ end
                    (Pair{Integer,Int64}(1, 2) => 3)       => "Pair{Integer,Int64}(1, 2) => 3",
                    ((1+2im) => (3+4im))                   => "1+2im => 3+4im",
                    (1 => 2 => Pair{Real,Int64}(3, 4))     => "1 => (2=>Pair{Real,Int64}(3, 4))")
-
         @test sprint(show, p) == s
     end
     # - when the context has :compact=>false, print pair's member non-compactly

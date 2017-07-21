@@ -230,7 +230,6 @@ g10178(x) = f10178(x)
 @test f22135(1) === Int
 
 # PR #22440
-
 f22440kernel(x...) = x[1] + x[1]
 f22440kernel(x::AbstractFloat) = x * x
 f22440kernel(::Type{T}) where {T} = one(T)

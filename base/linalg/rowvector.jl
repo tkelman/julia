@@ -228,13 +228,11 @@ Ac_mul_B(vec::AbstractVector, rowvec::RowVector) = throw(DimensionMismatch("Cann
 @inline Ac_mul_B(vec1::AbstractVector, vec2::AbstractVector) = ctranspose(vec1)*vec2
 
 # Left Division #
-
 \(mat::AbstractMatrix, rowvec::RowVector) = throw(DimensionMismatch("Cannot left-divide transposed vector by matrix"))
 At_ldiv_B(mat::AbstractMatrix, rowvec::RowVector) = throw(DimensionMismatch("Cannot left-divide transposed vector by matrix"))
 Ac_ldiv_B(mat::AbstractMatrix, rowvec::RowVector) = throw(DimensionMismatch("Cannot left-divide transposed vector by matrix"))
 
 # Right Division #
-
 @inline /(rowvec::RowVector, mat::AbstractMatrix) = transpose(transpose(mat) \ transpose(rowvec))
 @inline A_rdiv_Bt(rowvec::RowVector, mat::AbstractMatrix) = transpose(mat \ transpose(rowvec))
 @inline A_rdiv_Bc(rowvec::RowVector, mat::AbstractMatrix) = ctranspose(mat  \ ctranspose(rowvec))
