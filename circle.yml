@@ -9,8 +9,8 @@ jobs:
       - run: apt-get update
       - run: apt-get install -y wget make patch m4 xz-utils git
              ca-certificates g++-multilib gfortran-multilib ccache
-      - run: date +%Y%W > weeknumber
       - checkout
+      - run: date +%Y%W > ../weeknumber
       - restore_cache:
           keys:
             - ccache-{{ checksum "weeknumber" }}
@@ -21,6 +21,6 @@ jobs:
       - run: ./julia -e 'versioninfo()'
 #      - run: JULIA_CPU_CORES=4 make -j`nproc` testall test-libgit2-online test-download test-pkg
       - save_cache:
-          key: ccache-{{ checksum "weeknumber" }}
+          key: ccache-{{ checksum "../weeknumber" }}
           paths:
             - ~/.ccache
