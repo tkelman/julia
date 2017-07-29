@@ -10,7 +10,7 @@ jobs:
       - run: nproc
       - run: uname -a
       - run: cat /etc/os-release
-#      - run: apt-get update
+      - run: apt-get install -y gfortran
 #      - run: apt-get install -y wget make patch m4 xz-utils g++ gfortran
       - run: contrib/download_cmake.sh
       - run: make -j3 -C deps || make
