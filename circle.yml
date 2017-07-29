@@ -13,7 +13,7 @@ jobs:
       - run: date +%Y%W > ../weeknumber
       - restore_cache:
           keys:
-            - ccache-{{ checksum "weeknumber" }}
+            - ccache-{{ checksum "../weeknumber" }}
       - run: contrib/download_cmake.sh
       - run: make -j12 -C deps USECCACHE=1 || make USECCACHE=1
       - run: ccache -s
