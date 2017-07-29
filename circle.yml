@@ -15,7 +15,7 @@ jobs:
             - ccache
       - run: contrib/download_cmake.sh
       - run: make -j8 -C deps USECCACHE=1 || make USECCACHE=1
-      - run: make -j8 all && make -j8 install
+      - run: make -j8 all && make install
       - run: make -j8 testall test-libgit2-online test-download test-pkg
       - save_cache:
           key: ccache
