@@ -10,10 +10,9 @@ jobs:
       - run: apt-get install -y wget make patch m4 xz-utils
              git g++-multilib gfortran-multilib ccache
       - checkout
-      - run: date +%Y%W > /tmp/weeknumber
+      - run: echo "$HOME $(date +%Y%W)" > /tmp/weeknumber
       - restore_cache:
           keys:
-            - ccache-{{ .Environment.HOME }}-{{ checksum "/tmp/weeknumber" }}
             - ccache-{{ checksum "/tmp/weeknumber" }}
       - run: contrib/download_cmake.sh
       - run: make -j8 -C deps USECCACHE=1 || make USECCACHE=1
@@ -22,6 +21,6 @@ jobs:
       - run: ./julia -e 'versioninfo()'
 #      - run: JULIA_CPU_CORES=4 make -j8 testall test-libgit2-online test-download test-pkg
       - save_cache:
-          key: ccache-{{ .Environment.HOME }}-{{ checksum "/tmp/weeknumber" }}
+          key: ccache-{{ checksum "/tmp/weeknumber" }}
           paths:
             - ~/.ccache
