@@ -4,6 +4,8 @@ jobs:
     docker:
       - image: ubuntu:14.04
 #      - image: circleci/python:2.7
+        environment:
+          JULIA_CPU_CORES: 8
 #    resource_class: xlarge
     steps:
       - run: apt-get update
@@ -15,11 +17,11 @@ jobs:
           keys:
             - ccache-{{ checksum "/tmp/weeknumber" }}
       - run: contrib/download_cmake.sh
-      - run: make -j8 -C deps USECCACHE=1 || make USECCACHE=1
+      - run: make -j$JULIA_CPU_CORES -C deps USECCACHE=1 || make USECCACHE=1
       - run: ccache -s
-      - run: make -j8 all && make install
+      - run: make -j$JULIA_CPU_CORES all && make install
       - run: ./julia -e 'versioninfo()'
-#      - run: JULIA_CPU_CORES=4 make -j8 testall test-libgit2-online test-download test-pkg
+      - run: make -j$JULIA_CPU_CORES testall test-libgit2-online test-download test-pkg
       - save_cache:
           key: ccache-{{ checksum "/tmp/weeknumber" }}
           paths:
