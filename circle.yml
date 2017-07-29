@@ -19,8 +19,8 @@ jobs:
 #          apt-get update &&
       - run: | # install build dependencies
           sudo apt-get install -y gfortran-4.8-multilib time ccache &&
-          for prog in gcc-4.8 g++-4.8 gfortran-4.8; do
-            sudo ln -s /usr/bin/$prog /usr/local/bin;
+          for prog in gcc g++ gfortran; do
+            sudo ln -s /usr/bin/$prog-4.8 /usr/local/bin/$prog;
           done
 #          apt-get install -y curl make patch m4 xz-utils git g++-multilib
       - checkout # magic circle ci code checkout step
