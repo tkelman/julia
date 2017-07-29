@@ -15,11 +15,11 @@ jobs:
           keys:
             - ccache-{{ checksum "weeknumber" }}
       - run: contrib/download_cmake.sh
-      - run: make -j`nproc` -C deps USECCACHE=1 || make USECCACHE=1
+      - run: make -j12 -C deps USECCACHE=1 || make USECCACHE=1
       - run: ccache -s
-      - run: make -j`nproc` all && make install
+      - run: make -j12 all && make install
       - run: ./julia -e 'versioninfo()'
-#      - run: JULIA_CPU_CORES=4 make -j`nproc` testall test-libgit2-online test-download test-pkg
+      - run: JULIA_CPU_CORES=4 make -j12 testall test-libgit2-online test-download test-pkg
       - save_cache:
           key: ccache-{{ checksum "../weeknumber" }}
           paths:
