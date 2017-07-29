@@ -7,7 +7,7 @@ jobs:
     resource_class: xlarge
     steps:
       - checkout
-      - nproc
+      - run: nproc
       - run: uname -a
       - run: cat /etc/os-release
 #      - run: apt-get update
