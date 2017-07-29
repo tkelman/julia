@@ -27,15 +27,15 @@ jobs:
           for var in FORCE_ASSERTIONS LLVM_ASSERTIONS USECCACHE NO_GIT; do
             echo "override $var = 1" | tee -a Make.user;
           done &&
-          echo "$ARCH    $HOME    $(date +%Y%W)" | tee /tmp/weeknumber
+          echo "$ARCH     $HOME     $(date +%Y%W)" | tee /tmp/weeknumber
       - restore_cache: # silly to take a checksum of the tag file here instead of
           keys: # its contents but this is the only thing that works on circle
             - ccache-{{ checksum "/tmp/weeknumber" }}
       - run: | # build deps
           contrib/download_cmake.sh &&
-          make -j6 -C deps || make
+          make -j4 -C deps || make
       - run: | # build julia, output ccache stats when done
-          make -j6 all &&
+          make -j4 all &&
           make prefix=/tmp/julia install &&
           ccache -s &&
           make build-stats
