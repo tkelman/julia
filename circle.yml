@@ -4,6 +4,7 @@ jobs:
     docker:
       - image: ubuntu:14.04
     steps:
+      - checkout
       - run: uname -a
       - run: cat /etc/os-release
       - run: cmake --version
