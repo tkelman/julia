@@ -1,0 +1,6 @@
+test:
+  override:
+    - nproc
+    - gfortran --version
+    - make -j`nproc` -C deps
+    - make -j`nproc`
