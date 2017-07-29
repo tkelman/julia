@@ -10,17 +10,17 @@ jobs:
       - run: apt-get install -y wget make patch m4 xz-utils git
              ca-certificates g++-multilib gfortran-multilib ccache
       - checkout
-      - run: date +%Y%W > ../weeknumber
+      - run: date +%Y%W > /tmp/weeknumber
       - restore_cache:
           keys:
-            - ccache-{{ checksum "../weeknumber" }}
+            - ccache-{{ checksum "/tmp/weeknumber" }}
       - run: contrib/download_cmake.sh
-      - run: make -j12 -C deps USECCACHE=1 || make USECCACHE=1
+      - run: make -j8 -C deps USECCACHE=1 || make USECCACHE=1
       - run: ccache -s
-      - run: make -j12 all && make install
+      - run: make -j8 all && make install
       - run: ./julia -e 'versioninfo()'
-      - run: JULIA_CPU_CORES=4 make -j12 testall test-libgit2-online test-download test-pkg
+#      - run: JULIA_CPU_CORES=4 make -j8 testall test-libgit2-online test-download test-pkg
       - save_cache:
-          key: ccache-{{ checksum "../weeknumber" }}
+          key: ccache-{{ checksum "/tmp/weeknumber" }}
           paths:
             - ~/.ccache
