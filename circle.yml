@@ -26,9 +26,9 @@ jobs:
             - ccache-{{ checksum "/tmp/weeknumber" }}
       - run: contrib/download_cmake.sh
       - run: make -C base version_git.jl.phony
-      - run: echo "override ARCH = $ARCH
-override FORCE_ASSERTIONS = 1
-override LLVM_ASSERTIONS = 1
+      - run: echo "override ARCH = $ARCH \
+override FORCE_ASSERTIONS = 1 \
+override LLVM_ASSERTIONS = 1 \
 override NO_GIT = 1" | tee -a Make.user
       - run: make -j$JULIA_CPU_CORES -C deps USECCACHE=1 || make USECCACHE=1
       - run: ccache -s
