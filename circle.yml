@@ -19,7 +19,7 @@ jobs:
       - run: | # install dependencies and set weekly cache tag file
           apt-get update &&
           apt-get install -y curl make patch m4 xz-utils \
-             git g++-multilib gfortran-multilib ccache &&
+             git g++-multilib gfortran-multilib time ccache &&
           echo "$ARCH $HOME $(date +%Y%W)" | tee /tmp/weeknumber
       - checkout # magic circle ci code checkout step
       - restore_cache:
