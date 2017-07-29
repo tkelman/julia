@@ -18,8 +18,8 @@ jobs:
       - run: cat /etc/os-release
 #      - run: sudo apt-get install -y gfortran ccache
       - run: contrib/download_cmake.sh
-      - run: make -j4 -C deps USECCACHE=1 || make USECCACHE=1
-      - run: make -j4 all && make -j4 install
+      - run: make -j6 -C deps USECCACHE=1 || make USECCACHE=1
+      - run: make -j6 all && make -j6 install
       - save_cache:
           key: ccache
           paths:
