@@ -2,10 +2,13 @@ version: 2.0
 jobs:
   build:
     docker:
-#      - image: ubuntu:14.04
-      - image: circleci/python:2.7
+      - image: ubuntu:14.04
+#      - image: circleci/python:2.7
 #    resource_class: xlarge
     steps:
+      - run: apt-get update
+      - run: apt-get install -y wget make patch m4 xz-utils git \
+             ccache g++-multilib gfortran-multilib
       - checkout
       - restore_cache:
           keys:
@@ -13,8 +16,7 @@ jobs:
       - run: nproc
       - run: uname -a
       - run: cat /etc/os-release
-      - run: sudo apt-get install -y gfortran ccache
-#      - run: apt-get install -y wget make patch m4 xz-utils g++ gfortran
+#      - run: sudo apt-get install -y gfortran ccache
       - run: contrib/download_cmake.sh
       - run: make -j4 -C deps USECCACHE=1 || make USECCACHE=1
       - run: make -j4 all && make -j4 install
