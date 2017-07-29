@@ -4,7 +4,7 @@ jobs:
     docker:
 #      - image: ubuntu:14.04
       - image: circleci/python:2.7
-    resource_class: xlarge
+#    resource_class: xlarge
     steps:
       - checkout
       - run: nproc
@@ -12,6 +12,6 @@ jobs:
       - run: cat /etc/os-release
 #      - run: apt-get update
 #      - run: apt-get install -y wget make patch m4 xz-utils g++ gfortran
-#      - run: contrib/download_cmake.sh
-      - run: make -j`nproc` -C deps || make
-      - run: make -j`nproc` all install
+      - run: contrib/download_cmake.sh
+      - run: make -j3 -C deps || make
+      - run: make -j3 all install
