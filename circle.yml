@@ -16,23 +16,23 @@ jobs:
           ARCH: x86_64
 #    resource_class: xlarge
     steps: &steps
-      - run: | # install dependencies and set weekly cache tag file
+      - run: | # install build dependencies
           apt-get update &&
           apt-get install -y curl make patch m4 xz-utils \
              git g++-multilib gfortran-multilib time ccache &&
-          echo "$ARCH $HOME $(date +%Y%W)" | tee /tmp/weeknumber
       - checkout # magic circle ci code checkout step
-      - restore_cache:
-          keys:
-            - ccache-{{ checksum "/tmp/weeknumber" }}
-      - run: | # download cmake, set versioning info and Make.user variables
-          contrib/download_cmake.sh &&
+      - run: | # set versioning info and Make.user variables
           make -C base version_git.jl.phony &&
           echo "override ARCH = $ARCH" | tee -a Make.user &&
           for var in FORCE_ASSERTIONS LLVM_ASSERTIONS USECCACHE NO_GIT; do
             echo "override $var = 1" | tee -a Make.user;
-          done
+          done &&
+          echo "$ARCH $HOME $(date +%Y%W)" | tee /tmp/weeknumber
+      - restore_cache: # silly to take a checksum of the tag file here instead of
+          keys: # its contents but this is the only thing that works on circle
+            - ccache-{{ checksum "/tmp/weeknumber" }}
       - run: | # build deps, output ccache stats when done
+          contrib/download_cmake.sh &&
           make -j8 -C deps || make;
           ccache -s
       - run: | # build julia
@@ -40,7 +40,7 @@ jobs:
           make prefix=/tmp/julia install &&
           make build-stats &&
           /tmp/julia/bin/julia -e 'versioninfo()'
-#      - run: make -j8 testall test-libgit2-online test-download test-pkg
+      - run: make -j8 testall test-libgit2-online test-download test-pkg
       - save_cache:
           key: ccache-{{ checksum "/tmp/weeknumber" }}
           paths:
