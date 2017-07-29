@@ -7,16 +7,12 @@ jobs:
 #    resource_class: xlarge
     steps:
       - run: apt-get update
-      - run: apt-get install -y wget make patch m4 xz-utils git
+      - run: apt-get install -y git make patch m4 xz-utils
              ccache g++-multilib gfortran-multilib
       - checkout
       - restore_cache:
           keys:
             - ccache
-      - run: nproc
-      - run: uname -a
-      - run: cat /etc/os-release
-#      - run: sudo apt-get install -y gfortran ccache
       - run: contrib/download_cmake.sh
       - run: make -j6 -C deps USECCACHE=1 || make USECCACHE=1
       - run: make -j6 all && make -j6 install
