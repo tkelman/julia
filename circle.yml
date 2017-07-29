@@ -9,7 +9,7 @@ jobs:
       - run: uname -a
       - run: cat /etc/os-release
       - run: apt-get update
-      - run: apt-get install -y wget make patch g++ gfortran
+      - run: apt-get install -y wget make patch xz-utils g++ gfortran
 #      - run: apt-get install -y 
       - run: contrib/download_cmake.sh
       - run: make -j4 -C deps || make
