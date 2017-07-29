@@ -7,7 +7,7 @@ jobs:
       - checkout
 #      - run: uname -a
 #      - run: cat /etc/os-release
-      - run: apt-get install -y gfortran
+      - run: apt-get update && apt-get install -y gfortran
       - run: contrib/download_cmake.sh
       - run: cmake --version
       - run: gfortran --version
