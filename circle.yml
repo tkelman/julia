@@ -16,28 +16,29 @@ jobs:
           ARCH: x86_64
 #    resource_class: xlarge
     steps: &steps
-      - run: |
-          apt-get update
-          apt-get install -y curl make patch m4 xz-utils \
-             git g++-multilib gfortran-multilib ccache
-          echo "v2 $HOME $(date +%Y%W)" | tee /tmp/weeknumber
-      - checkout
+      - run: | # install dependencies and set weekly cache tag file
+          apt-get update &&
+          apt-get install -y curl make patch m4 xz-utils
+             git g++-multilib gfortran-multilib ccache &&
+          echo "$ARCH $HOME $(date +%Y%W)" | tee /tmp/weeknumber
+      - checkout # magic circle ci code checkout step
       - restore_cache:
           keys:
             - ccache-{{ checksum "/tmp/weeknumber" }}
-      - run: |
-          contrib/download_cmake.sh
-          make -C base version_git.jl.phony
-          echo "override ARCH = $ARCH" | tee -a Make.user
+      - run: | # download cmake, set versioning info and Make.user variables
+          contrib/download_cmake.sh &&
+          make -C base version_git.jl.phony &&
+          echo "override ARCH = $ARCH" | tee -a Make.user &&
           for var in FORCE_ASSERTIONS LLVM_ASSERTIONS USECCACHE NO_GIT; do
-            echo "override $var = 1" | tee -a Make.user
+            echo "override $var = 1" | tee -a Make.user;
           done
-      - run: |
-          make -j8 -C deps || make
+      - run: | # build deps, output ccache stats when done
+          make -j8 -C deps || make;
           ccache -s
-      - run: |
-          make -j8 all && make prefix=/tmp/julia install
-          make build-stats
+      - run: | # build julia
+          make -j8 all &&
+          make prefix=/tmp/julia install &&
+          make build-stats &&
           /tmp/julia/bin/julia -e 'versioninfo()'
 #      - run: make -j8 testall test-libgit2-online test-download test-pkg
       - save_cache:
