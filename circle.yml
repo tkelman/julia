@@ -1,8 +1,8 @@
 version: 2.0
-jobs:
-  build:
-    docker:
-      - image: ubuntu:14.04
+#jobs:
+#  build:
+#    docker:
+#      - image: ubuntu:14.04
 
 test:
   override:
