@@ -18,11 +18,13 @@ jobs:
     steps: &steps
 #          apt-get update &&
       - run: | # install build dependencies
-          sudo apt-get install -y gfortran-multilib time ccache
+          sudo apt-get install -y gfortran-4.8-multilib time ccache &&
+          for prog in gcc-4.8 g++-4.8 gfortran-4.8; do
+            sudo ln -s /usr/bin/$prog /usr/local/bin;
+          done
 #          apt-get install -y curl make patch m4 xz-utils git g++-multilib
       - checkout # magic circle ci code checkout step
       - run: | # set versioning info and Make.user variables
-          echo $PATH &&
           make -C base version_git.jl.phony &&
           echo "override ARCH = $ARCH" | tee -a Make.user &&
           for var in FORCE_ASSERTIONS LLVM_ASSERTIONS USECCACHE NO_GIT; do
