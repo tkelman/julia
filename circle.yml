@@ -2,23 +2,25 @@ version: 2.0
 jobs:
   build:
     docker:
-      - image: ubuntu:14.04
-#      - image: circleci/python:2.7
+#      - image: ubuntu:14.04
+      - image: circleci/python:2.7
 #    resource_class: xlarge
     steps:
-      - run: apt-get update
-      - run: apt-get install -y wget make patch m4 xz-utils
-             git ccache g++-multilib gfortran-multilib
+#      - run: apt-get update
+#      - run: apt-get install -y wget make patch m4 xz-utils
+      - run: apt-get install -y gfortran-multilib ccache
+      - run: export WEEK=$(date +%Y%W)
       - checkout
       - restore_cache:
           keys:
-            - ccache
+            - ccache-{{ .Environment.WEEK }}
       - run: contrib/download_cmake.sh
-      - run: make -j8 -C deps USECCACHE=1 || make USECCACHE=1
-      - ccache -s
-      - run: make -j8 all && make install
-      - run: make -j8 testall test-libgit2-online test-download test-pkg
+      - run: make -j`nproc` -C deps USECCACHE=1 || make USECCACHE=1
+      - run: ccache -s
+      - run: make -j`nproc` all && make install
+      - run: ./julia -e 'versioninfo()'
+      - run: make -j`nproc` testall test-libgit2-online test-download test-pkg
       - save_cache:
-          key: ccache
+          key: ccache-{{ .Environment.WEEK }}
           paths:
             - ~/.ccache
