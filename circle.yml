@@ -19,7 +19,7 @@ jobs:
       - run: | # install build dependencies
           apt-get update &&
           apt-get install -y curl make patch m4 xz-utils \
-             git g++-multilib gfortran-multilib time ccache &&
+             git g++-multilib gfortran-multilib time ccache
       - checkout # magic circle ci code checkout step
       - run: | # set versioning info and Make.user variables
           make -C base version_git.jl.phony &&
