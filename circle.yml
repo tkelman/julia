@@ -20,7 +20,7 @@ jobs:
           apt-get update
           apt-get install -y curl make patch m4 xz-utils \
              git g++-multilib gfortran-multilib ccache
-          echo "$HOME $(date +%Y%W)" | tee /tmp/weeknumber
+          echo "v2 $HOME $(date +%Y%W)" | tee /tmp/weeknumber
       - checkout
       - restore_cache:
           keys:
@@ -39,7 +39,7 @@ jobs:
           make -j8 all && make prefix=/tmp/julia install
           make build-stats
           /tmp/julia/bin/julia -e 'versioninfo()'
-      - run: make -j8 testall test-libgit2-online test-download test-pkg
+#      - run: make -j8 testall test-libgit2-online test-download test-pkg
       - save_cache:
           key: ccache-{{ checksum "/tmp/weeknumber" }}
           paths:
