@@ -21,6 +21,8 @@ jobs:
 #            curl make patch m4 xz-utils git time ccache bar
       - run: | # install build dependencies
           ifconfig &&
+          ifconfig lo add ::1/128 &&
+          ifconfig &&
           sudo apt-get install -y g++-4.8-multilib gfortran-4.8-multilib \
             time ccache bar &&
           for prog in gcc g++ gfortran; do
