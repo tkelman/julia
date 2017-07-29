@@ -1,12 +1,12 @@
 version: 2.0
 jobs:
   build:
-#    docker:
+    docker:
 #      - image: ubuntu:14.04
     steps:
       - run: uname -a
-      - cat /etc/os-release
-      - cmake --version
-      - gfortran --version
-      - make -j`nproc` -C deps
-      - make -j`nproc`
+      - run: cat /etc/os-release
+      - run: cmake --version
+      - run: gfortran --version
+      - run: make -j`nproc` -C deps
+      - run: make -j`nproc`
