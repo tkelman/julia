@@ -11,13 +11,13 @@ jobs:
     machine: true
     environment:
       - JULIA_CPU_CORES: 4
-      - JULIA_TEST_MAXRSS_MB: 800
+#      - JULIA_TEST_MAXRSS_MB: 800
       - ARCH: x86_64
 #    resource_class: xlarge
     steps: &steps
-      - run: | # install build dependencies (use gcc 4.8 as long as we support it)
-          sudo apt-get update &&
-          sudo apt-get install -y g++-multilib gfortran-multilib ccache bar
+      - run: | # install build dependencies
+          apt-get update &&
+          apt-get install -y g++-multilib gfortran-multilib ccache bar
       - checkout # circle ci code checkout step
 # (FIXME: need to unset url."ssh://git@github.com".insteadOf or libgit2 tests fail)
       - run: | # set versioning info and Make.user variables
@@ -68,7 +68,7 @@ jobs:
     machine: true
     environment:
       - JULIA_CPU_CORES: 4
-      - JULIA_TEST_MAXRSS_MB: 800
+#      - JULIA_TEST_MAXRSS_MB: 800
       - ARCH: i686
 #    resource_class: xlarge
     steps: *steps
