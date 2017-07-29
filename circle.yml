@@ -29,7 +29,7 @@ jobs:
 # (conntrack -D -p udp is to get the socket tests to pass?)
       - run: | # set versioning info and Make.user variables
           git config --global --unset url."ssh://git@github.com".insteadOf &&
-          conntrack -D -p udp &&
+          sudo conntrack -D -p udp &&
           make -C base version_git.jl.phony &&
           echo "override ARCH = $ARCH" | tee -a Make.user &&
           for var in FORCE_ASSERTIONS LLVM_ASSERTIONS USECCACHE NO_GIT; do
