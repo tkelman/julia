@@ -25,14 +25,16 @@ jobs:
 #          done
       - checkout # circle ci code checkout step
 # (FIXME: need to unset url."ssh://git@github.com".insteadOf or libgit2 tests fail)
+# (conntrack -D -p udp is to get the socket tests to pass?)
       - run: | # set versioning info and Make.user variables
           git config --global --unset url."ssh://git@github.com".insteadOf &&
+          conntrack -D -p udp &&
           make -C base version_git.jl.phony &&
           echo "override ARCH = $ARCH" | tee -a Make.user &&
           for var in FORCE_ASSERTIONS LLVM_ASSERTIONS USECCACHE NO_GIT; do
             echo "override $var = 1" | tee -a Make.user;
           done &&
-          echo "$ARCH  $HOME  $(date +%Y%W)" | tee /tmp/weeknumber
+          echo "$ARCH $HOME $(date +%Y%W)" | tee /tmp/weeknumber
       - restore_cache: # silly to take a checksum of the tag file here instead of
           keys: # its contents but this is the only thing that works on circle
             - ccache-{{ checksum "/tmp/weeknumber" }}
