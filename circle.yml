@@ -5,9 +5,11 @@ jobs:
       - image: ubuntu:14.04
     steps:
       - checkout
-      - run: uname -a
-      - run: cat /etc/os-release
+#      - run: uname -a
+#      - run: cat /etc/os-release
+      - run: apt-get install -y gfortran
+      - run: contrib/download_cmake.sh
       - run: cmake --version
       - run: gfortran --version
-      - run: make -j`nproc` -C deps
+      - run: make -j`nproc` -C deps || make
       - run: make -j`nproc`
