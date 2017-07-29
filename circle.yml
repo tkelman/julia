@@ -13,5 +13,5 @@ jobs:
       - run: sudo apt-get install -y gfortran
 #      - run: apt-get install -y wget make patch m4 xz-utils g++ gfortran
       - run: contrib/download_cmake.sh
-      - run: make -j3 -C deps || make
-      - run: make -j3 all install
+      - run: make -j2 -C deps || make
+      - run: make -j2 all install
