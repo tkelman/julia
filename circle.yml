@@ -1,7 +1,13 @@
+jobs:
+  build:
+    docker:
+      - image: ubuntu:14.04
+
 test:
   override:
-    - cmake --version
     - uname -a
     - cat /etc/os-release
+    - cmake --version
+    - gfortran --version
     - make -j`nproc` -C deps
     - make -j`nproc`
