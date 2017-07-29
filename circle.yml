@@ -7,7 +7,8 @@ jobs:
       - checkout
 #      - run: uname -a
 #      - run: cat /etc/os-release
-      - run: apt-get update && apt-get install -y wget make gfortran
+      - run: apt-get update
+      - run: apt-get install -y wget make patch gfortran
       - run: contrib/download_cmake.sh
       - run: make -j`nproc` -C deps || make
       - run: make -j`nproc`
