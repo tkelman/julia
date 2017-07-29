@@ -1,4 +1,11 @@
-version: 2.0
+version: 2
+workflows:
+  version: 2
+  builds:
+    jobs:
+      - build_x86_64
+      - build_i686
+
 jobs:
   build-x86_64:
     docker:
