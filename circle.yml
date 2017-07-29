@@ -24,6 +24,9 @@ jobs:
       - run: | # set versioning info and Make.user variables
           make -C base version_git.jl.phony &&
           echo "override ARCH = $ARCH" | tee -a Make.user &&
+          echo "override CC = gcc-4.8" | tee -a Make.user &&
+          echo "override CXX = g++-4.8" | tee -a Make.user &&
+          echo "override FC = gfortran-4.8" | tee -a Make.user &&
           for var in FORCE_ASSERTIONS LLVM_ASSERTIONS USECCACHE NO_GIT; do
             echo "override $var = 1" | tee -a Make.user;
           done &&
