@@ -1,16 +1,16 @@
 version: 2.0
 jobs:
   build:
-    docker:
-      - image: ubuntu:14.04
+#    docker:
+#      - image: ubuntu:14.04
 #      - image: circleci/python:2.7
     steps:
-      - checkout
+#      - checkout
       - run: uname -a
       - run: cat /etc/os-release
-      - run: apt-get update
-      - run: apt-get install -y wget make patch m4 xz-utils g++ gfortran
+#      - run: apt-get update
+#      - run: apt-get install -y wget make patch m4 xz-utils g++ gfortran
 #      - run: apt-get install -y 
       - run: contrib/download_cmake.sh
-      - run: make -j4 -C deps || make
-      - run: make -j4
+      - run: make -j3 -C deps || make
+      - run: make -j3 all install
