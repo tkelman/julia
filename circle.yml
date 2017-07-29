@@ -15,6 +15,7 @@ jobs:
       - ARCH: x86_64
 #    resource_class: xlarge
     steps: &steps
+      - run: nproc
       - run: | # install build dependencies
           sudo apt-get update &&
           sudo apt-get install -y g++-multilib gfortran-multilib ccache bar
@@ -27,7 +28,7 @@ jobs:
           for var in FORCE_ASSERTIONS LLVM_ASSERTIONS USECCACHE NO_GIT; do
             echo "override $var = 1" | tee -a Make.user;
           done &&
-          echo "$ARCH $HOME $(date +%Y%W)" | tee /tmp/weeknumber
+          echo "$ARCH   $HOME   $(date +%Y%W)" | tee /tmp/weeknumber
       - restore_cache: # silly to take a checksum of the tag file here instead of
           keys: # its contents but this is the only thing that works on circle
             - ccache-{{ checksum "/tmp/weeknumber" }}
@@ -46,14 +47,14 @@ jobs:
           /tmp/julia/bin/julia --precompiled=no -e 'true' &&
           /tmp/julia/bin/julia-debug --precompiled=no -e 'true' &&
           pushd /tmp/julia/share/julia/test &&
-          /tmp/julia/bin/julia --check-bounds=yes runtests.jl all | bar -i 30 &&
-          /tmp/julia/bin/julia --check-bounds=yes runtests.jl libgit2-online download pkg &&
           popd &&
           mkdir /tmp/embedding-test &&
           make check -C /tmp/julia/share/doc/julia/examples/embedding \
             JULIA=/tmp/julia/bin/julia BIN=/tmp/embedding-test \
             "$(cd julia-src && make print-CC)" &&
           mv julia-src project
+#          /tmp/julia/bin/julia --check-bounds=yes runtests.jl all | bar -i 30 &&
+#          /tmp/julia/bin/julia --check-bounds=yes runtests.jl libgit2-online download pkg &&
 #      - run: cd project && make -C doc deploy
 #       - run:
 #           command: sudo dmesg
