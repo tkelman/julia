@@ -12,16 +12,16 @@ jobs:
       - image: ubuntu:14.04
 #      - image: circleci/python:2.7
         environment:
-          JULIA_CPU_CORES: 8
+          JULIA_CPU_CORES: 6
           ARCH: x86_64
 #    resource_class: xlarge
     steps: &steps
       - run: |
-          apt-get update &&
-          apt-get install -y wget make patch m4 xz-utils \
+          apt-get update
+          apt-get install -y curl make patch m4 xz-utils \
              git g++-multilib gfortran-multilib ccache
+          echo "$HOME $(date +%Y%W)" | tee /tmp/weeknumber
       - checkout
-      - run: echo "$HOME $(date +%Y%W)" | tee /tmp/weeknumber
       - restore_cache:
           keys:
             - ccache-{{ checksum "/tmp/weeknumber" }}
@@ -29,17 +29,17 @@ jobs:
           contrib/download_cmake.sh
           make -C base version_git.jl.phony
           echo "override ARCH = $ARCH" | tee -a Make.user
-          for var in FORCE_ASSERTIONS LLVM_ASSERTIONS NO_GIT; do
-            echo "override $var = 1" >> Make.user
+          for var in FORCE_ASSERTIONS LLVM_ASSERTIONS USECCACHE NO_GIT; do
+            echo "override $var = 1" | tee -a Make.user
           done
       - run: |
-          make -j$JULIA_CPU_CORES -C deps USECCACHE=1 || make USECCACHE=1
+          make -j8 -C deps || make
           ccache -s
       - run: |
-          make -j$JULIA_CPU_CORES all && make prefix=/tmp/julia install
+          make -j8 all && make prefix=/tmp/julia install
           make build-stats
           /tmp/julia/bin/julia -e 'versioninfo()'
-      - run: make -j$JULIA_CPU_CORES testall test-libgit2-online test-download test-pkg
+      - run: make -j8 testall test-libgit2-online test-download test-pkg
       - save_cache:
           key: ccache-{{ checksum "/tmp/weeknumber" }}
           paths:
@@ -50,7 +50,7 @@ jobs:
       - image: ubuntu:14.04
 #      - image: circleci/python:2.7
         environment:
-          JULIA_CPU_CORES: 8
+          JULIA_CPU_CORES: 6
           ARCH: i686
 #    resource_class: xlarge
     steps: *steps
