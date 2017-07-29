@@ -1,7 +1,7 @@
 version: 2
 workflows:
   version: 2
-  builds:
+  linux-builds:
     jobs:
       - build-x86_64
       - build-i686
@@ -18,8 +18,8 @@ jobs:
     steps: &steps
 #          apt-get update &&
       - run: | # install build dependencies
-          sudo apt-get install -y gfortran-multilib ccache
-#             curl make patch m4 xz-utils git g++-multilib time
+          sudo apt-get install -y gfortran-4.8-multilib time ccache
+#          apt-get install -y curl make patch m4 xz-utils git g++-multilib
       - checkout # magic circle ci code checkout step
       - run: | # set versioning info and Make.user variables
           make -C base version_git.jl.phony &&
