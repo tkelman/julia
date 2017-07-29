@@ -9,20 +9,21 @@ workflows:
 jobs:
   build-x86_64:
     docker:
-      - image: ubuntu:14.04
-#      - image: circleci/python:2.7
+#      - image: ubuntu:14.04
+      - image: circleci/python:2.7
         environment:
           JULIA_CPU_CORES: 4
           ARCH: x86_64
 #    resource_class: xlarge
     steps: &steps
+#          apt-get update &&
+#            curl make patch m4 xz-utils git time ccache bar conntrack
       - run: | # install build dependencies
-          apt-get update &&
-          apt-get install -y g++-multilib gfortran-multilib \
-            curl make patch m4 xz-utils git time ccache bar
-#          for prog in gcc g++ gfortran; do
-#            sudo ln -s /usr/bin/$prog-4.8 /usr/local/bin/$prog;
-#          done
+          sudo apt-get install -y g++-4.8-multilib gfortran-4.8-multilib \
+            time ccache bar conntrack &&
+          for prog in gcc g++ gfortran; do
+            sudo ln -s /usr/bin/$prog-4.8 /usr/local/bin/$prog;
+          done
       - checkout # circle ci code checkout step
 # (FIXME: need to unset url."ssh://git@github.com".insteadOf or libgit2 tests fail)
 # (conntrack -D -p udp is to get the socket tests to pass?)
@@ -34,7 +35,7 @@ jobs:
           for var in FORCE_ASSERTIONS LLVM_ASSERTIONS USECCACHE NO_GIT; do
             echo "override $var = 1" | tee -a Make.user;
           done &&
-          echo "$ARCH $HOME $(date +%Y%W)" | tee /tmp/weeknumber
+          echo "$ARCH  $HOME  $(date +%Y%W)" | tee /tmp/weeknumber
       - restore_cache: # silly to take a checksum of the tag file here instead of
           keys: # its contents but this is the only thing that works on circle
             - ccache-{{ checksum "/tmp/weeknumber" }}
@@ -62,6 +63,9 @@ jobs:
             "$(cd julia-src && make print-CC)" &&
           mv julia-src project
 #      - run: cd project && make -C doc deploy
+       - run: # diagnostic in case of OOM killer
+           command: sudo dmesg
+           when: on_fail
       - save_cache:
           key: ccache-{{ checksum "/tmp/weeknumber" }}
           paths:
@@ -69,8 +73,8 @@ jobs:
 
   build-i686:
     docker:
-      - image: ubuntu:14.04
-#      - image: circleci/python:2.7
+#      - image: ubuntu:14.04
+      - image: circleci/python:2.7
         environment:
           JULIA_CPU_CORES: 4
           ARCH: i686
