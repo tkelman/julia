@@ -5,7 +5,7 @@ jobs:
 #      - image: ubuntu:14.04
       - image: circleci/python:2.7
     steps:
-#      - checkout
+      - checkout
       - run: uname -a
       - run: cat /etc/os-release
 #      - run: apt-get update
