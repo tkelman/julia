@@ -16,25 +16,29 @@ jobs:
           ARCH: x86_64
 #    resource_class: xlarge
     steps: &steps
-      - run: apt-get update
-      - run: apt-get install -y wget make patch m4 xz-utils
+      - run: |
+          apt-get update &&
+          apt-get install -y wget make patch m4 xz-utils \
              git g++-multilib gfortran-multilib ccache
       - checkout
       - run: echo "$HOME $(date +%Y%W)" | tee /tmp/weeknumber
       - restore_cache:
           keys:
             - ccache-{{ checksum "/tmp/weeknumber" }}
-      - run: contrib/download_cmake.sh
-      - run: make -C base version_git.jl.phony
-      - run: echo "override ARCH = $ARCH \
-override FORCE_ASSERTIONS = 1 \
-override LLVM_ASSERTIONS = 1 \
-override NO_GIT = 1" | tee -a Make.user
-      - run: make -j$JULIA_CPU_CORES -C deps USECCACHE=1 || make USECCACHE=1
-      - run: ccache -s
-      - run: make -j$JULIA_CPU_CORES all && make prefix=/tmp/julia install
-      - run: make build-stats
-      - run: /tmp/julia/bin/julia -e 'versioninfo()'
+      - run: |
+          contrib/download_cmake.sh
+          make -C base version_git.jl.phony
+          echo "override ARCH = $ARCH" | tee -a Make.user
+          for var in FORCE_ASSERTIONS LLVM_ASSERTIONS NO_GIT; do
+            echo "override $var = 1" >> Make.user
+          done
+      - run: |
+          make -j$JULIA_CPU_CORES -C deps USECCACHE=1 || make USECCACHE=1
+          ccache -s
+      - run: |
+          make -j$JULIA_CPU_CORES all && make prefix=/tmp/julia install
+          make build-stats
+          /tmp/julia/bin/julia -e 'versioninfo()'
       - run: make -j$JULIA_CPU_CORES testall test-libgit2-online test-download test-pkg
       - save_cache:
           key: ccache-{{ checksum "/tmp/weeknumber" }}
