@@ -25,10 +25,16 @@ jobs:
           keys:
             - ccache-{{ checksum "/tmp/weeknumber" }}
       - run: contrib/download_cmake.sh
+      - run: make -C base version_git.jl.phony
+      - run: echo "override ARCH = $ARCH
+override FORCE_ASSERTIONS = 1
+override LLVM_ASSERTIONS = 1
+override NO_GIT = 1" | tee -a Make.user
       - run: make -j$JULIA_CPU_CORES -C deps USECCACHE=1 || make USECCACHE=1
       - run: ccache -s
-      - run: make -j$JULIA_CPU_CORES all && make install
-      - run: ./julia -e 'versioninfo()'
+      - run: make -j$JULIA_CPU_CORES all && make prefix=/tmp/julia install
+      - run: make build-stats
+      - run: /tmp/julia/bin/julia -e 'versioninfo()'
       - run: make -j$JULIA_CPU_CORES testall test-libgit2-online test-download test-pkg
       - save_cache:
           key: ccache-{{ checksum "/tmp/weeknumber" }}
@@ -44,3 +50,24 @@ jobs:
           ARCH: i686
 #    resource_class: xlarge
     steps: *steps
+
+
+# how travis runs the tests:
+#    - cd .. && mv julia julia2
+#    - /tmp/julia/bin/julia --precompiled=no -e 'true' &&
+#        /tmp/julia/bin/julia-debug --precompiled=no -e 'true'
+#    - /tmp/julia/bin/julia -e 'versioninfo()'
+#    - pushd /tmp/julia/share/julia/test
+#    - export JULIA_CPU_CORES=2 && export JULIA_TEST_MAXRSS_MB=600 &&
+#        /tmp/julia/bin/julia --check-bounds=yes runtests.jl $TESTSTORUN &&
+#        /tmp/julia/bin/julia --check-bounds=yes runtests.jl libgit2-online download pkg
+#    - popd
+    # test that the embedding code works on our installation
+#    - mkdir /tmp/embedding-test &&
+#        make check -C /tmp/julia/share/doc/julia/examples/embedding \
+#             JULIA="DYLD_FALLBACK_LIBRARY_PATH='$DYLD_FALLBACK_LIBRARY_PATH' /tmp/julia/bin/julia" \
+#             BIN=/tmp/embedding-test \
+#             "$(cd julia2 && make print-CC)"
+#    - mv julia2 julia &&
+#after_success:
+#    - cd julia && make -C doc deploy
