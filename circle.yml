@@ -7,8 +7,8 @@ jobs:
 #    resource_class: xlarge
     steps:
       - run: apt-get update
-      - run: apt-get install -y git make patch m4 xz-utils
-             ccache g++-multilib gfortran-multilib
+      - run: apt-get install -y wget make patch m4 xz-utils
+             git ccache g++-multilib gfortran-multilib
       - checkout
       - restore_cache:
           keys:
