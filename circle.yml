@@ -7,11 +7,18 @@ jobs:
 #    resource_class: xlarge
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - ccache
       - run: nproc
       - run: uname -a
       - run: cat /etc/os-release
       - run: sudo apt-get install -y gfortran
 #      - run: apt-get install -y wget make patch m4 xz-utils g++ gfortran
       - run: contrib/download_cmake.sh
-      - run: make -j4 -C deps || make
-      - run: make -j4 all install
+      - run: make -j4 -C deps USECCACHE=1 || make USECCACHE=1
+      - run: make -j4 all && make -j4 install
+      - save_cache:
+          key: ccache
+          paths:
+            - ~/.ccache
