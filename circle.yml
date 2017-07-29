@@ -9,17 +9,20 @@ workflows:
 jobs:
   build-x86_64:
     docker:
-#      - image: ubuntu:14.04
       - image: circleci/python:2.7
+# plain ubuntu 14.04 has less extra stuff in it, but runs
+# as root by default so some of the julia tests would warn
+#      - image: ubuntu:14.04
         environment:
           JULIA_CPU_CORES: 4
           JULIA_TEST_MAXRSS_MB: 800
           ARCH: x86_64
 #    resource_class: xlarge
     steps: &steps
-#          apt-get update &&
+# in ubuntu 14.04, need to apt-get update first, and add
 #            curl make patch m4 xz-utils git time ccache bar
-      - run: | # install build dependencies
+      - setup_remote_docker
+      - run: | # install build dependencies (use gcc 4.8 as long as we support it)
           ifconfig &&
           ifconfig lo add ::1/128 &&
           ifconfig &&
@@ -30,6 +33,7 @@ jobs:
           done
       - checkout # circle ci code checkout step
 # (FIXME: need to unset url."ssh://git@github.com".insteadOf or libgit2 tests fail)
+# ifconfig lo add ::1/128 is to fix EADDRNOTAVAIL in UDP send in socket test
       - run: | # set versioning info and Make.user variables
           git config --global --unset url."ssh://git@github.com".insteadOf &&
           make -C base version_git.jl.phony &&
@@ -75,8 +79,8 @@ jobs:
 
   build-i686:
     docker:
-#      - image: ubuntu:14.04
       - image: circleci/python:2.7
+#      - image: ubuntu:14.04
         environment:
           JULIA_CPU_CORES: 4
           JULIA_TEST_MAXRSS_MB: 800
