@@ -8,20 +8,19 @@ workflows:
 
 jobs:
   build-x86_64:
-    docker:
-      - image: circleci/python:2.7
+    machine: true
+#      - image: circleci/python:2.7
 # plain ubuntu 14.04 has less extra stuff in it, but runs
 # as root by default so some of the julia tests would warn
 #      - image: ubuntu:14.04
-        environment:
-          JULIA_CPU_CORES: 4
-          JULIA_TEST_MAXRSS_MB: 800
-          ARCH: x86_64
+    environment:
+      - JULIA_CPU_CORES: 4
+      - JULIA_TEST_MAXRSS_MB: 800
+      - ARCH: x86_64
 #    resource_class: xlarge
     steps: &steps
 # in ubuntu 14.04, need to apt-get update first, and add
 #            curl make patch m4 xz-utils git time ccache bar
-      - setup_remote_docker
       - run: | # install build dependencies (use gcc 4.8 as long as we support it)
           ifconfig &&
           sudo apt-get install -y g++-4.8-multilib gfortran-4.8-multilib \
@@ -77,12 +76,12 @@ jobs:
             - ~/.ccache
 
   build-i686:
-    docker:
-      - image: circleci/python:2.7
+    machine: true
+#      - image: circleci/python:2.7
 #      - image: ubuntu:14.04
-        environment:
-          JULIA_CPU_CORES: 4
-          JULIA_TEST_MAXRSS_MB: 800
-          ARCH: i686
+    environment:
+      - JULIA_CPU_CORES: 4
+      - JULIA_TEST_MAXRSS_MB: 800
+      - ARCH: i686
 #    resource_class: xlarge
     steps: *steps
