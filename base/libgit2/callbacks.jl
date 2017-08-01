@@ -39,6 +39,15 @@ function is_passphrase_required(private_key::AbstractString)
     end
 end
 
+function user_abort()
+    # Note: Potentially it could be better to just throw a Julia error.
+    ccall((:giterr_set_str, :libgit2), Void,
+          (Cint, Cstring),
+          Cint(Error.Callback), "Aborting, user cancelled credential request.")
+
+    return Cint(Error.EAUTH)
+end
+
 function authenticate_ssh(creds::SSHCredentials, libgit2credptr::Ptr{Ptr{Void}},
         username_ptr, schema, host)
     isusedcreds = checkused!(creds)
@@ -70,7 +79,6 @@ function authenticate_ssh(creds::SSHCredentials, libgit2credptr::Ptr{Ptr{Void}},
         else
             unsafe_string(username_ptr)
         end
-        isempty(username) && return Cint(Error.EAUTH)
 
         prompt_url = git_url(scheme=schema, host=host, username=username)
 
@@ -119,13 +127,16 @@ function authenticate_ssh(creds::SSHCredentials, libgit2credptr::Ptr{Ptr{Void}},
             passdef = creds.pass # check if credentials were already used
             if (isempty(passdef) || isusedcreds) && is_passphrase_required(privatekey)
                 if Sys.iswindows()
-                    passdef = Base.winprompt(
+                    res = Base.winprompt(
                         "Your SSH Key requires a password, please enter it now:",
                         "Passphrase required", privatekey; prompt_username = false)
-                    isnull(passdef) && return Cint(Error.EAUTH)
-                    passdef = Base.get(passdef)[2]
+                    isnull(res) && return user_abort()
+                    passdef = unsafe_get(res)[2]
                 else
-                    passdef = prompt("Passphrase for $privatekey", password=true)
+                    res = prompt("Passphrase for $privatekey", password=true)
+                    isnull(res) && return user_abort()
+                    passdef = unsafe_get(res)
+                    isempty(passdef) && return user_abort()  # Ambiguous if EOF or newline
                 end
             end
             passdef
@@ -158,8 +169,8 @@ function authenticate_userpass(creds::UserPasswordCredentials, libgit2credptr::P
             if isempty(username) || isempty(userpass) || isusedcreds
                 res = Base.winprompt("Please enter your credentials for '$prompt_url'", "Credentials required",
                         isempty(username) ? urlusername : username; prompt_username = true)
-                isnull(res) && return Cint(Error.EAUTH)
-                username, userpass = Base.get(res)
+                isnull(res) && return user_abort()
+                username, userpass = unsafe_get(res)
             end
         elseif isusedcreds
             username = prompt("Username for '$prompt_url'",
@@ -167,11 +178,10 @@ function authenticate_userpass(creds::UserPasswordCredentials, libgit2credptr::P
             prompt_url = git_url(scheme=schema, host=host, username=username)
             userpass = prompt("Password for '$prompt_url'", password=true)
         end
+
         ((creds.user != username) || (creds.pass != userpass)) && reset!(creds)
         creds.user = username # save credentials
         creds.pass = userpass # save credentials
-
-        isempty(username) && isempty(userpass) && return Cint(Error.EAUTH)
     else
         isusedcreds && return Cint(Error.EAUTH)
     end
@@ -189,11 +199,11 @@ If a payload is provided then `payload_ptr` should contain a `LibGit2.AbstractCr
 
 For `LibGit2.Consts.CREDTYPE_USERPASS_PLAINTEXT` type, if the payload contains fields:
 `user` & `pass`, they are used to create authentication credentials.
-Empty `user` name and `pass`word trigger an authentication error.
 
 For `LibGit2.Consts.CREDTYPE_SSH_KEY` type, if the payload contains fields:
 `user`, `prvkey`, `pubkey` & `pass`, they are used to create authentication credentials.
-Empty `user` name triggers an authentication error.
+
+Typing `^D` (control key together with the `d` key) will abort the credential prompt.
 
 Credentials are checked in the following order (if supported):
 - ssh key pair (`ssh-agent` if specified in payload's `usesshagent` field)
