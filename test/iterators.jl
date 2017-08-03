@@ -350,7 +350,7 @@ end
 @test length(flatten(zip(1:3, 4:6))) == 6
 @test length(flatten(1:6)) == 6
 @test_throws ArgumentError collect(flatten(Any[]))
-@test_throws ArgumentError length(flatten(NTuple[(1,), ()])) # #16680
+@test_throws ArgumentError length(flatten(NTuple[(1,), ()])) #16680
 @test_throws ArgumentError length(flatten([[1], [1]]))
 
 @test Base.iteratoreltype(Base.Flatten((i for i=1:2) for j=1:1)) == Base.EltypeUnknown()
