@@ -68,8 +68,8 @@ end
 function _chol!(A::AbstractMatrix, ::Type{UpperTriangular})
     n = checksquare(A)
     @inbounds begin
-        for k = 1:n
-            for i = 1:k - 1
+        for k = 1 : n
+            for i = 1 : k - 1
                 A[k,k] -= A[i,k]'A[i,k]
             end
             Akk, info = _chol!(A[k,k], UpperTriangular)
@@ -78,8 +78,8 @@ function _chol!(A::AbstractMatrix, ::Type{UpperTriangular})
             end
             A[k,k] = Akk
             AkkInv = inv(Akk')
-            for j = k + 1:n
-                for i = 1:k - 1
+            for j = k + 1 : n
+                for i = 1 : k - 1
                     A[k,j] -= A[i,k]'A[i,j]
                 end
                 A[k,j] = AkkInv*A[k,j]
@@ -91,8 +91,8 @@ end
 function _chol!(A::AbstractMatrix, ::Type{LowerTriangular})
     n = checksquare(A)
     @inbounds begin
-        for k = 1:n
-            for i = 1:k - 1
+        for k = 1 : n
+            for i = 1 : k - 1
                 A[k,k] -= A[k,i]*A[k,i]'
             end
             Akk, info = _chol!(A[k,k], LowerTriangular)
@@ -101,12 +101,12 @@ function _chol!(A::AbstractMatrix, ::Type{LowerTriangular})
             end
             A[k,k] = Akk
             AkkInv = inv(Akk)
-            for j = 1:k - 1
-                @simd for i = k + 1:n
+            for j = 1 : k - 1
+                @simd for i = k + 1 : n
                     A[i,k] -= A[i,j]*A[k,j]'
                 end
             end
-            for i = k + 1:n
+            for i = k + 1 : n
                 A[i,k] *= AkkInv'
             end
         end
@@ -139,7 +139,6 @@ function chol!(A::StridedMatrix)
     C, info = _chol!(A, UpperTriangular)
     @assertposdef C info
 end
-
 
 
 # chol. Non-destructive methods for computing Cholesky factor of a real symmetric or
@@ -200,7 +199,6 @@ julia> chol(16)
 chol(x::Number, args...) = ((C, info) = _chol!(x, nothing); @assertposdef C info)
 
 
-
 # cholfact!. Destructive methods for computing Cholesky factorization of real symmetric
 # or Hermitian matrix
 ## No pivoting (default)
@@ -250,9 +248,8 @@ end
 
 ### Non BLAS/LAPACK element types (generic). Since generic fallback for pivoted Cholesky
 ### is not implemented yet we throw an error
-cholfact!(A::RealHermSymComplexHerm{<:Real}, ::Val{true};
-    tol = 0.0) =
-        throw(ArgumentError("generic pivoted Cholesky factorization is not implemented yet"))
+cholfact!(A::RealHermSymComplexHerm{<:Real}, ::Val{true}; tol = 0.0) =
+    throw(ArgumentError("generic pivoted Cholesky factorization is not implemented yet"))
 
 ### for StridedMatrices, check that matrix is symmetric/Hermitian
 """
@@ -397,7 +394,7 @@ function getindex(C::CholeskyPivoted{T}, d::Symbol) where T<:BlasFloat
     if d == :P
         n = size(C, 1)
         P = zeros(T, n, n)
-        for i = 1:n
+        for i = 1 : n
             P[C.piv[i],i] = one(T)
         end
         return P
@@ -543,8 +540,7 @@ function lowrankupdate!(C::Cholesky, v::StridedVector)
         conj!(v)
     end
 
-    for i = 1:n
-
+    for i = 1 : n
         # Compute Givens rotation
         c, s, r = givensAlgorithm(A[i,i], v[i])
 
@@ -553,14 +549,14 @@ function lowrankupdate!(C::Cholesky, v::StridedVector)
 
         # Update remaining elements in row/column
         if C.uplo == 'U'
-            for j = i + 1:n
+            for j = i + 1 : n
                 Aij = A[i,j]
                 vj  = v[j]
                 A[i,j]  =   c*Aij + s*vj
                 v[j]    = -s'*Aij + c*vj
             end
         else
-            for j = i + 1:n
+            for j = i + 1 : n
                 Aji = A[j,i]
                 vj  = v[j]
                 A[j,i]  =   c*Aji + s*vj
@@ -589,8 +585,7 @@ function lowrankdowndate!(C::Cholesky, v::StridedVector)
         conj!(v)
     end
 
-    for i = 1:n
-
+    for i = 1 : n
         Aii = A[i,i]
 
         # Compute Givens rotation
@@ -606,14 +601,14 @@ function lowrankdowndate!(C::Cholesky, v::StridedVector)
 
         # Update remaining elements in row/column
         if C.uplo == 'U'
-            for j = i + 1:n
+            for j = i + 1 : n
                 vj = v[j]
                 Aij = (A[i,j] - s*vj)/c
                 A[i,j] = Aij
                 v[j] = -s'*Aij + c*vj
             end
         else
-            for j = i + 1:n
+            for j = i + 1 : n
                 vj = v[j]
                 Aji = (A[j,i] - s*vj)/c
                 A[j,i] = Aji
