@@ -33,7 +33,8 @@ srand(123)
 
 n = 5 # should be odd
 
-@testset for elty in (Int, Rational{BigInt}, Float32, Float64, BigFloat, Complex{Float32}, Complex{Float64}, Complex{BigFloat})
+@testset for elty in (Int, Rational{BigInt}, Float32, Float64, BigFloat,
+                      Complex{Float32}, Complex{Float64}, Complex{BigFloat})
     # In the long run, these tests should step through Strang's
     #  axiomatic definition of determinants.
     # If all axioms are satisfied and all the composition rules work,

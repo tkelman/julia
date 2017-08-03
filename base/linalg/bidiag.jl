@@ -130,7 +130,7 @@ function Base.replace_in_print_matrix(A::Bidiagonal,i::Integer,j::Integer,s::Abs
     end
 end
 
-#Converting from Bidiagonal to dense Matrix
+# Converting from Bidiagonal to dense Matrix
 function convert(::Type{Matrix{T}}, A::Bidiagonal) where T
     n = size(A, 1)
     B = zeros(T, n, n)
@@ -150,11 +150,12 @@ convert(::Type{Array}, A::Bidiagonal) = convert(Matrix, A)
 full(A::Bidiagonal) = convert(Array, A)
 promote_rule(::Type{Matrix{T}}, ::Type{Bidiagonal{S}}) where {T,S} = Matrix{promote_type(T,S)}
 
-#Converting from Bidiagonal to Tridiagonal
+# Converting from Bidiagonal to Tridiagonal
 Tridiagonal(M::Bidiagonal{T}) where {T} = convert(Tridiagonal{T}, M)
 function convert(::Type{Tridiagonal{T}}, A::Bidiagonal) where T
     z = zeros(T, size(A)[1]-1)
-    A.uplo == 'U' ? Tridiagonal(z, convert(Vector{T},A.dv), convert(Vector{T},A.ev)) : Tridiagonal(convert(Vector{T},A.ev), convert(Vector{T},A.dv), z)
+    A.uplo == 'U' ? Tridiagonal(z, convert(Vector{T},A.dv), convert(Vector{T},A.ev)) :
+                    Tridiagonal(convert(Vector{T},A.ev), convert(Vector{T},A.dv), z)
 end
 promote_rule(::Type{Tridiagonal{T}}, ::Type{Bidiagonal{S}}) where {T,S} = Tridiagonal{promote_type(T,S)}
 
@@ -206,7 +207,7 @@ function size(M::Bidiagonal, d::Integer)
     end
 end
 
-#Elementary operations
+# Elementary operations
 broadcast(::typeof(abs), M::Bidiagonal) = Bidiagonal(abs.(M.dv), abs.(M.ev), M.uplo)
 broadcast(::typeof(round), M::Bidiagonal) = Bidiagonal(round.(M.dv), round.(M.ev), M.uplo)
 broadcast(::typeof(trunc), M::Bidiagonal) = Bidiagonal(trunc.(M.dv), trunc.(M.ev), M.uplo)
@@ -215,10 +216,14 @@ broadcast(::typeof(ceil), M::Bidiagonal) = Bidiagonal(ceil.(M.dv), ceil.(M.ev), 
 for func in (:conj, :copy, :real, :imag)
     @eval ($func)(M::Bidiagonal) = Bidiagonal(($func)(M.dv), ($func)(M.ev), M.uplo)
 end
-broadcast(::typeof(round), ::Type{T}, M::Bidiagonal) where {T<:Integer} = Bidiagonal(round.(T, M.dv), round.(T, M.ev), M.uplo)
-broadcast(::typeof(trunc), ::Type{T}, M::Bidiagonal) where {T<:Integer} = Bidiagonal(trunc.(T, M.dv), trunc.(T, M.ev), M.uplo)
-broadcast(::typeof(floor), ::Type{T}, M::Bidiagonal) where {T<:Integer} = Bidiagonal(floor.(T, M.dv), floor.(T, M.ev), M.uplo)
-broadcast(::typeof(ceil), ::Type{T}, M::Bidiagonal) where {T<:Integer} = Bidiagonal(ceil.(T, M.dv), ceil.(T, M.ev), M.uplo)
+broadcast(::typeof(round), ::Type{T}, M::Bidiagonal) where {T<:Integer} =
+    Bidiagonal(round.(T, M.dv), round.(T, M.ev), M.uplo)
+broadcast(::typeof(trunc), ::Type{T}, M::Bidiagonal) where {T<:Integer} =
+    Bidiagonal(trunc.(T, M.dv), trunc.(T, M.ev), M.uplo)
+broadcast(::typeof(floor), ::Type{T}, M::Bidiagonal) where {T<:Integer} =
+    Bidiagonal(floor.(T, M.dv), floor.(T, M.ev), M.uplo)
+broadcast(::typeof(ceil), ::Type{T}, M::Bidiagonal) where {T<:Integer} =
+    Bidiagonal(ceil.(T, M.dv), ceil.(T, M.ev), M.uplo)
 
 transpose(M::Bidiagonal) = Bidiagonal(M.dv, M.ev, M.uplo == 'U' ? :L : :U)
 ctranspose(M::Bidiagonal) = Bidiagonal(conj(M.dv), conj(M.ev), M.uplo == 'U' ? :L : :U)
@@ -311,13 +316,16 @@ A_mul_B!(C::AbstractVecOrMat, A::BiTri, B::AbstractVecOrMat) = A_mul_B_td!(C, A,
 
 \(::Diagonal, ::RowVector) = throw(DimensionMismatch("Cannot left-divide matrix by transposed vector"))
 \(::Bidiagonal, ::RowVector) = throw(DimensionMismatch("Cannot left-divide matrix by transposed vector"))
-\(::Bidiagonal{<:Number}, ::RowVector{<:Number}) = throw(DimensionMismatch("Cannot left-divide matrix by transposed vector"))
+\(::Bidiagonal{<:Number}, ::RowVector{<:Number}) =
+    throw(DimensionMismatch("Cannot left-divide matrix by transposed vector"))
 
 At_ldiv_B(::Bidiagonal, ::RowVector) = throw(DimensionMismatch("Cannot left-divide matrix by transposed vector"))
-At_ldiv_B(::Bidiagonal{<:Number}, ::RowVector{<:Number}) = throw(DimensionMismatch("Cannot left-divide matrix by transposed vector"))
+At_ldiv_B(::Bidiagonal{<:Number}, ::RowVector{<:Number}) =
+    throw(DimensionMismatch("Cannot left-divide matrix by transposed vector"))
 
 Ac_ldiv_B(::Bidiagonal, ::RowVector) = throw(DimensionMismatch("Cannot left-divide matrix by transposed vector"))
-Ac_ldiv_B(::Bidiagonal{<:Number}, ::RowVector{<:Number}) = throw(DimensionMismatch("Cannot left-divide matrix by transposed vector"))
+Ac_ldiv_B(::Bidiagonal{<:Number}, ::RowVector{<:Number}) =
+    throw(DimensionMismatch("Cannot left-divide matrix by transposed vector"))
 
 function check_A_mul_B!_sizes(C, A, B)
     nA, mA = size(A)

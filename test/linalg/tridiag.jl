@@ -91,10 +91,13 @@ B = randn(n,2)
     @testset "interconversion of Tridiagonal and SymTridiagonal" begin
         @test Tridiagonal(dl, d, dl) == SymTridiagonal(d, dl)
         @test SymTridiagonal(d, dl) == Tridiagonal(dl, d, dl)
-        @test Tridiagonal(dl, d, du) + Tridiagonal(du, d, dl) == SymTridiagonal(2d, dl+du)
-        @test SymTridiagonal(d, dl) + Tridiagonal(dl, d, du) == Tridiagonal(dl + dl, d+d, dl+du)
+        @test Tridiagonal(dl, d, du) + Tridiagonal(du, d, dl) ==
+            SymTridiagonal(2d, dl+du)
+        @test SymTridiagonal(d, dl) + Tridiagonal(dl, d, du) ==
+            Tridiagonal(dl + dl, d+d, dl+du)
         @test convert(SymTridiagonal,Tridiagonal(Ts)) == Ts
-        @test Array(convert(SymTridiagonal{Complex64},Tridiagonal(Ts))) == convert(Matrix{Complex64}, Ts)
+        @test Array(convert(SymTridiagonal{Complex64},Tridiagonal(Ts))) ==
+            convert(Matrix{Complex64}, Ts)
     end
     if elty == Int
         vs = rand(1:100, n)
@@ -205,7 +208,7 @@ B = randn(n,2)
     end
 end
 
-#Test equivalence of eigenvectors/singular vectors taking into account possible phase (sign) differences
+# Test equivalence of eigenvectors/singular vectors taking into account possible phase (sign) differences
 function test_approx_eq_vecs(a::StridedVecOrMat{S}, b::StridedVecOrMat{T}, error=nothing) where {S<:Real,T<:Real}
     n = size(a, 1)
     @test n==size(b,1) && size(a,2)==size(b,2)
@@ -219,7 +222,7 @@ function test_approx_eq_vecs(a::StridedVecOrMat{S}, b::StridedVecOrMat{T}, error
     end
 end
 
-let n = 12 #Size of matrix problem to test
+let n = 12 # Size of matrix problem to test
     srand(123)
     @testset "SymTridiagonal (symmetric tridiagonal) matrices" begin
         for relty in (Float32, Float64), elty in (relty, Complex{relty})
@@ -454,8 +457,10 @@ end
 end
 
 @testset "convert for SymTridiagonal" begin
-    @test convert(SymTridiagonal{Float64},SymTridiagonal(ones(Float32,5),ones(Float32,4))) == SymTridiagonal(ones(Float64,5),ones(Float64,4))
-    @test convert(AbstractMatrix{Float64},SymTridiagonal(ones(Float32,5),ones(Float32,4))) == SymTridiagonal(ones(Float64,5),ones(Float64,4))
+    @test convert(SymTridiagonal{Float64},SymTridiagonal(ones(Float32,5),ones(Float32,4))) ==
+        SymTridiagonal(ones(Float64,5),ones(Float64,4))
+    @test convert(AbstractMatrix{Float64},SymTridiagonal(ones(Float32,5),ones(Float32,4))) ==
+        SymTridiagonal(ones(Float64,5),ones(Float64,4))
 end
 
 @testset "constructors from matrix" begin
