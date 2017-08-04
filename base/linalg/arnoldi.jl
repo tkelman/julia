@@ -201,7 +201,7 @@ function _eigs(A, B;
         which=Symbol(which)
     end
     if (which != :LM && which != :SM && which != :LR && which != :SR &&
-        which != :LI && which != :SI && which != :BE)
+            which != :LI && which != :SI && which != :BE)
         throw(ArgumentError("which must be :LM, :SM, :LR, :SR, :LI, :SI, or :BE, got $(repr(which))"))
     end
     if which == :BE && !sym
