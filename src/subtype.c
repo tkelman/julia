@@ -251,10 +251,10 @@ static int obviously_disjoint(jl_value_t *a, jl_value_t *b, int specificity)
     if (a == b || a == (jl_value_t*)jl_any_type || b == (jl_value_t*)jl_any_type)
         return 0;
     if (jl_is_leaf_type(a) && !((jl_datatype_t*)a)->abstract &&
-        jl_is_leaf_type(b) && !((jl_datatype_t*)b)->abstract &&
-        // TODO: remove these 2 lines if and when Tuple{Union{}} === Union{}
-        (((jl_datatype_t*)a)->name != jl_tuple_typename ||
-         ((jl_datatype_t*)b)->name != jl_tuple_typename))
+            jl_is_leaf_type(b) && !((jl_datatype_t*)b)->abstract &&
+            // TODO: remove these 2 lines if and when Tuple{Union{}} === Union{}
+            (((jl_datatype_t*)a)->name != jl_tuple_typename ||
+             ((jl_datatype_t*)b)->name != jl_tuple_typename))
         return 1;
     if (jl_is_unionall(a)) a = jl_unwrap_unionall(a);
     if (jl_is_unionall(b)) b = jl_unwrap_unionall(b);
