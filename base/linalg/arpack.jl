@@ -200,8 +200,8 @@ function eupd_wrapper(T, n::Integer, sym::Bool, cmplx::Bool, bmat::String,
 end
 
 for (T, saupd_name, seupd_name, naupd_name, neupd_name) in
-    ((:Float64, :dsaupd_, :dseupd_, :dnaupd_, :dneupd_),
-     (:Float32, :ssaupd_, :sseupd_, :snaupd_, :sneupd_))
+        ((:Float64, :dsaupd_, :dseupd_, :dnaupd_, :dneupd_),
+         (:Float32, :ssaupd_, :sseupd_, :snaupd_, :sneupd_))
     @eval begin
         function naupd(ido, bmat, n, evtype, nev, TOL::Array{$T}, resid::Array{$T}, ncv, v::Array{$T}, ldv,
                        iparam, ipntr, workd::Array{$T}, workl::Array{$T}, lworkl, info)
@@ -254,8 +254,8 @@ for (T, saupd_name, seupd_name, naupd_name, neupd_name) in
 end
 
 for (T, TR, naupd_name, neupd_name) in
-    ((:Complex128, :Float64, :znaupd_, :zneupd_),
-     (:Complex64,  :Float32, :cnaupd_, :cneupd_))
+        ((:Complex128, :Float64, :znaupd_, :zneupd_),
+         (:Complex64,  :Float32, :cnaupd_, :cneupd_))
     @eval begin
         function naupd(ido, bmat, n, evtype, nev, TOL::Array{$TR}, resid::Array{$T}, ncv, v::Array{$T}, ldv,
                        iparam, ipntr, workd::Array{$T}, workl::Array{$T}, lworkl,
