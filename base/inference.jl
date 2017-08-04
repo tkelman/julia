@@ -859,7 +859,7 @@ function limit_type_size(@nospecialize(t), @nospecialize(compare), @nospecialize
     @assert t <: r
     #@assert r === _limit_type_size(r, t, source) # this monotonicity constraint is slightly stronger than actually required,
       # since we only actually need to demonstrate that repeated application would reaches a fixed point,
-      #not that it is already at the fixed point
+      # not that it is already at the fixed point
     return r
 end
 

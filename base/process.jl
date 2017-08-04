@@ -760,8 +760,8 @@ process_exited(s::ProcessChain) = process_exited(s.processes)
 
 process_signaled(s::Process) = (s.termsignal > 0)
 
-#process_stopped (s::Process) = false #not supported by libuv. Do we need this?
-#process_stop_signal(s::Process) = false #not supported by libuv. Do we need this?
+#process_stopped (s::Process) = false # not supported by libuv. Do we need this?
+#process_stop_signal(s::Process) = false # not supported by libuv. Do we need this?
 
 function process_status(s::Process)
     process_running(s) ? "ProcessRunning" :

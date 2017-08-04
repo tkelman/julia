@@ -26,7 +26,7 @@ let a=[1.0:n;]
        tritype = isupper ? UpperTriangular : LowerTriangular
        @test full(tritype(A)) == full(A)
 
-       A=Bidiagonal(a, zeros(n-1), ifelse(isupper, :U, :L)) #morally Diagonal
+       A=Bidiagonal(a, zeros(n-1), ifelse(isupper, :U, :L)) # morally Diagonal
        for newtype in [Diagonal, Bidiagonal, SymTridiagonal, Tridiagonal, Matrix]
            debug && println("newtype is $(newtype)")
            @test full(convert(newtype, A)) == full(A)
@@ -45,32 +45,32 @@ let a=[1.0:n;]
    A = SymTridiagonal(a, zeros(n-1))
    @test full(convert(Bidiagonal,A)) == full(A)
 
-   A = Tridiagonal(zeros(n-1), [1.0:n;], zeros(n-1)) #morally Diagonal
+   A = Tridiagonal(zeros(n-1), [1.0:n;], zeros(n-1)) # morally Diagonal
    for newtype in [Diagonal, Bidiagonal, SymTridiagonal, Matrix]
        @test full(convert(newtype, A)) == full(A)
    end
-   A = Tridiagonal(ones(n-1), [1.0:n;], ones(n-1)) #not morally Diagonal
+   A = Tridiagonal(ones(n-1), [1.0:n;], ones(n-1)) # not morally Diagonal
    for newtype in [SymTridiagonal, Matrix]
        @test full(convert(newtype, A)) == full(A)
    end
    for newtype in [Diagonal, Bidiagonal]
        @test_throws ArgumentError convert(newtype,A)
    end
-   A = Tridiagonal(zeros(n-1), [1.0:n;], ones(n-1)) #not morally Diagonal
+   A = Tridiagonal(zeros(n-1), [1.0:n;], ones(n-1)) # not morally Diagonal
    @test full(convert(Bidiagonal, A)) == full(A)
    A = UpperTriangular(Tridiagonal(zeros(n-1), [1.0:n;], ones(n-1)))
    @test full(convert(Bidiagonal, A)) == full(A)
-   A = Tridiagonal(ones(n-1), [1.0:n;], zeros(n-1)) #not morally Diagonal
+   A = Tridiagonal(ones(n-1), [1.0:n;], zeros(n-1)) # not morally Diagonal
    @test full(convert(Bidiagonal, A)) == full(A)
    A = LowerTriangular(Tridiagonal(ones(n-1), [1.0:n;], zeros(n-1)))
    @test full(convert(Bidiagonal, A)) == full(A)
    @test_throws ArgumentError convert(SymTridiagonal,A)
 
-   A = LowerTriangular(full(Diagonal(a))) #morally Diagonal
+   A = LowerTriangular(full(Diagonal(a))) # morally Diagonal
    for newtype in [Diagonal, Bidiagonal, SymTridiagonal, LowerTriangular, Matrix]
        @test full(convert(newtype, A)) == full(A)
    end
-   A = UpperTriangular(full(Diagonal(a))) #morally Diagonal
+   A = UpperTriangular(full(Diagonal(a))) # morally Diagonal
    for newtype in [Diagonal, Bidiagonal, SymTridiagonal, UpperTriangular, Matrix]
        @test full(convert(newtype, A)) == full(A)
    end

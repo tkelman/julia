@@ -162,7 +162,7 @@ B = randn(n,2)
             @test DT ≈ D
             @test abs.(VT'Vecs) ≈ eye(elty, n)
             @test eigvecs(Ts) == eigvecs(Fs)
-            #call to LAPACK.stein here
+            # call to LAPACK.stein here
             Test.test_approx_eq_modphase(eigvecs(Ts,eigvals(Ts)),eigvecs(Fs))
         elseif elty != Int
             # check that undef is determined accurately even if type inference
