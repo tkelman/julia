@@ -141,7 +141,7 @@ function create_match_data(re)
 end
 
 function substring_number_from_name(re, name)
-  ccall((:pcre2_substring_number_from_name_8, PCRE_LIB), Cint,
+    ccall((:pcre2_substring_number_from_name_8, PCRE_LIB), Cint,
         (Ptr{Void}, Cstring), re, name)
 end
 
