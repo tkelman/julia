@@ -111,7 +111,7 @@ jl_value_t *jl_resolve_globals(jl_value_t *expr, jl_module_t *module, jl_svec_t 
                 JL_TYPECHK(ccall method definition, long, jl_exprarg(e, 4));
             }
             if (e->head == method_sym || e->head == abstracttype_sym || e->head == structtype_sym ||
-                e->head == primtype_sym || e->head == module_sym) {
+                    e->head == primtype_sym || e->head == module_sym) {
                 i++;
             }
             for (; i < nargs; i++) {
