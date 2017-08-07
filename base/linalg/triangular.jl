@@ -1012,7 +1012,7 @@ function A_mul_Bt!(A::StridedMatrix, B::UnitLowerTriangular)
     A
 end
 
-#Generic solver using naive substitution
+# Generic solver using naive substitution
 # manually hoisting x[j] significantly improves performance as of Dec 2015
 # manually eliding bounds checking significantly improves performance as of Dec 2015
 # directly indexing A.data rather than A significantly improves performance as of Dec 2015

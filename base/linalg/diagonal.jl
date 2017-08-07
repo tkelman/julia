@@ -326,7 +326,7 @@ logm(D::Diagonal{<:AbstractMatrix}) = Diagonal(logm.(D.diag))
 sqrtm(D::Diagonal) = Diagonal(sqrt.(D.diag))
 sqrtm(D::Diagonal{<:AbstractMatrix}) = Diagonal(sqrtm.(D.diag))
 
-#Linear solver
+# Linear solver
 function A_ldiv_B!(D::Diagonal, B::StridedVecOrMat)
     m, n = size(B, 1), size(B, 2)
     if m != length(D.diag)

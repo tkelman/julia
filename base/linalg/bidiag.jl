@@ -456,12 +456,12 @@ const SpecialMatrix = Union{Bidiagonal,SymTridiagonal,Tridiagonal}
 *(A::AbstractTriangular, B::SpecialMatrix) = Array(A) * Array(B)
 *(A::SpecialMatrix, B::SpecialMatrix) = Array(A) * Array(B)
 
-#Generic multiplication
+# Generic multiplication
 for func in (:*, :Ac_mul_B, :A_mul_Bc, :/, :A_rdiv_Bc)
     @eval ($func)(A::Bidiagonal{T}, B::AbstractVector{T}) where {T} = ($func)(Array(A), B)
 end
 
-#Linear solvers
+# Linear solvers
 A_ldiv_B!(A::Union{Bidiagonal, AbstractTriangular}, b::AbstractVector) = naivesub!(A, b)
 At_ldiv_B!(A::Bidiagonal, b::AbstractVector) = A_ldiv_B!(transpose(A), b)
 Ac_ldiv_B!(A::Bidiagonal, b::AbstractVector) = A_ldiv_B!(ctranspose(A), b)
@@ -495,19 +495,19 @@ for func in (:Ac_ldiv_B!, :At_ldiv_B!)
         B
     end
 end
-#Generic solver using naive substitution
+# Generic solver using naive substitution
 function naivesub!(A::Bidiagonal{T}, b::AbstractVector, x::AbstractVector = b) where T
     N = size(A, 2)
     if N != length(b) || N != length(x)
         throw(DimensionMismatch("second dimension of A, $N, does not match one of the lengths of x, $(length(x)), or b, $(length(b))"))
     end
-    if A.uplo == 'L' #do forward substitution
+    if A.uplo == 'L' # do forward substitution
         for j = 1:N
             x[j] = b[j]
             j > 1 && (x[j] -= A.ev[j-1] * x[j-1])
             x[j] /= A.dv[j] == zero(T) ? throw(SingularException(j)) : A.dv[j]
         end
-    else #do backward substitution
+    else # do backward substitution
         for j = N:-1:1
             x[j] = b[j]
             j < N && (x[j] -= A.ev[j] * x[j+1])

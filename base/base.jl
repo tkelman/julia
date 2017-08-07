@@ -88,8 +88,8 @@ mutable struct AssertionError <: Exception
     AssertionError(msg) = new(msg)
 end
 
-#Generic wrapping of arbitrary exceptions
-#Subtypes should put the exception in an 'error' field
+# Generic wrapping of arbitrary exceptions
+# Subtypes should put the exception in an 'error' field
 abstract type WrappedException <: Exception end
 
 """

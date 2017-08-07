@@ -110,7 +110,7 @@ end
 
 similar(S::SymTridiagonal, ::Type{T}) where {T} = SymTridiagonal{T}(similar(S.dv, T), similar(S.ev, T))
 
-#Elementary operations
+# Elementary operations
 broadcast(::typeof(abs), M::SymTridiagonal) = SymTridiagonal(abs.(M.dv), abs.(M.ev))
 broadcast(::typeof(round), M::SymTridiagonal) = SymTridiagonal(round.(M.dv), round.(M.ev))
 broadcast(::typeof(trunc), M::SymTridiagonal) = SymTridiagonal(trunc.(M.dv), trunc.(M.ev))
@@ -217,11 +217,11 @@ function eigvals(A::SymTridiagonal{T}, vl::Real, vu::Real) where T
     return eigvals!(copy_oftype(A, S), vl, vu)
 end
 
-#Computes largest and smallest eigenvalue
+# Computes largest and smallest eigenvalue
 eigmax(A::SymTridiagonal) = eigvals(A, size(A, 1):size(A, 1))[1]
 eigmin(A::SymTridiagonal) = eigvals(A, 1:1)[1]
 
-#Compute selected eigenvectors only corresponding to particular eigenvalues
+# Compute selected eigenvectors only corresponding to particular eigenvalues
 eigvecs(A::SymTridiagonal) = eigfact(A)[:vectors]
 
 """
@@ -262,7 +262,7 @@ julia> eigvecs(A, [1.])
 """
 eigvecs(A::SymTridiagonal{<:BlasFloat}, eigvals::Vector{<:Real}) = LAPACK.stein!(A.dv, A.ev, eigvals)
 
-#tril and triu
+# tril and triu
 
 istriu(M::SymTridiagonal) = iszero(M.ev)
 istril(M::SymTridiagonal) = iszero(M.ev)
@@ -307,7 +307,7 @@ end
 # Generic methods #
 ###################
 
-#Needed for inv_usmani()
+# Needed for inv_usmani()
 mutable struct ZeroOffsetVector
     data::Vector
 end
@@ -320,10 +320,10 @@ function Base.replace_in_print_matrix(A::SymTridiagonal, i::Integer, j::Integer,
     i==j-1||i==j||i==j+1 ? s : Base.replace_with_centered_mark(s)
 end
 
-#Implements the inverse using the recurrence relation between principal minors
+# Implements the inverse using the recurrence relation between principal minors
 # a, b, c are assumed to be the subdiagonal, diagonal, and superdiagonal of
 # a tridiagonal matrix.
-#Reference:
+# Reference:
 #    R. Usmani, "Inversion of a tridiagonal Jacobi matrix",
 #    Linear Algebra and its Applications 212-213 (1994), pp.413-414
 #    doi:10.1016/0024-3795(94)90414-6
@@ -355,8 +355,8 @@ function inv_usmani(a::V, b::V, c::V) where {T,V<:AbstractVector{T}}
     α
 end
 
-#Implements the determinant using principal minors
-#Inputs and reference are as above for inv_usmani()
+# Implements the determinant using principal minors
+# Inputs and reference are as above for inv_usmani()
 function det_usmani(a::V, b::V, c::V) where {T,V<:AbstractVector{T}}
     n = length(b)
     θa = one(T)
@@ -518,7 +518,7 @@ end
 # Operations on Tridiagonal matrices
 copy!(dest::Tridiagonal, src::Tridiagonal) = Tridiagonal(copy!(dest.dl, src.dl), copy!(dest.d, src.d), copy!(dest.du, src.du), copy!(dest.du2, src.du2))
 
-#Elementary operations
+# Elementary operations
 broadcast(::typeof(abs), M::Tridiagonal) = Tridiagonal(abs.(M.dl), abs.(M.d), abs.(M.du), abs.(M.du2))
 broadcast(::typeof(round), M::Tridiagonal) = Tridiagonal(round.(M.dl), round.(M.d), round.(M.du), round.(M.du2))
 broadcast(::typeof(trunc), M::Tridiagonal) = Tridiagonal(trunc.(M.dl), trunc.(M.d), trunc.(M.du), trunc.(M.du2))
@@ -590,7 +590,7 @@ function Base.replace_in_print_matrix(A::Tridiagonal,i::Integer,j::Integer,s::Ab
     i==j-1||i==j||i==j+1 ? s : Base.replace_with_centered_mark(s)
 end
 
-#tril and triu
+# tril and triu
 
 istriu(M::Tridiagonal) = iszero(M.dl)
 istril(M::Tridiagonal) = iszero(M.du)
@@ -646,8 +646,10 @@ end
 inv(A::Tridiagonal) = inv_usmani(A.dl, A.d, A.du)
 det(A::Tridiagonal) = det_usmani(A.dl, A.d, A.du)
 
-convert(::Type{Tridiagonal{T}},M::Tridiagonal) where {T} = Tridiagonal(convert(Vector{T}, M.dl), convert(Vector{T}, M.d), convert(Vector{T}, M.du), convert(Vector{T}, M.du2))
-convert(::Type{AbstractMatrix{T}},M::Tridiagonal) where {T} = convert(Tridiagonal{T}, M)
+convert(::Type{Tridiagonal{T}}, M::Tridiagonal) where {T} =
+    Tridiagonal(convert(Vector{T}, M.dl), convert(Vector{T}, M.d),
+                convert(Vector{T}, M.du), convert(Vector{T}, M.du2))
+convert(::Type{AbstractMatrix{T}}, M::Tridiagonal) where {T} = convert(Tridiagonal{T}, M)
 convert(::Type{Tridiagonal{T}}, M::SymTridiagonal{T}) where {T} = Tridiagonal(M)
 function convert(::Type{SymTridiagonal{T}}, M::Tridiagonal) where T
     if M.dl == M.du

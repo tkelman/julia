@@ -12,7 +12,7 @@ import ..LinAlg: BlasFloat, Char, BlasInt, LAPACKException,
 
 using Base: iszero
 
-#Generic LAPACK error handlers
+# Generic LAPACK error handlers
 """
 Handle only negative LAPACK error codes
 
@@ -3387,21 +3387,21 @@ for (trcon, trevc, trrfs, elty) in
                 work, info)
             chklapackerror(info[])
 
-            #Decide what exactly to return
-            if howmny == 'S' #compute selected eigenvectors
-                if side == 'L' #left eigenvectors only
+            # Decide what exactly to return
+            if howmny == 'S' # compute selected eigenvectors
+                if side == 'L' # left eigenvectors only
                     return select, VL[:,1:m[]]
-                elseif side == 'R' #right eigenvectors only
+                elseif side == 'R' # right eigenvectors only
                     return select, VR[:,1:m[]]
-                else #side == 'B' #both eigenvectors
+                else #side == 'B' # both eigenvectors
                     return select, VL[:,1:m[]], VR[:,1:m[]]
                 end
-            else #compute all eigenvectors
-                if side == 'L' #left eigenvectors only
+            else # compute all eigenvectors
+                if side == 'L' # left eigenvectors only
                     return VL[:,1:m[]]
-                elseif side == 'R' #right eigenvectors only
+                elseif side == 'R' # right eigenvectors only
                     return VR[:,1:m[]]
-                else #side == 'B' #both eigenvectors
+                else #side == 'B' # both eigenvectors
                     return VL[:,1:m[]], VR[:,1:m[]]
                 end
             end
@@ -3516,21 +3516,21 @@ for (trcon, trevc, trrfs, elty, relty) in
                 work, rwork, info)
             chklapackerror(info[])
 
-            #Decide what exactly to return
-            if howmny == 'S' #compute selected eigenvectors
-                if side == 'L' #left eigenvectors only
+            # Decide what exactly to return
+            if howmny == 'S' # compute selected eigenvectors
+                if side == 'L' # left eigenvectors only
                     return select, VL[:,1:m[]]
-                elseif side == 'R' #right eigenvectors only
+                elseif side == 'R' # right eigenvectors only
                     return select, VR[:,1:m[]]
-                else #side=='B' #both eigenvectors
+                else #side=='B' # both eigenvectors
                     return select, VL[:,1:m[]], VR[:,1:m[]]
                 end
-            else #compute all eigenvectors
-                if side == 'L' #left eigenvectors only
+            else # compute all eigenvectors
+                if side == 'L' # left eigenvectors only
                     return VL[:,1:m[]]
-                elseif side == 'R' #right eigenvectors only
+                elseif side == 'R' # right eigenvectors only
                     return VR[:,1:m[]]
-                else #side=='B' #both eigenvectors
+                else #side=='B' # both eigenvectors
                     return VL[:,1:m[]], VR[:,1:m[]]
                 end
             end
