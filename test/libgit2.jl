@@ -558,7 +558,6 @@ mktempdir() do dir
     end
 
     @testset "Update cache repository" begin
-
         @testset "with commits" begin
             repo = LibGit2.GitRepo(cache_repo)
             repo_file = open(joinpath(cache_repo,test_file), "a")
@@ -1744,7 +1743,6 @@ mktempdir() do dir
                     "SSH_PUB_KEY_PATH" => nothing,
                     "SSH_KEY_PASS" => nothing,
                     (Sys.iswindows() ? "USERPROFILE" : "HOME") => tempdir()) do
-
                 # Set the USERPROFILE / HOME above to be a directory that does not contain
                 # the "~/.ssh/id_rsa" file. If this file exists the credential callback
                 # will default to use this private key instead of triggering a prompt.
