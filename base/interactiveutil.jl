@@ -136,12 +136,12 @@ if Sys.isapple()
 
 elseif Sys.islinux() || Sys.KERNEL === :FreeBSD
     _clipboardcmd = nothing
-    const _clipboardcmds = Dict(:copy => Dict(:xsel => Sys.islinux() ?
-            `xsel --nodetach --input --clipboard` : `xsel -c`,
-            :xclip => `xclip -silent -in -selection clipboard`),
-        :paste => Dict(:xsel => Sys.islinux() ?
-            `xsel --nodetach --output --clipboard` : `xsel -p`,
-            :xclip => `xclip -quiet -out -selection clipboard`))
+    xsel_copy  = Sys.islinux() ? `xsel --nodetach --input --clipboard`  : `xsel -c`
+    xsel_paste = Sys.islinux() ? `xsel --nodetach --output --clipboard` : `xsel -p`
+    const _clipboardcmds = Dict(:copy  => Dict(:xsel => xsel_copy,
+                                    :xclip => `xclip -silent -in -selection clipboard`),
+                                :paste => Dict(:xsel => xsel_paste,
+                                    :xclip => `xclip -quiet -out -selection clipboard`)
     function clipboardcmd()
         global _clipboardcmd
         _clipboardcmd !== nothing && return _clipboardcmd
