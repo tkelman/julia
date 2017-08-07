@@ -18,7 +18,7 @@ build:
     - uname -a
     - cat /etc/os-release
     - sudo apt-get update &&
-      sudo apt-get install -y g++-multilib gfortran-multilib
+      sudo apt-get install -y g++-multilib gfortran-multilib \
         curl make patch m4 xz-utils git time ccache bar
 #      echo "override ARCH = $ARCH" | tee -a Make.user &&
     - make -C base version_git.jl.phony &&
