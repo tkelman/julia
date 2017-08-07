@@ -4,24 +4,31 @@ os:
 build_environment: Ubuntu 14.04
 notifications:
     - email: false
-before_install:
-    - curl -sSL https://get.docker.io/ubuntu/ | sudo sh 
-    - sudo docker version
-    - sudo docker pull ubuntu
-#    - sudo apt-get update -qq -y
-#    - sudo apt-get install zlib1g-dev lsb-release
-#    - lsb_release -a
-#    - sudo add-apt-repository ppa:staticfloat/julia-deps -y
-#    - sudo apt-get update -qq -y
-#    - sudo apt-get install patchelf gfortran llvm-3.3-dev libsuitesparse-dev libopenblas-dev liblapack-dev libarpack2-dev libfftw3-dev libgmp-dev libpcre3-dev libunwind7-dev libdouble-conversion-dev libopenlibm-dev librmath-dev libmpfr-dev -y
 script:
-    - sudo docker run --rm ubuntu echo "hello world"
-#    - BUILDOPTS="-j4 USEGCC=1 LLVM_CONFIG=llvm-config-3.3 LLVM_LLC=llc-3.3 VERBOSE=1 USE_BLAS64=0";
-#      for lib in LLVM ZLIB SUITESPARSE ARPACK BLAS FFTW LAPACK GMP MPFR PCRE LIBUNWIND OPENLIBM RMATH; do
-#        export BUILDOPTS="$BUILDOPTS USE_SYSTEM_$lib=1";
-#      done;
-#      make $BUILDOPTS prefix=/tmp/julia install;
-#      cd .. && mv julia julia2;
-#      cd /tmp/julia/share/julia/test && /tmp/julia/bin/julia-debug --check-bounds=yes runtests.jl all && /tmp/julia/bin/julia-debug --check-bounds=yes runtests.jl pkg;
-#      cd - && mv julia2 julia;
-#      echo "Ready for packaging..."
+    - sudo apt-get update &&
+      sudo apt-get install -y g++-multilib gfortran-multilib ccache bar
+#      echo "override ARCH = $ARCH" | tee -a Make.user &&
+    - make -C base version_git.jl.phony &&
+      for var in FORCE_ASSERTIONS LLVM_ASSERTIONS USECCACHE NO_GIT; do
+        echo "override $var = 1" | tee -a Make.user;
+      done
+    - contrib/download_cmake.sh &&
+      make -j3 -C deps || make
+    - make -j3 all &&
+      make prefix=/tmp/julia install &&
+      ccache -s &&
+      make build-stats
+    - cd .. &&
+      mv project julia-src &&
+      /tmp/julia/bin/julia -e 'versioninfo()' &&
+      /tmp/julia/bin/julia --precompiled=no -e 'true' &&
+      /tmp/julia/bin/julia-debug --precompiled=no -e 'true' &&
+      pushd /tmp/julia/share/julia/test &&
+      /tmp/julia/bin/julia --check-bounds=yes runtests.jl all | bar -i 30 &&
+      /tmp/julia/bin/julia --check-bounds=yes runtests.jl libgit2-online download pkg &&
+      popd &&
+      mkdir /tmp/embedding-test &&
+      make check -C /tmp/julia/share/doc/julia/examples/embedding \
+        JULIA=/tmp/julia/bin/julia BIN=/tmp/embedding-test \
+        "$(cd julia-src && make print-CC)" &&
+      mv julia-src project
