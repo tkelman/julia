@@ -14,6 +14,9 @@ build:
       pull: true
       options: "-u 65534 -w /tmp"
   ci:
+    - nproc
+    - uname -a
+    - cat /etc/os-release
     - sudo apt-get update &&
       sudo apt-get install -y g++-multilib gfortran-multilib
         curl make patch m4 xz-utils git time ccache bar
