@@ -1,10 +1,14 @@
-language: python # a lie because shippable "doesn't support" cpp
-os:
-    - linux
-build_environment: Ubuntu 14.04
-notifications:
-    - email: false
-script:
+language: c
+integrations:
+  notifications:
+    - integrationName: email
+      type: email
+      on_success: never
+      on_failure: never
+      on_cancel: never
+      on_pull_request: never
+build:
+  ci:
     - sudo apt-get update &&
       sudo apt-get install -y g++-multilib gfortran-multilib ccache bar
 #      echo "override ARCH = $ARCH" | tee -a Make.user &&
@@ -32,3 +36,6 @@ script:
         JULIA=/tmp/julia/bin/julia BIN=/tmp/embedding-test \
         "$(cd julia-src && make print-CC)" &&
       mv julia-src project
+  cache: true
+  cache_dir_list:
+    - ~/.ccache
