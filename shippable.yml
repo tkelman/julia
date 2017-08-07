@@ -8,9 +8,15 @@ integrations:
       on_cancel: never
       on_pull_request: never
 build:
+  pre_ci_boot:
+      image_name: ubuntu
+      image_tag: 14.04
+      pull: true
+      options: "-u 65534 -w /tmp"
   ci:
     - sudo apt-get update &&
-      sudo apt-get install -y g++-multilib gfortran-multilib ccache bar
+      sudo apt-get install -y g++-multilib gfortran-multilib
+        curl make patch m4 xz-utils git time ccache bar
 #      echo "override ARCH = $ARCH" | tee -a Make.user &&
     - make -C base version_git.jl.phony &&
       for var in FORCE_ASSERTIONS LLVM_ASSERTIONS USECCACHE NO_GIT; do
