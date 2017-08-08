@@ -2573,8 +2573,10 @@ JL_DLLEXPORT int jl_type_morespecific(jl_value_t *a, jl_value_t *b)
 {
     if (obviously_disjoint(a, b, 1))
         return 0;
-    if (jl_subtype(b, a)) return 0;
-    if (jl_subtype(a, b)) return 1;
+    if (jl_subtype(b, a))
+        return 0;
+    if (jl_subtype(a, b))
+        return 1;
     return type_morespecific_(a, b, 0, NULL);
 }
 
