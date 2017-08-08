@@ -38,8 +38,7 @@ isequaldlm(m1, m2, t) = isequal(m1, m2) && (eltype(m1) == eltype(m2) == t)
 @test size(readdlm(IOBuffer("1,,2,3,4\n1,2,3\n"), ',')) == (2,5)
 
 let result1 = reshape(Any["", "", "", "", "", "", 1.0, 1.0, "", "", "", "", "", 1.0, 2.0, "", 3.0, "", "", "", "", "", 4.0, "", "", ""], 2, 13),
-    result2 = reshape(Any[1.0, 1.0, 2.0, 1.0, 3.0, "", 4.0, ""], 2, 4)
-
+        result2 = reshape(Any[1.0, 1.0, 2.0, 1.0, 3.0, "", 4.0, ""], 2, 4)
     @test isequaldlm(readdlm(IOBuffer(",,,1,,,,2,3,,,4,\n,,,1,,,1\n"), ','), result1, Any)
     @test isequaldlm(readdlm(IOBuffer("   1    2 3   4 \n   1   1\n")), result2, Any)
     @test isequaldlm(readdlm(IOBuffer("   1    2 3   4 \n   1   1\n"), ' '), result1, Any)
@@ -61,14 +60,13 @@ let result1 = reshape(Any[1.0, 1.0, 2.0, 2.0, 3.0, 3.0, 4.0, ""], 2, 4)
 end
 
 let result1 = reshape(Any["abc", "hello", "def,ghi", " \"quote\" ", "new\nline", "world"], 2, 3),
-    result2 = reshape(Any["abc", "line\"", "\"hello\"", "\"def", "", "\" \"\"quote\"\" \"", "ghi\"", "", "world", "\"new", "", ""], 3, 4)
-
+        result2 = reshape(Any["abc", "line\"", "\"hello\"", "\"def", "", "\" \"\"quote\"\" \"", "ghi\"", "", "world", "\"new", "", ""], 3, 4)
     @test isequaldlm(readdlm(IOBuffer("abc,\"def,ghi\",\"new\nline\"\n\"hello\",\" \"\"quote\"\" \",world"), ','), result1, Any)
     @test isequaldlm(readdlm(IOBuffer("abc,\"def,ghi\",\"new\nline\"\n\"hello\",\" \"\"quote\"\" \",world"), ',', quotes=false), result2, Any)
 end
 
 let result1 = reshape(Any["t", "c", "", "c"], 2, 2),
-    result2 = reshape(Any["t", "\"c", "t", "c"], 2, 2)
+        result2 = reshape(Any["t", "\"c", "t", "c"], 2, 2)
     @test isequaldlm(readdlm(IOBuffer("t  \n\"c\" c")), result1, Any)
     @test isequaldlm(readdlm(IOBuffer("t t \n\"\"\"c\" c")), result2, Any)
 end
@@ -209,7 +207,6 @@ let i18n_data = ["Origin (English)", "Name (English)", "Origin (Native)", "Name 
         "U.S.A.", "Brad Pitt", "U.S.A.", "Brad Pitt",
         "Yugoslavia (Cyrillic)", "Djordje Balasevic", "Југославија", "Ђорђе Балашевић",
         "Yugoslavia (Latin)", "Djordje Balasevic", "Jugoslavija", "Đorđe Balašević"]
-
     i18n_arr = permutedims(reshape(i18n_data, 4, Int(floor(length(i18n_data)/4))), [2, 1])
     i18n_buff = PipeBuffer()
     writedlm(i18n_buff, i18n_arr, ',')
