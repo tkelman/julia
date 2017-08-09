@@ -12,7 +12,7 @@ jobs:
 #      - image: ubuntu:14.04
       - image: circleci/python:2.7
         environment:
-          JULIA_CPU_CORES: 6
+          JULIA_CPU_CORES: 4
           JULIA_TEST_MAXRSS_MB: 800
           ARCH: i686
 #    resource_class: xlarge
@@ -75,7 +75,7 @@ jobs:
 #      - image: ubuntu:14.04
       - image: circleci/python:2.7
         environment:
-          JULIA_CPU_CORES: 6
+          JULIA_CPU_CORES: 4
           JULIA_TEST_MAXRSS_MB: 800
           ARCH: x86_64
 #    resource_class: xlarge
