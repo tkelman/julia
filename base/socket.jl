@@ -283,7 +283,7 @@ mutable struct TCPSocket <: LibuvStream
     end
 end
 
-# kw arg "delay": if true, libuv delays creation of the socket fd till the first bind call
+# kw arg "delay": if true, libuv delays creation of the socket fd until the first bind call
 function TCPSocket(; delay=true)
     tcp = TCPSocket(Libc.malloc(_sizeof_uv_tcp), StatusUninit)
     af_spec = delay ? 0 : 2   # AF_UNSPEC is 0, AF_INET is 2

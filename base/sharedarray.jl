@@ -117,7 +117,7 @@ function SharedArray{T,N}(dims::Dims{N}; init=false, pids=Int[]) where {T,N}
             refs[i] = remotecall(func_mapshmem, p)
         end
 
-        # Wait till all the workers have mapped the segment
+        # Wait until all the workers have mapped the segment
         for ref in refs
             wait(ref)
         end
@@ -212,7 +212,7 @@ function SharedArray{T,N}(filename::AbstractString, dims::NTuple{N,Int}, offset:
         end
     end
 
-    # Wait till all the workers have mapped the segment
+    # Wait until all the workers have mapped the segment
     for ref in refs
         wait(ref)
     end

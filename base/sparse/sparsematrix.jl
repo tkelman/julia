@@ -2827,7 +2827,7 @@ function setindex!(A::SparseMatrixCSC, x, I::AbstractVector{<:Real})
             r1 = Int(colptrA[col])
             r2 = Int(colptrA[col+1] - 1)
 
-            # copy from last position till current column
+            # copy from last position until current column
             if (nadd > 0)
                 colptrB[(lastcol+1):col] = colptrA[(lastcol+1):col] .+ nadd
                 copylen = r1 - aidx

@@ -120,7 +120,7 @@ end
 test_futures_dgc(id_me)
 test_futures_dgc(id_other)
 
-# if sent to another worker, it should not be deleted till all references are fetched.
+# if sent to another worker, it should not be deleted until all references are fetched.
 wid1 = workers()[1]
 wid2 = workers()[2]
 f = remotecall(myid, wid1)
@@ -139,7 +139,7 @@ sleep(0.5) # to ensure that wid2 gc messages have been executed on wid1
 f = Future(wid1)
 fid = Base.remoteref_id(f)
 
-# should not be created remotely till accessed
+# should not be created remotely until accessed
 @test remotecall_fetch(k->haskey(Base.Distributed.PGRP.refs, k), wid1, fid) == false
 # create it remotely
 isready(f)
@@ -190,7 +190,7 @@ end
 test_remoteref_dgc(id_me)
 test_remoteref_dgc(id_other)
 
-# if sent to another worker, it should not be deleted till the other worker has also finalized.
+# if sent to another worker, it should not be deleted until the other worker has also finalized.
 wid1 = workers()[1]
 wid2 = workers()[2]
 rr = RemoteChannel(wid1)

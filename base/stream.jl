@@ -1187,6 +1187,6 @@ function eof(s::BufferStream)
     return !isopen(s) && nb_available(s)<=0
 end
 
-# If buffer_writes is called, it will delay notifying waiters till a flush is called.
+# If buffer_writes is called, it will delay notifying waiters until a flush is called.
 buffer_writes(s::BufferStream, bufsize=0) = (s.buffer_writes=true; s)
 flush(s::BufferStream) = (notify(s.r_c); nothing)

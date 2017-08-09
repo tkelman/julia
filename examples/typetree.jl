@@ -30,7 +30,7 @@ function add_ttnode(subtypes::Dict{Binding, TTNode}, sname::Binding, t::Type)
 end
 
 # Store a type and its type hierarchy chain
-# Recurse till we reach the top level type
+# Recurse until we reach the top level type
 function store_type(sname::Binding, t::Union)
     suptype = Union
     tnode = TTNode(t)

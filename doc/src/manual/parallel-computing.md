@@ -1411,7 +1411,7 @@ onto the same OS thread. I/O tasks and timers yield implicitly while waiting for
 occur. Calling [`yield()`](@ref) explicitly allows for other tasks to be scheduled.
 
 Thus, a task executing a [`ccall`](@ref) effectively prevents the Julia scheduler from executing any other
-tasks till the call returns. This is true for all calls into external libraries. Exceptions are
+tasks until the call returns. This is true for all calls into external libraries. Exceptions are
 calls into custom C code that call back into Julia (which may then yield) or C code that calls
 `jl_yield()` (C equivalent of [`yield()`](@ref)).
 
@@ -1424,7 +1424,7 @@ event loop. It schedules a C function for execution in a separate thread. A thre
 default size of 4 is used for this. The size of the threadpool is controlled via environment variable
 `UV_THREADPOOL_SIZE`. While waiting for a free thread, and during function execution once a thread
 is available, the requesting task (on the main Julia event loop) yields to other tasks. Note that
-`@threadcall` does not return till the execution is complete. From a user point of view, it is
+`@threadcall` does not return until the execution is complete. From a user point of view, it is
 therefore a blocking call like other Julia APIs.
 
 It is very important that the called function does not call back into Julia.
