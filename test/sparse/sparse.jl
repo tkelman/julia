@@ -259,8 +259,10 @@ end
         a = sprand(10, 5, 0.7)
         b = sprand(5, 15, 0.3)
         @test maximum(abs.(a*b - Array(a)*Array(b))) < 100*eps()
-        @test maximum(abs.(Base.SparseArrays.spmatmul(a,b,sortindices=:sortcols) - Array(a)*Array(b))) < 100*eps()
-        @test maximum(abs.(Base.SparseArrays.spmatmul(a,b,sortindices=:doubletranspose) - Array(a)*Array(b))) < 100*eps()
+        @test maximum(abs.(Base.SparseArrays.spmatmul(a,b,sortindices=:sortcols) -
+            Array(a)*Array(b))) < 100*eps()
+        @test maximum(abs.(Base.SparseArrays.spmatmul(a,b,sortindices=:doubletranspose) -
+            Array(a)*Array(b))) < 100*eps()
         @test Array(kron(a,b)) == kron(Array(a), Array(b))
         @test Array(kron(Array(a),b)) == kron(Array(a), Array(b))
         @test Array(kron(a,Array(b))) == kron(Array(a), Array(b))
@@ -1015,9 +1017,9 @@ end
     a = sparse( [1,1,2,3], [1,3,4,1], [1,2,3,4] )
 
     @test rot180(a,2) == a
-    @test rot180(a,1) == sparse( [3,3,2,1], [4,2,1,4], [1,2,3,4] )
-    @test rotr90(a,1) == sparse( [1,3,4,1], [3,3,2,1], [1,2,3,4] )
-    @test rotl90(a,1) == sparse( [4,2,1,4], [1,1,2,3], [1,2,3,4] )
+    @test rot180(a,1) == sparse([3,3,2,1], [4,2,1,4], [1,2,3,4])
+    @test rotr90(a,1) == sparse([1,3,4,1], [3,3,2,1], [1,2,3,4])
+    @test rotl90(a,1) == sparse([4,2,1,4], [1,1,2,3], [1,2,3,4])
     @test rotl90(a,2) == rot180(a)
     @test rotr90(a,2) == rot180(a)
     @test rotl90(a,3) == rotr90(a)
@@ -1031,7 +1033,8 @@ end
     @test size(rotl90(a)) == (5,3)
 end
 
-function test_getindex_algs(A::SparseMatrixCSC{Tv,Ti}, I::AbstractVector, J::AbstractVector, alg::Int) where {Tv,Ti}
+function test_getindex_algs(A::SparseMatrixCSC{Tv,Ti}, I::AbstractVector,
+        J::AbstractVector, alg::Int) where {Tv,Ti}
     # Sorted vectors for indexing rows.
     # Similar to getindex_general but without the transpose trick.
     (m, n) = size(A)
@@ -1079,8 +1082,9 @@ end
             end
 
             if debug
-                @printf(" %7d | %7d | %4.2e | %4.2e | %4.2e | %s\n", round(Int,nnz(S)/S.n), length(I), times[1], times[2], times[3],
-                            (0 == best[2]) ? "binary S" : (1 == best[2]) ? "binary I" : "linear")
+                @printf(" %7d | %7d | %4.2e | %4.2e | %4.2e | %s\n",
+                    round(Int,nnz(S)/S.n), length(I), times[1], times[2], times[3],
+                    (0 == best[2]) ? "binary S" : (1 == best[2]) ? "binary I" : "linear")
             end
             if res[1] != res[2]
                 println("1 and 2")
@@ -1129,7 +1133,8 @@ end
             gc()
             rs = @timed S[Isorted, Jsorted]
             if debug
-                @printf(" %7d | %7d | %7d | %4.2e | %4.2e | %4.2e | %4.2e |\n", round(Int,nnz(S)/S.n), length(I), length(J), rs[2], ru[2], rs[3], ru[3])
+                @printf(" %7d | %7d | %7d | %4.2e | %4.2e | %4.2e | %4.2e |\n",
+                    round(Int,nnz(S)/S.n), length(I), length(J), rs[2], ru[2], rs[3], ru[3])
             end
         end
     end
@@ -1786,12 +1791,12 @@ end
                                       "  =  1.0\n  [2, 1]  =  2.0\n  [3, 2]  =  3.0\n  [4, 2]  =  4.0")
 
     show(ioc, MIME"text/plain"(), sparse(Int64[1,2,3,4,5], Int64[1,1,2,2,3], [1.0,2.0,3.0,4.0,5.0]))
-    @test String(take!(io)) ==  string("5×3 SparseMatrixCSC{Float64,Int64} with 5 stored entries:\n  [1, 1]",
-                                       "  =  1.0\n  ⋮\n  [5, 3]  =  5.0")
+    @test String(take!(io)) == string("5×3 SparseMatrixCSC{Float64,Int64} with 5 stored entries:\n  [1, 1]",
+                                      "  =  1.0\n  ⋮\n  [5, 3]  =  5.0")
 
     show(ioc, MIME"text/plain"(), sparse(ones(5,3)))
-    @test String(take!(io)) ==  string("5×3 SparseMatrixCSC{Float64,$Int} with 15 stored entries:\n  [1, 1]",
-                                       "  =  1.0\n  ⋮\n  [5, 3]  =  1.0")
+    @test String(take!(io)) == string("5×3 SparseMatrixCSC{Float64,$Int} with 15 stored entries:\n  [1, 1]",
+                                      "  =  1.0\n  ⋮\n  [5, 3]  =  1.0")
 
     # odd number of rows
     ioc = IOContext(io, displaysize = (9, 80), limit = true)
@@ -1800,16 +1805,16 @@ end
                                       "  =  1.0\n  [2, 1]  =  2.0\n  [3, 2]  =  3.0\n  [4, 2]  =  4.0\n  [5, 3]  =  5.0")
 
     show(ioc, MIME"text/plain"(), sparse(Int64[1,2,3,4,5,6], Int64[1,1,2,2,3,3], [1.0,2.0,3.0,4.0,5.0,6.0]))
-    @test String(take!(io)) ==  string("6×3 SparseMatrixCSC{Float64,Int64} with 6 stored entries:\n  [1, 1]",
-                                       "  =  1.0\n  [2, 1]  =  2.0\n  ⋮\n  [5, 3]  =  5.0\n  [6, 3]  =  6.0")
+    @test String(take!(io)) == string("6×3 SparseMatrixCSC{Float64,Int64} with 6 stored entries:\n  [1, 1]",
+                                      "  =  1.0\n  [2, 1]  =  2.0\n  ⋮\n  [5, 3]  =  5.0\n  [6, 3]  =  6.0")
 
     show(ioc, MIME"text/plain"(), sparse(ones(6,3)))
-    @test String(take!(io)) ==  string("6×3 SparseMatrixCSC{Float64,$Int} with 18 stored entries:\n  [1, 1]",
-                                       "  =  1.0\n  [2, 1]  =  1.0\n  ⋮\n  [5, 3]  =  1.0\n  [6, 3]  =  1.0")
+    @test String(take!(io)) == string("6×3 SparseMatrixCSC{Float64,$Int} with 18 stored entries:\n  [1, 1]",
+                                      "  =  1.0\n  [2, 1]  =  1.0\n  ⋮\n  [5, 3]  =  1.0\n  [6, 3]  =  1.0")
 
     ioc = IOContext(io, displaysize = (9, 80))
     show(ioc, MIME"text/plain"(), sparse(Int64[1,2,3,4,5,6], Int64[1,1,2,2,3,3], [1.0,2.0,3.0,4.0,5.0,6.0]))
-    @test String(take!(io)) ==  string("6×3 SparseMatrixCSC{Float64,Int64} with 6 stored entries:\n  [1, 1]  =  1.0\n",
+    @test String(take!(io)) == string("6×3 SparseMatrixCSC{Float64,Int64} with 6 stored entries:\n  [1, 1]  =  1.0\n",
         "  [2, 1]  =  2.0\n  [3, 2]  =  3.0\n  [4, 2]  =  4.0\n  [5, 3]  =  5.0\n  [6, 3]  =  6.0")
 end
 
@@ -1825,8 +1830,8 @@ end
 @testset "check buffers" for n in 1:3
     colptr = [1,2,3,4]
     rowval = [1,2,3]
-    nzval1  = ones(0)
-    nzval2  = ones(3)
+    nzval1 = ones(0)
+    nzval2 = ones(3)
     A = SparseMatrixCSC(n, n, colptr, rowval, nzval1)
     @test nnz(A) == n
     @test_throws BoundsError A[n,n]
@@ -1868,17 +1873,17 @@ end
     @testset "Test with no Infs and NaNs, vardim=$vardim, corrected=$corrected" for vardim in (1, 2),
                                                                                  corrected in (true, false)
         @test cov(x_sparse, vardim, corrected=corrected) ≈
-              cov(x_dense , vardim, corrected=corrected)
+              cov(x_dense,  vardim, corrected=corrected)
     end
 
     @testset "Test with $x11, vardim=$vardim, corrected=$corrected" for x11 in (NaN, Inf),
                                                                      vardim in (1, 2),
                                                                   corrected in (true, false)
         x_sparse[1,1] = x11
-        x_dense[1 ,1] = x11
+        x_dense[1, 1] = x11
 
         cov_sparse = cov(x_sparse, vardim, corrected=corrected)
-        cov_dense  = cov(x_dense , vardim, corrected=corrected)
+        cov_dense  = cov(x_dense,  vardim, corrected=corrected)
         @test cov_sparse[2:end, 2:end] ≈ cov_dense[2:end, 2:end]
         @test isfinite.(cov_sparse) == isfinite.(cov_dense)
         @test isfinite.(cov_sparse) == isfinite.(cov_dense)
@@ -1887,12 +1892,12 @@ end
     @testset "Test with NaN and Inf, vardim=$vardim, corrected=$corrected" for vardim in (1, 2),
                                                                             corrected in (true, false)
         x_sparse[1,1] = Inf
-        x_dense[1 ,1] = Inf
+        x_dense[1, 1] = Inf
         x_sparse[2,1] = NaN
-        x_dense[2 ,1] = NaN
+        x_dense[2, 1] = NaN
 
         cov_sparse = cov(x_sparse, vardim, corrected=corrected)
-        cov_dense  = cov(x_dense , vardim, corrected=corrected)
+        cov_dense  = cov(x_dense,  vardim, corrected=corrected)
         @test cov_sparse[(1 + vardim):end, (1 + vardim):end] ≈
               cov_dense[ (1 + vardim):end, (1 + vardim):end]
         @test isfinite.(cov_sparse) == isfinite.(cov_dense)
