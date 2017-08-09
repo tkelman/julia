@@ -103,7 +103,7 @@ function test_futures_dgc(id)
     @test isnull(f.v) == true
     @test fetch(f) == id
     @test isnull(f.v) == false
-    yield(); # flush gc msgs
+    yield() # flush gc msgs
     @test remotecall_fetch(k->(yield();haskey(Base.Distributed.PGRP.refs, k)), id, fid) == false
 
 
@@ -113,7 +113,7 @@ function test_futures_dgc(id)
     @test remotecall_fetch(k->(yield();haskey(Base.Distributed.PGRP.refs, k)), id, fid) == true
     @test isnull(f.v) == true
     finalize(f)
-    yield(); # flush gc msgs
+    yield() # flush gc msgs
     @test remotecall_fetch(k->(yield();haskey(Base.Distributed.PGRP.refs, k)), id, fid) == false
 end
 
@@ -184,7 +184,7 @@ function test_remoteref_dgc(id)
     @test fetch(rr) == :OK
     @test remotecall_fetch(k->(yield();haskey(Base.Distributed.PGRP.refs, k)), id, rrid) == true
     finalize(rr)
-    yield(); # flush gc msgs
+    yield() # flush gc msgs
     @test remotecall_fetch(k->(yield();haskey(Base.Distributed.PGRP.refs, k)), id, rrid) == false
 end
 test_remoteref_dgc(id_me)
@@ -201,7 +201,7 @@ put!(fstore, rr)
 
 @test remotecall_fetch(k->haskey(Base.Distributed.PGRP.refs, k), wid1, rrid) == true
 finalize(rr) # finalize locally
-yield(); # flush gc msgs
+yield() # flush gc msgs
 @test remotecall_fetch(k->haskey(Base.Distributed.PGRP.refs, k), wid1, rrid) == true
 remotecall_fetch(r->(finalize(take!(r)); yield(); nothing), wid2, fstore) # finalize remotely
 sleep(0.5) # to ensure that wid2 messages have been executed on wid1
@@ -218,8 +218,8 @@ end
 wid1,wid2 = workers()[1:2]
 f = @spawnat wid1 rand(1,1)
 @sync begin
-        @async fetch(f)
-        @async remotecall_fetch(()->fetch(f), wid2)
+    @async fetch(f)
+    @async remotecall_fetch(()->fetch(f), wid2)
 end
 
 
@@ -471,7 +471,8 @@ A = @inferred(convert(SharedArray, AA))
 B = @inferred(convert(SharedArray, AA'))
 @test B*A == ctranspose(AA)*AA
 
-d=SharedArray{Int64,2}((10,10); init = D->fill!(D.loc_subarr_1d, myid()), pids=[id_me, id_other])
+d = SharedArray{Int64,2}((10,10);
+    init = D->fill!(D.loc_subarr_1d, myid()), pids=[id_me, id_other])
 d2 = map(x->1, d)
 @test reduce(+, d2) == 100
 
@@ -561,7 +562,8 @@ workloads = Int[sum(ids .== i) for i in 2:nprocs()]
 @test_throws ArgumentError timedwait(()->false, 0.1, pollint=-0.5)
 
 # specify pids for pmap
-@test sort(workers()[1:2]) == sort(unique(pmap(WorkerPool(workers()[1:2]), x->(sleep(0.1);myid()), 1:10)))
+@test sort(workers()[1:2]) ==
+    sort(unique(pmap(WorkerPool(workers()[1:2]), x->(sleep(0.1); myid()), 1:10)))
 
 # Testing buffered  and unbuffered reads
 # This large array should write directly to the socket
@@ -572,16 +574,17 @@ a = ones(10^6)
 s = [randstring() for x in 1:10^5]
 @test s == remotecall_fetch((x)->x, id_other, s)
 
-#large number of small requests
+# large number of small requests
 num_small_requests = 10000
-@test fill(id_other, num_small_requests) == [remotecall_fetch(myid, id_other) for i in 1:num_small_requests]
+@test fill(id_other, num_small_requests) ==
+    [remotecall_fetch(myid, id_other) for i in 1:num_small_requests]
 
 # test parallel sends of large arrays from multiple tasks to the same remote worker
 ntasks = 10
 rr_list = [Channel(1) for x in 1:ntasks]
 
 for rr in rr_list
-    let rr=rr
+    let rr = rr
         @async try
             for i in 1:10
                 a = rand(2*10^5)
@@ -616,12 +619,12 @@ end
 test_channel(Channel(10))
 test_channel(RemoteChannel(()->Channel(10)))
 
-c=Channel{Int}(1)
+c = Channel{Int}(1)
 @test_throws MethodError put!(c, "Hello")
 
 # test channel iterations
 function test_iteration(in_c, out_c)
-    t=@schedule for v in in_c
+    t = @schedule for v in in_c
         put!(out_c, v)
     end
 
@@ -834,7 +837,7 @@ end
 @test length(unique(asyncmap(x->(yield();object_id(current_task())), 1:200))) == 100
 
 # ntasks as a function
-let nt=0
+let nt = 0
     global nt_func
     nt_func() = (v=div(nt, 25); nt+=1; v)  # increment number of tasks by 1 for every 25th call.
                                            # nt_func() will be called initally once and then for every
@@ -894,10 +897,10 @@ function testmap_equivalence(f, c...)
     @test eltype(x2) == eltype(x3)
 
     for (v1,v2) in zip(x1,x3)
-        @test v1==v2
+        @test v1 == v2
     end
     for (v1,v2) in zip(x2,x3)
-        @test v1==v2
+        @test v1 == v2
     end
 end
 
@@ -987,7 +990,7 @@ if Sys.isunix() # aka have ssh
     print("3) Port 9300 is not in use.\n")
 
     sshflags = `-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=ERROR `
-    #Issue #9951
+    # Issue #9951
     hosts=[]
     localhost_aliases = ["localhost", string(getipaddr()), "127.0.0.1"]
     num_workers = parse(Int,(get(ENV, "JULIA_ADDPROCS_NUM", "9")))
@@ -1032,13 +1035,11 @@ if Sys.isunix() # aka have ssh
     for exename in [`$(joinpath(JULIA_HOME, Base.julia_exename()))`, "$(joinpath(JULIA_HOME, Base.julia_exename()))"]
         for addp_func in [()->addprocs_with_testenv(["localhost"]; exename=exename, exeflags=test_exeflags, sshflags=sshflags),
                           ()->addprocs_with_testenv(1; exename=exename, exeflags=test_exeflags)]
-
             new_pids = addp_func()
             @test length(new_pids) == 1
             test_n_remove_pids(new_pids)
         end
     end
-
 end # unix-only
 end # full-test
 
@@ -1108,11 +1109,11 @@ for tid in [id_other, id_me, Base.default_worker_pool()]
 end
 
 # Test remote_do
-f=Future(id_me)
+f = Future(id_me)
 remote_do(fut->put!(fut, myid()), id_me, f)
 @test fetch(f) == id_me
 
-f=Future(id_other)
+f = Future(id_other)
 remote_do(fut->put!(fut, myid()), id_other, f)
 @test fetch(f) == id_other
 
@@ -1421,9 +1422,12 @@ if DoFullTest
 end
 
 append!(testruns, [
-    (()->addprocs_with_testenv(ErrorSimulator(:exit)), "Unable to read host:port string from worker. Launch command exited with error?", ()),
-    (()->addprocs_with_testenv(ErrorSimulator(:ntries)), "Unexpected output from worker launch command. Host:port string not found.", ()),
-    (()->addprocs_with_testenv(ErrorSimulator(:timeout)), "Timed out waiting to read host:port string from worker.", ("JULIA_WORKER_TIMEOUT"=>"1",))
+    (()->addprocs_with_testenv(ErrorSimulator(:exit)),
+        "Unable to read host:port string from worker. Launch command exited with error?", ()),
+    (()->addprocs_with_testenv(ErrorSimulator(:ntries)),
+        "Unexpected output from worker launch command. Host:port string not found.", ()),
+    (()->addprocs_with_testenv(ErrorSimulator(:timeout)),
+        "Timed out waiting to read host:port string from worker.", ("JULIA_WORKER_TIMEOUT"=>"1",))
 ])
 
 for (addp_testf, expected_errstr, env) in testruns
