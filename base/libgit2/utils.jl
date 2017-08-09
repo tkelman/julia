@@ -112,7 +112,6 @@ function git_url(;
         host::AbstractString="",
         port::Union{AbstractString,Integer}="",
         path::AbstractString="")
-
     port_str = string(port)
     scp_syntax = isempty(scheme)
 
