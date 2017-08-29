@@ -39,6 +39,7 @@ cache:
 branches:
   only:
     - master
+    - /^mda-.*/
     - /^release-.*/
     - /^v\d+\.\d+\.\d+$/
 notifications:
