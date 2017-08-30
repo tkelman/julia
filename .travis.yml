@@ -1,5 +1,5 @@
 language: cpp
-sudo: required
+sudo: required # using fully virtualized environment
 dist: trusty
 matrix:
   include:
